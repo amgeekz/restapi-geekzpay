@@ -20,25 +20,9 @@ const app = express();
 // --- Raw body capture (so webhook can compute digests/regex on raw text) ---
 app.use((req, res, next) => {
   let data = '';
-  const maxSize = 1024 * 1024; // 1MB limit
-  let size = 0;
-  let overflowed = false;
-  
   req.setEncoding('utf8');
-  req.on('data', chunk => { 
-    if (overflowed) return;
-    
-    size += Buffer.byteLength(chunk, 'utf8');
-    if (size > maxSize) {
-      overflowed = true;
-      res.status(413).json({ error: 'Request entity too large' });
-      return;
-    }
-    data += chunk; 
-  });
+  req.on('data', chunk => { data += chunk; });
   req.on('end', () => {
-    if (overflowed) return;
-    
     req.rawBody = data || '';
     // Best-effort body parser (JSON or x-www-form-urlencoded); fall back to empty object
     const ct = (req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
@@ -131,6 +115,17 @@ app.post('/qris/dynamic', async (req, res) => {
     if (!Number.isFinite(total) || total <= 0) {
       return res.status(422).json({ error: 'Invalid total amount' });
     }
+    const uniq = parseInt(req.body.unique_code ?? process.env.UNIQUE_CODE ?? '338', 10);
+    const directAmount = req.body.amount ? parseInt(req.body.amount, 10) : null;
+
+    if ((baseAmount === null || Number.isNaN(baseAmount)) && (directAmount === null || Number.isNaN(directAmount))) {
+      return res.status(422).json({ error: 'Provide base_amount (+ unique_code) or amount' });
+    }
+
+    const total = directAmount ?? (baseAmount + (Number.isFinite(uniq) ? uniq : 0));
+    if (!Number.isFinite(total) || total <= 0) {
+      return res.status(422).json({ error: 'Invalid total amount' });
+    }
 
     const dynamicPayload = makeDynamic(payloadStatic, total);
     const response = {
@@ -165,28 +160,45 @@ app.post('/qris/dynamic', async (req, res) => {
  *  - Extracts amount heuristically (fields: amount, total, nominal, value, text/message/etc.).
  *  - Returns parsed insight (amount, currency guess), and echo raw.
  */
+function getClientIp(req) {
+  const h = req.headers || {};
+  const cand = [
+    h['x-vercel-forwarded-for'],
+    h['x-forwarded-for'],
+    h['cf-connecting-ip'],
+    h['x-real-ip'],
+    req.socket?.remoteAddress
+  ].filter(Boolean);
+  let ip = String(cand[0] || '').split(',')[0].trim();
+  if (ip.startsWith('::ffff:')) ip = ip.slice(7);
+  return ip || '0.0.0.0';
+}
+
+function isIpAllowedNow(ip, csv) {
+  const list = String(csv || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (list.length === 0) return true;
+  const norm = ip.startsWith('::ffff:') ? ip.slice(7) : ip;
+  return list.some(x => x === norm);
+}
+
 app.all('/webhook/dana', async (req, res) => {
   try {
-    // IP allowlist (secure check - use direct socket IP to prevent spoofing)
-    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress;
-
-    // Token check
-    const expected = (process.env.WEBHOOK_TOKEN || '').trim();
-    if (expected) {
-      const token = (req.headers['x-webhook-token'] || req.query.token || '').toString();
-      if (token !== expected) return res.status(401).json({ error: 'Bad token' });
+    const ip = getClientIp(req);
+    const tokenExpected = String(process.env.WEBHOOK_TOKEN || '').trim();
+    if (tokenExpected) {
+      const tokenGot = String(req.headers['x-webhook-token'] || req.query.token || '');
+      if (tokenGot !== tokenExpected) return res.status(401).json({ error: 'Bad token' });
     }
+    const allowed = isIpAllowedNow(ip, process.env.ALLOWED_IPS || '');
+    if (!allowed) return res.status(403).json({ error: 'IP not allowed', ip });
 
     const method = req.method;
     const headers = req.headers;
     const body = req.body || {};
     const raw = req.rawBody || '';
 
-    // Heuristic amount extraction
     const amount = parseAmountFromAnything(body, raw);
-
-    // Basic idempotency key from raw payload + a short time bucket
-    const bucket = Math.floor(Date.now() / 10000); // 10s bucket
+    const bucket = Math.floor(Date.now() / 10000);
     const eventId = crypto.createHash('sha1').update(raw + '|' + bucket).digest('hex');
 
     const payload = {
@@ -201,19 +213,14 @@ app.all('/webhook/dana', async (req, res) => {
       headers
     };
 
-    // Minimal logging to ./data/events.log (append)
     try {
       const fs = require('fs');
-      const line = JSON.stringify(payload) + "\n";
       fs.mkdirSync('./data', { recursive: true });
-      fs.appendFileSync('./data/events.log', line);
-    } catch (e) {
-      console.error('log failed', e);
-    }
+      fs.appendFileSync('./data/events.log', JSON.stringify(payload) + '\n');
+    } catch {}
 
     return res.json(payload);
   } catch (err) {
-    console.error('webhook/dana error', err);
     return res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
 });
