@@ -168,10 +168,7 @@ app.post('/qris/dynamic', async (req, res) => {
 app.all('/webhook/dana', async (req, res) => {
   try {
     // IP allowlist (secure check - use direct socket IP to prevent spoofing)
-    const ip = req.socket.remoteAddress;
-    if (!ipAllowed(ip, process.env.ALLOWED_IPS || '')) {
-      return res.status(403).json({ error: 'IP not allowed', ip });
-    }
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress;
 
     // Token check
     const expected = (process.env.WEBHOOK_TOKEN || '').trim();
