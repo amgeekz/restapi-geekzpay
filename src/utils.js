@@ -3,98 +3,132 @@ function onlyDigits(str) {
 }
 
 function normalizeRupiahFragment(s) {
-  if (!s) return null;
-  let t = String(s).trim();
+  if (!s) return null
+  let t = String(s).trim()
+  t = t.replace(/[^\d.,]/g, "")
+  if (!t) return null
 
-  t = t.replace(/[^\d.,]/g, '');
-  if (!t) return null;
-
-  const hasDot = t.includes('.');
-  const hasComma = t.includes(',');
+  const hasDot = t.includes(".")
+  const hasComma = t.includes(",")
 
   if (hasDot && hasComma) {
-    // contoh: 25.000,00 -> 25000
-    // contoh: 1,234.56 (jarang di ID) -> 1235 (dibulatkan)
-    const lastSep = t.lastIndexOf('.') > t.lastIndexOf(',') ? '.' : ',';
-    if (lastSep === ',' && /,\d{1,2}$/.test(t)) {
-      t = t.replace(/\./g, '').replace(',', '.');
-      const f = Number(t);
-      return Number.isFinite(f) ? Math.round(f) : null;
+    const lastSep = t.lastIndexOf(".") > t.lastIndexOf(",") ? "." : ","
+    if (lastSep === "," && /,\d{1,2}$/.test(t)) {
+      t = t.replace(/\./g, "").replace(",", ".")
+      const f = Number(t)
+      return Number.isFinite(f) ? Math.round(f) : null
     }
-    if (lastSep === '.' && /\.\d{1,2}$/.test(t)) {
-      t = t.replace(/,/g, '');
-      const f = Number(t);
-      return Number.isFinite(f) ? Math.round(f) : null;
+    if (lastSep === "." && /\.\d{1,2}$/.test(t)) {
+      t = t.replace(/,/g, "")
+      const f = Number(t)
+      return Number.isFinite(f) ? Math.round(f) : null
     }
-    t = t.replace(/[.,]/g, '');
-    const n = Number(t);
-    return Number.isFinite(n) ? n : null;
+    t = t.replace(/[.,]/g, "")
+    const n = Number(t)
+    return Number.isFinite(n) ? n : null
   }
 
   if (hasComma) {
     if (/,?\d{1,2}$/.test(t)) {
-      t = t.replace(/\./g, '').replace(',', '.');
-      const f = Number(t);
-      return Number.isFinite(f) ? Math.round(f) : null;
+      t = t.replace(/\./g, "").replace(",", ".")
+      const f = Number(t)
+      return Number.isFinite(f) ? Math.round(f) : null
     }
-    t = t.replace(/,/g, '');
-    const n = Number(t);
-    return Number.isFinite(n) ? n : null;
+    t = t.replace(/,/g, "")
+    const n = Number(t)
+    return Number.isFinite(n) ? n : null
   }
 
   if (hasDot) {
-    // di ID, titik hampir selalu pemisah ribuan
-    t = t.replace(/\./g, '');
-    const n = Number(t);
-    return Number.isFinite(n) ? n : null;
+    t = t.replace(/\./g, "")
+    const n = Number(t)
+    return Number.isFinite(n) ? n : null
   }
 
-  const n = Number(t);
-  return Number.isFinite(n) ? n : null;
+  const n = Number(t)
+  return Number.isFinite(n) ? n : null
 }
 
 function parseAmountLike(str) {
-  if (!str) return null;
-  const m = String(str).match(/(?:rp\.?|idr)?\s*([0-9][0-9.,]*)/i);
-  if (!m) return null;
-  return normalizeRupiahFragment(m[1]);
+  if (!str) return null
+  const m = String(str).match(/(?:rp\.?|idr)\s*([0-9][0-9.,]*)/i)
+  if (!m) return null
+  return normalizeRupiahFragment(m[1])
 }
 
-function parseAmountFromAnything(body, raw) {
-  const candidates = [];
-  const keys = ['amount', 'total', 'nominal', 'value', 'price'];
-  for (const k of keys) if (body && body[k] != null) candidates.push(body[k]);
+function flatStrings(obj, out = []) {
+  if (obj == null) return out
+  if (typeof obj === "string") {
+    out.push(obj)
+    return out
+  }
+  if (typeof obj === "number" || typeof obj === "boolean") {
+    out.push(String(obj))
+    return out
+  }
+  if (Array.isArray(obj)) {
+    for (const v of obj) flatStrings(v, out)
+    return out
+  }
+  if (typeof obj === "object") {
+    for (const k of Object.keys(obj)) flatStrings(obj[k], out)
+    return out
+  }
+  return out
+}
 
-  const msgKeys = ['message', 'msg', 'text', 'note', 'description', 'desc', 'content', 'title', 'bigtext', 'subtext', 'infotext'];
-  for (const k of msgKeys) if (body && body[k]) candidates.push(body[k]);
-
-  if (raw) candidates.push(raw);
-
-  for (const c of candidates) {
-    const n = parseAmountLike(c);
-    if (n != null) return n;
+function parseAmountFromAnything(body = {}, raw = "") {
+  const directKeys = ["amount", "total", "nominal", "value", "price"]
+  for (const k of directKeys) {
+    const v = body?.[k]
+    if (v == null) continue
+    if (typeof v === "number" && Number.isFinite(v)) return Math.round(v)
+    const n = parseAmountLike(String(v)) ?? normalizeRupiahFragment(String(v))
+    if (Number.isFinite(n)) return n
   }
 
-  const merged = candidates.filter(Boolean).join(' ');
-  const m = merged.match(/(?:rp|idr)\s*[:\-]?\s*([0-9][0-9.,]*)/i);
-  if (m) {
-    const n = normalizeRupiahFragment(m[1]);
-    if (n != null) return n;
+  const allTexts = flatStrings(body)
+  if (raw) allTexts.push(String(raw))
+
+  let tagged = []
+  const rpRe = /(rp\.?|idr)\s*([0-9][0-9.,]*)/gi
+  for (const s of allTexts) {
+    let m
+    while ((m = rpRe.exec(String(s))) !== null) {
+      const n = normalizeRupiahFragment(m[2])
+      if (Number.isFinite(n)) tagged.push(n)
+    }
+  }
+  if (tagged.length) {
+    const big = Math.max(...tagged)
+    if (Number.isFinite(big)) return big
   }
 
-  const anyNums = [...merged.matchAll(/([0-9][0-9.,]+)/g)].map(x => x[1]);
-  let best = null;
-  for (const frag of anyNums) {
-    const v = normalizeRupiahFragment(frag);
-    if (v != null && (best == null || v > best)) best = v;
+  let nums = []
+  const numRe = /\b\d[\d.,]{1,}\b/g
+  for (const s of allTexts) {
+    let m
+    while ((m = numRe.exec(String(s))) !== null) {
+      const n = normalizeRupiahFragment(m[0])
+      if (Number.isFinite(n)) nums.push(n)
+    }
   }
-  return best;
+  if (nums.length) {
+    const filtered = nums.filter(n => n >= 100 && n <= 1e12)
+    if (filtered.length) return Math.max(...filtered)
+    return Math.max(...nums)
+  }
+
+  return null
 }
 
 function ipAllowed(ip, allowListStr) {
-  const list = (allowListStr || '').split(',').map(s => s.trim()).filter(Boolean);
-  if (list.length === 0) return true;
-  return list.includes(ip);
+  const list = String(allowListStr || "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean)
+  if (list.length === 0) return true
+  return list.includes(ip)
 }
 
-module.exports = { parseAmountFromAnything, ipAllowed };
+module.exports = { parseAmountFromAnything, ipAllowed }
