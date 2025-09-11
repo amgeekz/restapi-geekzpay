@@ -183,22 +183,34 @@ function isIpAllowedNow(ip, csv) {
 
 app.all('/webhook/dana', async (req, res) => {
   try {
-    const ip = getClientIp(req);
-    const tokenExpected = String(process.env.WEBHOOK_TOKEN || '').trim();
-    if (tokenExpected) {
-      const tokenGot = String(req.headers['x-webhook-token'] || req.query.token || '');
-      if (tokenGot !== tokenExpected) return res.status(401).json({ error: 'Bad token' });
+    // Token-only auth (optional): jika WEBHOOK_TOKEN di-set, maka wajib cocok
+    const expected = String(process.env.WEBHOOK_TOKEN || '').trim();
+    const provided =
+      String(req.headers['x-webhook-token'] || req.query.token || (req.body && req.body.token) || '');
+
+    if (expected && provided !== expected) {
+      return res.status(401).json({ error: 'Bad token' });
     }
-    const allowed = isIpAllowedNow(ip, process.env.ALLOWED_IPS || '');
-    if (!allowed) return res.status(403).json({ error: 'IP not allowed', ip });
 
-    const method = req.method;
+    // Info IP hanya untuk logging (tidak dipakai untuk memblokir)
+    const ip =
+      (req.headers['x-vercel-forwarded-for'] ||
+       req.headers['x-forwarded-for'] ||
+       req.headers['cf-connecting-ip'] ||
+       req.headers['x-real-ip'] ||
+       req.socket?.remoteAddress || ''
+      ).toString().split(',')[0].trim().replace(/^::ffff:/, '') || '0.0.0.0';
+
+    const method  = req.method;
     const headers = req.headers;
-    const body = req.body || {};
-    const raw = req.rawBody || '';
+    const body    = req.body || {};
+    const raw     = req.rawBody || '';
 
+    // Ambil amount secara heuristik
     const amount = parseAmountFromAnything(body, raw);
-    const bucket = Math.floor(Date.now() / 10000);
+
+    // Idempotency sederhana
+    const bucket  = Math.floor(Date.now() / 10000); // 10s bucket
     const eventId = crypto.createHash('sha1').update(raw + '|' + bucket).digest('hex');
 
     const payload = {
@@ -213,6 +225,7 @@ app.all('/webhook/dana', async (req, res) => {
       headers
     };
 
+    // Log minimal ke file
     try {
       const fs = require('fs');
       fs.mkdirSync('./data', { recursive: true });
