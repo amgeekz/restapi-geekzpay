@@ -20,9 +20,25 @@ const app = express();
 // --- Raw body capture (so webhook can compute digests/regex on raw text) ---
 app.use((req, res, next) => {
   let data = '';
+  const maxSize = 1024 * 1024; // 1MB limit
+  let size = 0;
+  let overflowed = false;
+  
   req.setEncoding('utf8');
-  req.on('data', chunk => { data += chunk; });
+  req.on('data', chunk => { 
+    if (overflowed) return;
+    
+    size += Buffer.byteLength(chunk, 'utf8');
+    if (size > maxSize) {
+      overflowed = true;
+      res.status(413).json({ error: 'Request entity too large' });
+      return;
+    }
+    data += chunk; 
+  });
   req.on('end', () => {
+    if (overflowed) return;
+    
     req.rawBody = data || '';
     // Best-effort body parser (JSON or x-www-form-urlencoded); fall back to empty object
     const ct = (req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
@@ -151,8 +167,8 @@ app.post('/qris/dynamic', async (req, res) => {
  */
 app.all('/webhook/dana', async (req, res) => {
   try {
-    // IP allowlist (simple check)
-    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress;
+    // IP allowlist (secure check - use direct socket IP to prevent spoofing)
+    const ip = req.socket.remoteAddress;
     if (!ipAllowed(ip, process.env.ALLOWED_IPS || '')) {
       return res.status(403).json({ error: 'IP not allowed', ip });
     }

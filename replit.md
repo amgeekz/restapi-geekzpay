@@ -20,15 +20,16 @@ This is a Node.js REST API application for converting QRIS static payloads to dy
   - `server.js` - Main application server
   - `src/qris.js` - QRIS TLV parsing and CRC calculation utilities
   - `src/utils.js` - Helper functions for amount parsing and IP validation
-  - `.env` - Environment configuration (contains secrets)
 
 ## Environment Configuration
-The application requires several environment variables:
-- `QRIS_STATIC` - Static QRIS payload string
-- `UNIQUE_CODE` - Default unique code for amount calculation
+The application requires several environment variables that should be configured using Replit Secrets (not a committed .env file):
+- `QRIS_STATIC` - Static QRIS payload string (keep private)
+- `UNIQUE_CODE` - Default unique code for amount calculation 
 - `WEBHOOK_TOKEN` - Token for webhook authentication
 - `ALLOWED_IPS` - Comma-separated list of allowed IP addresses
-- `PORT` - Server port (defaults to 3000)
+- `PORT` - Server port (defaults to 3000, can be overridden)
+
+Note: Use Replit's Secrets tab to configure these environment variables securely rather than committing them to the repository.
 
 ## Deployment
 - **Target**: VM deployment (stateful API requiring continuous operation)
