@@ -183,6 +183,21 @@ app.get('/webhook/recent', (req, res) => {
   res.json({ ok: true, count: out.length, events: out })
 })
 
+app.get('/webhook/summary', (req, res) => {
+  const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
+  const out = EVENTS.slice(-limit).reverse().map(e => {
+    return {
+      id: e.event_id,
+      time: e.received_at,
+      amount: e.amount,
+      order_id: e.body?.order_id,
+      status: e.body?.status,
+      ip: e.ip
+    };
+  });
+  res.json({ ok: true, count: out.length, events: out });
+});
+
 app.use((req, res) => res.status(404).json({ error: 'Not found' }))
 
 if (require.main === module) {
