@@ -8,9 +8,18 @@ const crypto = require('crypto');
 const QRCode = require('qrcode');
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
+const fs = require('fs');
 
 const app = express();
 
+// --- buffer untuk riwayat webhook (in-memory) ---
+const EVENTS = [];
+function pushEvent(evt) {
+  EVENTS.push({ ...evt, _ts: Date.now() });
+  if (EVENTS.length > 500) EVENTS.splice(0, EVENTS.length - 500); // max 500
+}
+
+// --- raw body capture ---
 app.use((req, res, next) => {
   let data = '';
   let size = 0;
@@ -51,6 +60,7 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
 
+// --- diag ---
 app.get('/diag', (req, res) => {
   res.json({
     ok: true,
@@ -61,6 +71,7 @@ app.get('/diag', (req, res) => {
   });
 });
 
+// --- qris dynamic ---
 app.post('/qris/dynamic', async (req, res) => {
   try {
     const payloadStatic = (req.body.payload_static || process.env.QRIS_STATIC || '').trim();
@@ -112,6 +123,7 @@ app.post('/qris/dynamic', async (req, res) => {
   }
 });
 
+// --- webhook dana ---
 app.all('/webhook/dana', async (req, res) => {
   try {
     const expected = String(process.env.WEBHOOK_TOKEN || '').trim();
@@ -139,8 +151,9 @@ app.all('/webhook/dana', async (req, res) => {
       headers
     };
 
+    pushEvent(payload);
+
     try {
-      const fs = require('fs');
       const path = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
       if (!process.env.VERCEL) fs.mkdirSync('./data', { recursive: true });
       fs.appendFileSync(path, JSON.stringify(payload) + '\n');
@@ -150,6 +163,13 @@ app.all('/webhook/dana', async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
+});
+
+// --- riwayat webhook ---
+app.get('/webhook/recent', (req, res) => {
+  const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
+  const out = EVENTS.slice(-limit).reverse();
+  res.json({ ok: true, count: out.length, events: out });
 });
 
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
