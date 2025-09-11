@@ -115,17 +115,6 @@ app.post('/qris/dynamic', async (req, res) => {
     if (!Number.isFinite(total) || total <= 0) {
       return res.status(422).json({ error: 'Invalid total amount' });
     }
-    const uniq = parseInt(req.body.unique_code ?? process.env.UNIQUE_CODE ?? '338', 10);
-    const directAmount = req.body.amount ? parseInt(req.body.amount, 10) : null;
-
-    if ((baseAmount === null || Number.isNaN(baseAmount)) && (directAmount === null || Number.isNaN(directAmount))) {
-      return res.status(422).json({ error: 'Provide base_amount (+ unique_code) or amount' });
-    }
-
-    const total = directAmount ?? (baseAmount + (Number.isFinite(uniq) ? uniq : 0));
-    if (!Number.isFinite(total) || total <= 0) {
-      return res.status(422).json({ error: 'Invalid total amount' });
-    }
 
     const dynamicPayload = makeDynamic(payloadStatic, total);
     const response = {
