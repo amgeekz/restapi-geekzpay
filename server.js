@@ -9,7 +9,8 @@ const crypto = require('crypto');
 const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
-
+const Jimp = require('jimp');
+const jsqr = require('jsqr');
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
 const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
@@ -143,24 +144,17 @@ app.post('/qris/decode', async (req, res) => {
     }
 
     const imageFile = req.files.image;
-    const formData = new FormData();
-    formData.append('file', imageFile.data, {
-      filename: imageFile.name,
-      contentType: imageFile.mimetype
-    });
+    const image = await Jimp.read(imageFile.data);
+    const qrCode = jsqr(
+      image.bitmap.data,
+      image.bitmap.width,
+      image.bitmap.height
+    );
 
-    const response = await fetch('https://api.qrserver.com/v1/read-qr-code/', {
-      method: 'POST',
-      body: formData
-    });
-
-    const result = await response.json();
-    
-    if (result && result[0] && result[0].symbol && result[0].symbol[0]) {
-      const payload = result[0].symbol[0].data;
+    if (qrCode) {
       return res.json({ 
         ok: true, 
-        payload: payload,
+        payload: qrCode.data,
         file_info: {
           name: imageFile.name,
           type: imageFile.mimetype,
@@ -179,7 +173,8 @@ app.post('/qris/decode', async (req, res) => {
     console.error('QR decode error:', error);
     res.status(500).json({ 
       ok: false, 
-      error: 'Terjadi kesalahan internal'
+      error: 'Terjadi kesalahan internal',
+      detail: error.message
     });
   }
 });
