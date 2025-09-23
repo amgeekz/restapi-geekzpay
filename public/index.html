@@ -309,76 +309,94 @@
   <button id="toTop" class="fixed bottom-5 right-5 md:hidden rounded-full bg-indigo-600 text-white px-4 py-2 shadow-lg hidden">Top</button>
 
   <script>
-    hljs.highlightAll();
+  hljs.highlightAll();
 
-    // Drawer Mobile
-    const drawer = document.getElementById('drawer');
-    document.getElementById('openMenu').addEventListener('click', () => drawer.classList.remove('hidden'));
-    document.getElementById('closeMenu').addEventListener('click', () => drawer.classList.add('hidden'));
-    drawer.addEventListener('click', (e) => { if (e.target === drawer.firstElementChild) drawer.classList.add('hidden'); });
-    drawer.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', () => drawer.classList.add('hidden')));
+  // Drawer Mobile (tetap)
+  const drawer = document.getElementById('drawer');
+  document.getElementById('openMenu').addEventListener('click', () => drawer.classList.remove('hidden'));
+  document.getElementById('closeMenu').addEventListener('click', () => drawer.classList.add('hidden'));
+  drawer.addEventListener('click', (e) => { if (e.target === drawer.firstElementChild) drawer.classList.add('hidden'); });
+  drawer.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', () => drawer.classList.add('hidden')));
 
-    // Back to top
-    const toTop = document.getElementById('toTop');
-    const toggleTop = () => { if (window.scrollY > 400) toTop.classList.remove('hidden'); else toTop.classList.add('hidden'); };
-    window.addEventListener('scroll', toggleTop);
-    toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  // Back to top (tetap)
+  const toTop = document.getElementById('toTop');
+  const toggleTop = () => { if (window.scrollY > 400) toTop.classList.remove('hidden'); else toTop.classList.add('hidden'); };
+  window.addEventListener('scroll', toggleTop);
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-    // Base URL helpers (default langsung punyamu)
-    const DEFAULT_BASE = 'https://restapi-geekzpay.replit.app';
-    const baseInput = document.getElementById('baseUrl');
-    const saveBase = document.getElementById('saveBase');
-    const useLocal = document.getElementById('useLocal');
-    function guessOrigin(){ try { return window.location.origin; } catch { return ''; } }
-    function getBase(){
-      const v = (localStorage.getItem('geekzpay_base') || '').trim();
-      return v || DEFAULT_BASE;
+  /* ===== Base URL helpers =====
+     Jika domain mengandung "vercel.app" → default pakai origin (proxy Vercel).
+     Selain itu → default ke Replit. */
+  const baseInput = document.getElementById('baseUrl');
+  const saveBase = document.getElementById('saveBase');
+  const useLocal = document.getElementById('useLocal');
+
+  function defaultBase() {
+    const host = (location.hostname || '').toLowerCase();
+    if (host.endsWith('vercel.app')) return location.origin;
+    return 'https://restapi-geekzpay.replit.app';
+  }
+  function getBase(){
+    const v = (localStorage.getItem('geekzpay_base') || '').trim();
+    return v || defaultBase();
+  }
+  function setBase(v){ localStorage.setItem('geekzpay_base', v); }
+  baseInput.value = getBase();
+  saveBase.onclick = () => { setBase(baseInput.value.trim() || defaultBase()); alert('Base URL disimpan'); };
+  useLocal.onclick = () => { const o = window.location.origin; baseInput.value = o; setBase(o); };
+
+  // Util tampilan hasil
+  function showJSON(el, text) {
+    try { el.textContent = JSON.stringify(JSON.parse(text), null, 2); }
+    catch { el.textContent = text; }
+    hljs.highlightElement(el);
+  }
+
+  /* ========== Live Test: /qris/dynamic ========== */
+  const btnDyn = document.getElementById('btnDynamic');
+  const btnDynReset = document.getElementById('btnDynamicReset');
+  const outDyn = document.getElementById('outDynamic');
+  const jsonDyn = document.getElementById('jsonDynamic');
+  const metaDyn = document.getElementById('metaDynamic');
+  const imgQR = document.getElementById('imgQR');
+  function rand1to999(){ return Math.floor(Math.random()*999)+1; }
+
+  btnDyn.addEventListener('click', async () => {
+    const base = document.getElementById('tiBase').value.trim();
+    const uniqIn = document.getElementById('tiUnique').value.trim();
+    const auto = document.getElementById('tiAutoUnique').checked;
+    const amount = document.getElementById('tiAmount').value.trim();
+    const payloadStatic = document.getElementById('tiPayload').value.trim();
+
+    const url = (baseInput.value || defaultBase()).replace(/\/$/, '') + '/qris/dynamic';
+    const form = new URLSearchParams();
+
+    if (amount) {
+      form.append('amount', amount);
+    } else {
+      if (!base) { alert('Isi base_amount atau amount.'); return; }
+      form.append('base_amount', base);
+      const uniq = auto ? rand1to999() : (uniqIn || '');
+      if (!uniq) { alert('unique_code wajib (atau centang auto random).'); return; }
+      form.append('unique_code', uniq);
     }
-    function setBase(v){ localStorage.setItem('geekzpay_base', v); }
-    baseInput.value = getBase();
-    saveBase.onclick = () => { setBase(baseInput.value.trim() || DEFAULT_BASE); alert('Base URL disimpan'); };
-    useLocal.onclick = () => { const o = guessOrigin(); baseInput.value = o; setBase(o); };
+    if (payloadStatic) form.append('payload_static', payloadStatic);
+    form.append('qr', 'png');
 
-    // Live Test: /qris/dynamic
-    const btnDyn = document.getElementById('btnDynamic');
-    const btnDynReset = document.getElementById('btnDynamicReset');
-    const outDyn = document.getElementById('outDynamic');
-    const jsonDyn = document.getElementById('jsonDynamic');
-    const metaDyn = document.getElementById('metaDynamic');
-    const imgQR = document.getElementById('imgQR');
-    function rand1to999(){ return Math.floor(Math.random()*999)+1; }
-
-    btnDyn.addEventListener('click', async () => {
-      const base = document.getElementById('tiBase').value.trim();
-      const uniqIn = document.getElementById('tiUnique').value.trim();
-      const auto = document.getElementById('tiAutoUnique').checked;
-      const amount = document.getElementById('tiAmount').value.trim();
-      const payloadStatic = document.getElementById('tiPayload').value.trim();
-
-      const url = (baseInput.value || DEFAULT_BASE).replace(/\/$/, '') + '/qris/dynamic';
-      const form = new URLSearchParams();
-
-      if (amount) {
-        form.append('amount', amount);
-      } else {
-        if (!base) { alert('Isi base_amount atau amount.'); return; }
-        form.append('base_amount', base);
-        const uniq = auto ? rand1to999() : (uniqIn || '');
-        if (!uniq) { alert('unique_code wajib (atau centang auto random).'); return; }
-        form.append('unique_code', uniq);
-      }
-
-      if (payloadStatic) form.append('payload_static', payloadStatic);
-      form.append('qr', 'png');
-
+    btnDyn.disabled = true; btnDyn.textContent = 'Mengirim...';
+    try {
       const started = performance.now();
-      const r = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:form });
+      const r = await fetch(url, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+        body:form,
+        mode: 'cors',
+        credentials: 'omit',
+      });
       const text = await r.text();
       const dur = Math.round(performance.now() - started);
       metaDyn.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
-      try { jsonDyn.textContent = JSON.stringify(JSON.parse(text), null, 2); }
-      catch { jsonDyn.textContent = text; }
-      hljs.highlightElement(jsonDyn);
+      showJSON(jsonDyn, text);
 
       try {
         const obj = JSON.parse(text);
@@ -387,65 +405,80 @@
 
       outDyn.classList.remove('hidden');
       window.scrollTo({ top: outDyn.offsetTop - 80, behavior: 'smooth' });
-    });
+    } catch (err) {
+      metaDyn.textContent = `Gagal fetch: ${url}`;
+      showJSON(jsonDyn, String(err && err.message || err));
+      imgQR.src = '';
+      outDyn.classList.remove('hidden');
+    } finally {
+      btnDyn.disabled = false; btnDyn.textContent = 'Kirim';
+    }
+  });
 
-    btnDynReset.addEventListener('click', () => {
-      document.getElementById('tiBase').value = '';
-      document.getElementById('tiUnique').value = '';
-      document.getElementById('tiAutoUnique').checked = false;
-      document.getElementById('tiAmount').value = '';
-      document.getElementById('tiPayload').value = '';
-      outDyn.classList.add('hidden');
-    });
+  btnDynReset.addEventListener('click', () => {
+    document.getElementById('tiBase').value = '';
+    document.getElementById('tiUnique').value = '';
+    document.getElementById('tiAutoUnique').checked = false;
+    document.getElementById('tiAmount').value = '';
+    document.getElementById('tiPayload').value = '';
+    outDyn.classList.add('hidden');
+  });
 
-    // Live Test: /webhook/payment
-    const btnWh = document.getElementById('btnWebhook');
-    const btnWhReset = document.getElementById('btnWebhookReset');
-    const outWh = document.getElementById('outWebhook');
-    const jsonWh = document.getElementById('jsonWebhook');
-    const metaWh = document.getElementById('metaWebhook');
+  /* ========== Live Test: /webhook/payment ========== */
+  const btnWh = document.getElementById('btnWebhook');
+  const btnWhReset = document.getElementById('btnWebhookReset');
+  const outWh = document.getElementById('outWebhook');
+  const jsonWh = document.getElementById('jsonWebhook');
+  const metaWh = document.getElementById('metaWebhook');
 
-    btnWh.addEventListener('click', async () => {
-      const token = document.getElementById('tiToken').value.trim();
-      const mode = document.getElementById('tiMode').value;
-      const body = document.getElementById('tiBody').value;
-      if (!token) { alert('Isi token.'); return; }
+  btnWh.addEventListener('click', async () => {
+    const token = document.getElementById('tiToken').value.trim();
+    const mode = document.getElementById('tiMode').value;
+    const body = document.getElementById('tiBody').value;
+    if (!token) { alert('Isi token.'); return; }
 
-      const base = (baseInput.value || DEFAULT_BASE).replace(/\/$/, '');
-      const url = `${base}/webhook/payment?token=${encodeURIComponent(token)}`;
+    const base = (baseInput.value || defaultBase()).replace(/\/$/, '');
+    const url = `${base}/webhook/payment?token=${encodeURIComponent(token)}`;
 
-      let headers = {};
-      let payload;
-      if (mode === 'json') {
-        headers['Content-Type'] = 'application/json';
-        try { JSON.parse(body); } catch { alert('Body bukan JSON valid'); return; }
-        payload = body;
-      } else if (mode === 'form') {
-        headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        payload = new URLSearchParams(Object.entries({ message: body }));
-      } else {
-        headers['Content-Type'] = 'text/plain';
-        payload = body;
-      }
+    let headers = {};
+    let payload;
+    if (mode === 'json') {
+      headers['Content-Type'] = 'application/json';
+      try { JSON.parse(body); } catch { alert('Body bukan JSON valid'); return; }
+      payload = body;
+    } else if (mode === 'form') {
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      payload = new URLSearchParams(Object.entries({ message: body }));
+    } else {
+      headers['Content-Type'] = 'text/plain';
+      payload = body;
+    }
 
+    btnWh.disabled = true; btnWh.textContent = 'Mengirim...';
+    try {
       const started = performance.now();
-      const r = await fetch(url, { method:'POST', headers, body: payload });
+      const r = await fetch(url, { method:'POST', headers, body: payload, mode:'cors', credentials:'omit' });
       const text = await r.text();
       const dur = Math.round(performance.now() - started);
       metaWh.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
-      try { jsonWh.textContent = JSON.stringify(JSON.parse(text), null, 2); }
-      catch { jsonWh.textContent = text; }
-      hljs.highlightElement(jsonWh);
+      showJSON(jsonWh, text);
       outWh.classList.remove('hidden');
       window.scrollTo({ top: outWh.offsetTop - 80, behavior: 'smooth' });
-    });
+    } catch (err) {
+      metaWh.textContent = `Gagal fetch: ${url}`;
+      showJSON(jsonWh, String(err && err.message || err));
+      outWh.classList.remove('hidden');
+    } finally {
+      btnWh.disabled = false; btnWh.textContent = 'Kirim';
+    }
+  });
 
-    btnWhReset.addEventListener('click', () => {
-      document.getElementById('tiToken').value = '';
-      document.getElementById('tiMode').value = 'json';
-      document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" }';
-      outWh.classList.add('hidden');
-    });
-  </script>
+  btnWhReset.addEventListener('click', () => {
+    document.getElementById('tiToken').value = '';
+    document.getElementById('tiMode').value = 'json';
+    document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" }';
+    outWh.classList.add('hidden');
+  });
+</script>
 </body>
 </html>
