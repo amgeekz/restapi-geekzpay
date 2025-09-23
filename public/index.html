@@ -332,10 +332,8 @@
   const useLocal = document.getElementById('useLocal');
 
   function defaultBase() {
-    const host = (location.hostname || '').toLowerCase();
-    if (host.endsWith('vercel.app')) return location.origin;
-    return 'https://restapi-geekzpay.replit.app';
-  }
+  return window.location.origin;
+}
   function getBase(){
     const v = (localStorage.getItem('geekzpay_base') || '').trim();
     return v || defaultBase();
