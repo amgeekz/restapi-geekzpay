@@ -122,13 +122,4 @@ function parseAmountFromAnything(body = {}, raw = "") {
   return null
 }
 
-function ipAllowed(ip, allowListStr) {
-  const list = String(allowListStr || "")
-    .split(",")
-    .map(s => s.trim())
-    .filter(Boolean)
-  if (list.length === 0) return true
-  return list.includes(ip)
-}
-
-module.exports = { parseAmountFromAnything, ipAllowed }
+module.exports = { parseAmountFromAnything }

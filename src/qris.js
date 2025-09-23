@@ -27,7 +27,6 @@ function parseTLV(payload) {
     const value = payload.substring(start, end);
     fields.push({ tag, len, value });
     i = end;
-    // Guard break if malformed
     if (len <= 0) break;
   }
   return fields;
@@ -65,27 +64,24 @@ function removeTag(fields, tag) {
 }
 
 /**
- * Make dynamic payload by injecting amount (tag '54') and recomputing CRC (tag '63').
- * amount is integer rupiah or number -> formatted to 2 decimals (e.g., 10338 -> '10338.00').
+ * Buat payload dinamis: inject amount (Tag '54') + CRC (Tag '63')
+ * amount: integer rupiah → diformat 2 decimal (10338 -> "10338.00")
  */
 function makeDynamic(staticPayload, amount) {
   if (!staticPayload || typeof staticPayload !== 'string') {
     throw new Error('Invalid static payload');
   }
-  // Remove trailing CRC if present
-  let payload = staticPayload.replace(/6304[0-9A-Fa-f]{4}$/,'');
-
+  // Hapus CRC trailing jika ada
+  let payload = staticPayload.replace(/6304[0-9A-Fa-f]{4}$/, '');
   // Parse TLV
   let fields = parseTLV(payload);
-  // Remove any existing 54/63
+  // Hapus 54/63 lama
   removeTag(fields, '63');
   removeTag(fields, '54');
-
-  // Insert amount after 53 (transaction currency) if present
+  // Sisipkan amount setelah 53 (jika ada)
   const amtStr = Number(amount).toFixed(2);
   setOrInsert(fields, '54', amtStr, '53');
-
-  // Build without CRC
+  // Build + CRC
   const partial = buildTLV(fields);
   const beforeCRC = partial + '63' + '04';
   const crc = crc16ccitt(beforeCRC);
