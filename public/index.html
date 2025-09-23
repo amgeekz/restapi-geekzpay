@@ -606,8 +606,9 @@ btnConvert.onclick = async () => {
     const body = document.getElementById('tiBody').value;
     
     if (!token) { alert('Isi token'); return; }
-
-    const url = `${getBase().replace(/\/$/, '')}/webhook/summary?token=${encodeURIComponent(token)}&limit=5`;
+    
+    const url = `${getBase().replace(/\/$/, '')}/webhook/payment?token=${encodeURIComponent(token)}`;
+    const urlstatus = `${getBase().replace(/\/$/, '')}/webhook/summary?token=${encodeURIComponent(token)}&limit=5`;
     let headers = {};
     let payload;
 
@@ -636,7 +637,7 @@ btnConvert.onclick = async () => {
       const text = await r.text();
       const dur = Math.round(performance.now() - start);
       
-      metaWh.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
+      metaWh.textContent = `Status: ${r.status} • ${dur} ms • Cek Riwayat Pembayaran ${urlstatus}`;
       showJSON(jsonWh, text);
       outWh.classList.remove('hidden');
       outWh.scrollIntoView({ behavior: 'smooth' });
