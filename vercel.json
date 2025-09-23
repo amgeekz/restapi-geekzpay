@@ -1,13 +1,8 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "^/qris/(.*)$", "dest": "https://restapi-geekzpay.replit.app/qris/$1" },
-    { "src": "^/webhook/(.*)$", "dest": "https://restapi-geekzpay.replit.app/webhook/$1" },
-    { "src": "^/diag$", "dest": "https://restapi-geekzpay.replit.app/diag" },
-
-    { "src": "^/docs$", "dest": "/public/index.html" },
-    { "src": "^/$", "dest": "/public/index.html" },
-
-    { "src": "^/(.*)$", "dest": "/public/$1" }
+  "rewrites": [
+    { "source": "/qris/(.*)", "destination": "https://restapi-geekzpay.replit.app/qris/$1" },
+    { "source": "/webhook/(.*)", "destination": "https://restapi-geekzpay.replit.app/webhook/$1" },
+    { "source": "/diag", "destination": "https://restapi-geekzpay.replit.app/diag" }
   ]
 }
