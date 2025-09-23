@@ -525,7 +525,7 @@
     reader.readAsDataURL(file);
   }
 
-  btnConvert.onclick = async () => {
+btnConvert.onclick = async () => {
     if (!currentFile) return;
 
     btnConvert.disabled = true;
@@ -535,36 +535,48 @@
     formData.append('image', currentFile);
 
     try {
-      const start = performance.now();
-      // Using a free QR code decoding service (you might need to replace this with your own endpoint)
-      const response = await fetch('https://api.qrserver.com/v1/read-qr-code/', {
-        method: 'POST',
-        body: formData
-      });
-      
-      const result = await response.json();
-      const dur = Math.round(performance.now() - start);
+        const start = performance.now();        
+        const url = getBase().replace(/\/$/, '') + '/qris/decode';
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        const dur = Math.round(performance.now() - start);
 
-      metaConverter.textContent = `Status: ${response.status} • ${dur} ms`;
-      
-      if (result && result[0] && result[0].symbol && result[0].symbol[0]) {
-        const payload = result[0].symbol[0].data;
-        showJSON(jsonConverter, JSON.stringify({ payload: payload }, null, 2));
+        metaConverter.textContent = `Status: ${response.status} • ${dur} ms`;
+        
+        if (result.ok && result.payload) {
+            showJSON(jsonConverter, JSON.stringify({ 
+                payload: result.payload,
+                file_info: result.file_info,
+                decoded_at: result.decoded_at
+            }, null, 2));
+            
+            navigator.clipboard.writeText(result.payload).then(() => {
+                console.log('Payload copied to clipboard');
+            });
+        } else {
+            showJSON(jsonConverter, JSON.stringify({ 
+                error: result.error || 'Gagal decode QR code'
+            }, null, 2));
+        }
+        
         outConverter.classList.remove('hidden');
         outConverter.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        showJSON(jsonConverter, JSON.stringify({ error: 'Tidak dapat membaca QR code' }, null, 2));
-        outConverter.classList.remove('hidden');
-      }
     } catch (err) {
-      metaConverter.textContent = `Error: ${err.message}`;
-      showJSON(jsonConverter, JSON.stringify({ error: err.message }, null, 2));
-      outConverter.classList.remove('hidden');
+        metaConverter.textContent = `Error: ${err.message}`;
+        showJSON(jsonConverter, JSON.stringify({ 
+            error: err.message,
+            note: 'Pastikan endpoint /qris/decode tersedia di server'
+        }, null, 2));
+        outConverter.classList.remove('hidden');
     } finally {
-      btnConvert.disabled = false;
-      btnConvert.textContent = 'Convert ke Payload';
+        btnConvert.disabled = false;
+        btnConvert.textContent = 'Convert ke Payload';
     }
-  };
+};
 
   btnCopyPayload.onclick = () => {
     const payloadText = jsonConverter.textContent;
@@ -595,7 +607,7 @@
     
     if (!token) { alert('Isi token'); return; }
 
-    const url = `${getBase().replace(/\/$/, '')}/webhook/payment?token=${encodeURIComponent(token)}`;
+    const url = `${getBase().replace(/\/$/, '')}/webhook/summary?token=${encodeURIComponent(token)}&limit=5`;
     let headers = {};
     let payload;
 
