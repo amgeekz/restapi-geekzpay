@@ -109,15 +109,4 @@ function parseAmountFromAnything(body = {}, raw = "") {
   return null
 }
 
-function toCompact(ev) {
-  return {
-    id: ev.event_id,
-    time: ev.received_at,
-    amount: ev.amount ?? null,
-    method: ev.method,
-    ip: ev.ip,
-    message: ev.body?.message ?? ev.body?.text ?? null
-  };
-}
-
-module.exports = { parseAmountFromAnything, toCompact }
+module.exports = { parseAmountFromAnything }
