@@ -526,7 +526,15 @@
   }
 
 btnConvert.onclick = async () => {
-    if (!currentFile) return;
+    if (!currentFile) {
+        metaConverter.textContent = 'Error: Pilih file gambar terlebih dahulu';
+        showJSON(jsonConverter, JSON.stringify({ 
+            error: 'Tidak ada file yang dipilih',
+            instruction: 'Klik area upload dan pilih gambar QR code'
+        }, null, 2));
+        outConverter.classList.remove('hidden');
+        return;
+    }
 
     btnConvert.disabled = true;
     btnConvert.textContent = 'Converting...';
@@ -535,31 +543,47 @@ btnConvert.onclick = async () => {
     formData.append('image', currentFile);
 
     try {
-        const start = performance.now();        
+        const start = performance.now();
+        
         const url = getBase().replace(/\/$/, '') + '/qris/decode';
         const response = await fetch(url, {
             method: 'POST',
-            body: formData
+            body: formData  // Kirim FormData dengan file
         });
         
-        const result = await response.json();
+        const responseText = await response.text();
         const dur = Math.round(performance.now() - start);
+
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            metaConverter.textContent = `Status: ${response.status} • Response tidak valid`;
+            showJSON(jsonConverter, JSON.stringify({ 
+                error: 'Response server tidak valid',
+                response: responseText.substring(0, 200),
+                url: url
+            }, null, 2));
+            outConverter.classList.remove('hidden');
+            return;
+        }
 
         metaConverter.textContent = `Status: ${response.status} • ${dur} ms`;
         
         if (result.ok && result.payload) {
             showJSON(jsonConverter, JSON.stringify({ 
+                success: true,
                 payload: result.payload,
                 file_info: result.file_info,
                 decoded_at: result.decoded_at
             }, null, 2));
             
-            navigator.clipboard.writeText(result.payload).then(() => {
-                console.log('Payload copied to clipboard');
-            });
+            // Auto-copy payload
+            navigator.clipboard.writeText(result.payload);
         } else {
             showJSON(jsonConverter, JSON.stringify({ 
-                error: result.error || 'Gagal decode QR code'
+                error: result.error || 'Gagal decode QR code',
+                response: result
             }, null, 2));
         }
         
@@ -569,7 +593,7 @@ btnConvert.onclick = async () => {
         metaConverter.textContent = `Error: ${err.message}`;
         showJSON(jsonConverter, JSON.stringify({ 
             error: err.message,
-            note: 'Pastikan endpoint /qris/decode tersedia di server'
+            note: 'Pastikan file yang diupload adalah gambar QR code yang valid'
         }, null, 2));
         outConverter.classList.remove('hidden');
     } finally {
