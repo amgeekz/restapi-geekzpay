@@ -10,8 +10,6 @@ const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
 const Jimp = require('jimp-compact');
-let jsQR = require('jsqr');
-jsQR = jsQR.default || jsQR;
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
 const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
@@ -28,6 +26,25 @@ function extractToken(req) {
     (req.body && req.body.token) ||
     ''
   );
+}
+
+async function loadJsQR() {
+  let mod;
+  try {
+    mod = require('jsqr');
+    if (typeof mod === 'function') return mod;
+    if (mod && typeof mod.default === 'function') return mod.default;
+  } catch {}
+  try {
+    mod = require('jsqr/dist/jsQR.js');
+    if (typeof mod === 'function') return mod;
+    if (mod && typeof mod.default === 'function') return mod.default;
+  } catch {}
+  try {
+    const esm = await import('jsqr');
+    if (esm && typeof esm.default === 'function') return esm.default;
+  } catch {}
+  throw new Error('jsQR module not found as a function');
 }
 
 app.use(fileUpload({
@@ -138,17 +155,19 @@ app.post('/qris/dynamic', async (req, res) => {
 app.post('/qris/decode', async (req, res) => {
   try {
     if (!req.files || !req.files.image) {
-      return res.status(400).json({ ok: false, error: 'File gambar diperlukan' });
+      return res.status(400).json({ ok: false, error: 'File gambar diperlukan (field name: image)' });
     }
+
+    const jsQR = await loadJsQR();
 
     const imageFile = req.files.image;
     const img = await Jimp.read(imageFile.data);
+    const { width, height, data } = img.bitmap;
 
-    const data = new Uint8ClampedArray(img.bitmap.data);
-    const { width, height } = img.bitmap;
+    const rgba = (data instanceof Uint8ClampedArray) ? data : new Uint8ClampedArray(data);
 
-    const qr = jsQR(data, width, height);
-    if (!qr) {
+    const qr = jsQR(rgba, width, height);
+    if (!qr || !qr.data) {
       return res.status(400).json({ ok: false, error: 'Tidak dapat membaca QR code' });
     }
 
@@ -163,7 +182,7 @@ app.post('/qris/decode', async (req, res) => {
       decoded_at: new Date().toISOString()
     });
   } catch (err) {
-    res.status(500).json({ ok: false, error: 'Terjadi kesalahan internal', detail: String(err.message || err) });
+    return res.status(500).json({ ok: false, error: 'Terjadi kesalahan internal', detail: String(err.message || err) });
   }
 });
 
