@@ -142,55 +142,44 @@ app.post('/qris/decode', async (req, res) => {
       });
     }
 
-    const imageFile = req.files.image;    
-    if (!imageFile.mimetype.startsWith('image/')) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: 'File harus berupa gambar (PNG, JPG, JPEG)' 
-      });
-    }
+    const imageFile = req.files.image;
+    const formData = new FormData();
+    formData.append('file', imageFile.data, {
+      filename: imageFile.name,
+      contentType: imageFile.mimetype
+    });
 
-    if (imageFile.size > 2 * 1024 * 1024) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: 'Ukuran file maksimal 2MB' 
-      });
-    }
+    const response = await fetch('https://api.qrserver.com/v1/read-qr-code/', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
     
-    console.log('QR decode attempt:', imageFile.name, imageFile.size);
-
-    try {
-      const payload = await QRCode.decode(imageFile.data);
-      
-      if (payload) {
-        return res.json({ 
-          ok: true, 
-          payload: payload,
-          file_info: {
-            name: imageFile.name,
-            type: imageFile.mimetype,
-            size: imageFile.size
-          },
-          decoded_at: new Date().toISOString()
-        });
-      }
-    } catch (decodeError) {
-      console.log('QRCode.decode error:', decodeError.message);
+    if (result && result[0] && result[0].symbol && result[0].symbol[0]) {
+      const payload = result[0].symbol[0].data;
+      return res.json({ 
+        ok: true, 
+        payload: payload,
+        file_info: {
+          name: imageFile.name,
+          type: imageFile.mimetype,
+          size: imageFile.size
+        },
+        decoded_at: new Date().toISOString()
+      });
     }
 
     return res.status(400).json({ 
       ok: false, 
-      error: 'Tidak dapat membaca QR code',
-      note: 'Pastikan gambar jelas dan format QR code valid'
+      error: 'Tidak dapat membaca QR code'
     });
 
   } catch (error) {
-    console.error('QR decode endpoint error:', error);
-    
+    console.error('QR decode error:', error);
     res.status(500).json({ 
       ok: false, 
-      error: 'Terjadi kesalahan internal',
-      detail: error.message
+      error: 'Terjadi kesalahan internal'
     });
   }
 });
