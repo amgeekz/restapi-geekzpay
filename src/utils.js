@@ -116,8 +116,6 @@ function toCompact(ev) {
     amount: ev.amount ?? null,
     method: ev.method,
     ip: ev.ip,
-    order_id: ev.body?.order_id ?? null,
-    status: ev.body?.status ?? null,
     message: ev.body?.message ?? ev.body?.text ?? null
   };
 }
