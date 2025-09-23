@@ -143,85 +143,29 @@ app.post('/qris/dynamic', async (req, res) => {
 app.all('/webhook/payment', async (req, res) => {
   try {
     const expected = String(process.env.WEBHOOK_TOKEN || '').trim();
-    const provided = String(
-      req.headers['x-webhook-token'] ||
-      req.query.token ||
-      (req.body && req.body.token) ||
-      ''
-    );
-
+    const provided = String(extractToken(req));
     if (expected) {
       if (provided !== expected) return res.status(401).json({ error: 'Bad token' });
     } else {
-      if (!provided) {
-        return res.status(401).json({ error: 'Token required (X-Webhook-Token / ?token= / body.token)' });
-      }
+      if (!provided) return res.status(401).json({ error: 'Token required (X-Webhook-Token / ?token= / body.token)' });
     }
-
     const tokenForBucket = provided;
-    const ip = (req.headers['x-forwarded-for'] ||
-                req.headers['cf-connecting-ip'] ||
-                req.headers['x-real-ip'] ||
-                req.socket?.remoteAddress ||
-                ''
-               ).toString().split(',')[0].trim().replace(/^::ffff:/, '') || '0.0.0.0';
-
+    const ip = (req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || req.headers['x-real-ip'] || req.socket?.remoteAddress || '').toString().split(',')[0].trim().replace(/^::ffff:/, '') || '0.0.0.0';
     const method = req.method;
+    const headers = req.headers;
     const body = req.body || {};
     const raw = req.rawBody || '';
     const amount = parseAmountFromAnything(body, raw);
-
     const bucket = Math.floor(Date.now() / 10000);
-    const eventId = crypto
-      .createHash('sha1')
-      .update((raw || JSON.stringify(body)) + '|' + bucket)
-      .digest('hex');
-
-    const eventPayload = {
-      ok: true,
-      token: tokenForBucket,
-      event_id: eventId,
-      received_at: new Date().toISOString(),
-      method,
-      ip,
-      amount,
-      body,
-      query: req.query || {},
-      headers: req.headers
-    };
-
-    // simpan ke TTL store kamu (tetap sama)
-    pushEventLocal(tokenForBucket, eventPayload);
-
-    // log file opsional (tetap sama)
+    const eventId = crypto.createHash('sha1').update((raw || JSON.stringify(body)) + '|' + bucket).digest('hex');
+    const payload = { ok: true, token: tokenForBucket, event_id: eventId, received_at: new Date().toISOString(), method, ip, amount, body, query: req.query || {}, headers };
+    pushEventLocal(tokenForBucket, payload);
     try {
       const p = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
       if (!process.env.VERCEL) fs.mkdirSync('./data', { recursive: true });
-      fs.appendFileSync(p, JSON.stringify(eventPayload) + '\n');
+      fs.appendFileSync(p, JSON.stringify(payload) + '\n');
     } catch {}
-
-    // === Respons RINGKAS (tidak raw) ===
-    const compact = {
-      ok: true,
-      token: tokenForBucket,
-      event_id: eventId,
-      received_at: eventPayload.received_at,
-      amount,
-      method,
-      ip
-    };
-
-    // Kalau butuh raw untuk debugging → ?debug=1
-    const wantsDebug = String(req.query.debug || '0') === '1';
-    if (wantsDebug) {
-      compact.debug = {
-        body,
-        query: req.query || {},
-        headers: req.headers
-      };
-    }
-
-    return res.json(compact);
+    return res.json(payload);
   } catch (err) {
     return res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
