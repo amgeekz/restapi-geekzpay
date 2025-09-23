@@ -33,22 +33,40 @@ app.use(fileUpload({
   abortOnLimit: true
 }));
 
+app.use(fileUpload({
+  limits: { fileSize: 2 * 1024 * 1024 },
+  abortOnLimit: true
+}));
+
+// REPLACE middleware ini ↓
 app.use((req, res, next) => {
-  let data = '';
+  const chunks = [];
   let size = 0;
   const maxSize = 1024 * 1024;
-  req.setEncoding('utf8');
+  
+  // Skip untuk file upload
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    req.rawBody = '';
+    req.body = req.body || {};
+    return next();
+  }
+  
   req.on('data', chunk => {
-    size += Buffer.byteLength(chunk, 'utf8');
+    size += chunk.length;
     if (size > maxSize) {
       res.status(413).json({ error: 'Request entity too large' });
       return req.destroy();
     }
-    data += chunk;
+    chunks.push(chunk);
   });
+  
   req.on('end', () => {
     if (res.headersSent) return;
-    req.rawBody = data || '';
+    
+    req.rawBodyBuffer = Buffer.concat(chunks);
+    req.rawBody = req.rawBodyBuffer.toString('utf8');
+    
     const ct = (req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
     try {
       if (req.method !== 'GET' && req.method !== 'HEAD') {
