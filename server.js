@@ -133,6 +133,8 @@ app.post('/qris/dynamic', async (req, res) => {
   }
 });
 
+const FormData = require('form-data');
+
 app.post('/qris/decode', async (req, res) => {
   try {
     if (!req.files || !req.files.image) {
@@ -143,6 +145,9 @@ app.post('/qris/decode', async (req, res) => {
     }
 
     const imageFile = req.files.image;
+
+    console.log('Processing QR image:', imageFile.name, imageFile.size);
+
     const formData = new FormData();
     formData.append('file', imageFile.data, {
       filename: imageFile.name,
@@ -154,10 +159,26 @@ app.post('/qris/decode', async (req, res) => {
       body: formData
     });
 
-    const result = await response.json();
+    const responseText = await response.text();
+    console.log('API Response status:', response.status);
+    console.log('API Response text:', responseText.substring(0, 200));
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError.message);
+      return res.status(500).json({ 
+        ok: false, 
+        error: 'Invalid response from QR decoder API',
+        api_response: responseText.substring(0, 200)
+      });
+    }
     
     if (result && result[0] && result[0].symbol && result[0].symbol[0] && result[0].symbol[0].data) {
       const payload = result[0].symbol[0].data;
+      console.log('QR decoded successfully:', payload.substring(0, 50) + '...');
+      
       return res.json({ 
         ok: true, 
         payload: payload,
@@ -170,9 +191,11 @@ app.post('/qris/decode', async (req, res) => {
       });
     }
 
+    console.log('QR decode failed, result:', result);
     return res.status(400).json({ 
       ok: false, 
-      error: 'Tidak dapat membaca QR code dari gambar'
+      error: 'Tidak dapat membaca QR code dari gambar',
+      api_result: result
     });
 
   } catch (error) {
