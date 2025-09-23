@@ -9,7 +9,7 @@ const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
 const { makeDynamic } = require('./src/qris');
-const { parseAmountFromAnything } = require('./src/utils');
+const { parseAmountFromAnything, toCompact } = require('./src/utils');
 
 const app = express();
 
@@ -27,6 +27,7 @@ function pushEventLocal(token, ev) {
   if (arr.length > EVENT_MAX_KEEP) arr = arr.slice(0, EVENT_MAX_KEEP);
   EVENTS_BY_TOKEN.set(key, arr);
 }
+
 function getRecentEvents(token, limit) {
   const key = String(token || 'default');
   const now = Date.now();
@@ -198,18 +199,13 @@ app.all('/webhook/payment', async (req, res) => {
       fs.appendFileSync(p, JSON.stringify(eventPayload) + '\n');
     } catch {}
 
-    const compact = {
-      ok: true,
-      token: tokenForBucket,
-      event_id: eventId,
-      received_at: eventPayload.received_at,
-      amount,
-      method,
-      ip
-    };
-
+    const compact = toCompact(eventPayload);
     if (String(req.query.debug || '0') === '1') {
-      compact.debug = { body, query: req.query || {}, headers: req.headers };
+      compact.debug = {
+        body,
+        query: req.query || {},
+        headers: req.headers
+      };
     }
 
     return res.json(compact);
@@ -221,23 +217,21 @@ app.all('/webhook/payment', async (req, res) => {
 app.get('/webhook/recent', (req, res) => {
   const token = String(extractToken(req));
   if (!token) return res.status(401).json({ error: 'Token required' });
+
   const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
   const events = getRecentEvents(token, limit);
-  res.json({ ok: true, token, count: events.length, events });
+  const out = (String(req.query.raw || '0') === '1') ? events : events.map(toCompact);
+
+  res.json({ ok: true, token, count: out.length, events: out });
 });
 
 app.get('/webhook/summary', (req, res) => {
   const token = String(extractToken(req));
   if (!token) return res.status(401).json({ error: 'Token required' });
+
   const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
-  const events = getRecentEvents(token, limit).map(e => ({
-    id: e.event_id,
-    time: e.received_at,
-    amount: e.amount,
-    order_id: e.body?.order_id,
-    status: e.body?.status,
-    ip: e.ip
-  }));
+  const events = getRecentEvents(token, limit).map(toCompact);
+
   res.json({ ok: true, token, count: events.length, events });
 });
 
