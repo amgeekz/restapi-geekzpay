@@ -272,20 +272,19 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 app.get('/__routes', (req, res) => {
-  try {
-    const routes = [];
-    app._router.stack.forEach((m) => {
-      if (m.route?.path) routes.push({ method: Object.keys(m.route.methods)[0]?.toUpperCase() || 'USE', path: m.route.path });
-      else if (m.name === 'router' && m.handle?.stack) {
-        m.handle.stack.forEach((s) => {
-          if (s.route?.path) routes.push({ method: Object.keys(s.route.methods)[0]?.toUpperCase() || 'USE', path: s.route.path });
-        });
-      }
-    });
-    res.json({ ok: true, count: routes.length, routes });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: String(e.message || e) });
-  }
+  const routes = [];
+  app._router.stack.forEach((m) => {
+    if (m.route?.path) {
+      routes.push({ method: Object.keys(m.route.methods)[0]?.toUpperCase() || 'USE', path: m.route.path });
+    } else if (m.name === 'router' && m.handle?.stack) {
+      m.handle.stack.forEach((s) => {
+        if (s.route?.path) {
+          routes.push({ method: Object.keys(s.route.methods)[0]?.toUpperCase() || 'USE', path: s.route.path });
+        }
+      });
+    }
+  });
+  res.json({ ok: true, routes });
 });
 
 // Route khusus / dan /docs -> docs.html
