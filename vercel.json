@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "rewrites": [
-    { "source": "/qris/(.*)", "destination": "https://restapi-geekzpay.replit.app/qris/$1" },
-    { "source": "/webhook/(.*)", "destination": "https://restapi-geekzpay.replit.app/webhook/$1" },
-    { "source": "/diag", "destination": "https://restapi-geekzpay.replit.app/diag" }
-  ]
-}
