@@ -273,7 +273,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 
 // Route khusus / dan /docs -> docs.html
 app.get(['/', '/docs'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'docs.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 /* ================================ */
