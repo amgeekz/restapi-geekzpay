@@ -14,9 +14,10 @@ const { parseAmountFromAnything } = require('./src/utils');
 const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
 
 const app = express();
-app.set('json spaces', 2);                  // <-- pretty JSON for curl
-const EVENT_TTL_SEC  = Math.max(1, parseInt(process.env.EVENT_TTL_SEC || '30', 10)); // default 30s
-const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '5', 10)); // default keep 5
+app.set('json spaces', 2);
+
+const EVENT_TTL_SEC = Math.max(1, parseInt(process.env.EVENT_TTL_SEC || '30', 10));
+const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '5', 10));
 
 function extractToken(req) {
   return (
@@ -53,7 +54,7 @@ app.use((req, res, next) => {
           const obj = {}; for (const [k, v] of params) obj[k] = v;
           req.body = obj;
         } else if (ct === 'text/plain') {
-          req.body = { text: req.rawBody };
+          req.body = { message: req.rawBody, text: req.rawBody };
         } else {
           try { req.body = JSON.parse(req.rawBody); } catch { req.body = {}; }
         }
@@ -128,7 +129,7 @@ function toCompact(ev, debug = false) {
   };
   if (debug) {
     base.debug = { body: ev.body, query: ev.query, headers: ev.headers };
-  } else if (ev.body && (ev.body.message || ev.body.text || ev.body.amount || ev.body.total)) {
+  } else if (ev.body && (ev.body.message || ev.body.text || ev.body.amount || ev.body.total || ev.body.order_id || ev.body.status)) {
     base.body = {};
     if (ev.body.message) base.body.message = ev.body.message;
     if (ev.body.text) base.body.text = ev.body.text;
@@ -200,7 +201,6 @@ app.get('/webhook/recent', async (req, res) => {
   const token = String(extractToken(req));
   if (!token) return res.status(401).json({ error: 'Token required' });
   const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
-
   const key = `ev:${token}`;
   const rows = await redisLRangeJSON(key, 0, limit - 1);
   const events = rows.map(ev => toCompact(ev, false));
@@ -211,7 +211,6 @@ app.get('/webhook/summary', async (req, res) => {
   const token = String(extractToken(req));
   if (!token) return res.status(401).json({ error: 'Token required' });
   const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
-
   const key = `ev:${token}`;
   const rows = await redisLRangeJSON(key, 0, limit - 1);
   const events = rows.map(e => ({
