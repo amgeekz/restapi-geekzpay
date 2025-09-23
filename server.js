@@ -10,7 +10,8 @@ const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
 const Jimp = require('jimp-compact');
-const jsqr = require('jsqr');
+let jsQR = require('jsqr');
+jsQR = jsQR.default || jsQR;
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
 const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
@@ -137,45 +138,32 @@ app.post('/qris/dynamic', async (req, res) => {
 app.post('/qris/decode', async (req, res) => {
   try {
     if (!req.files || !req.files.image) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: 'File gambar diperlukan' 
-      });
+      return res.status(400).json({ ok: false, error: 'File gambar diperlukan' });
     }
 
     const imageFile = req.files.image;
-    const image = await Jimp.read(imageFile.data);
-    const qrCode = jsqr(
-      image.bitmap.data,
-      image.bitmap.width,
-      image.bitmap.height
-    );
+    const img = await Jimp.read(imageFile.data);
 
-    if (qrCode) {
-      return res.json({ 
-        ok: true, 
-        payload: qrCode.data,
-        file_info: {
-          name: imageFile.name,
-          type: imageFile.mimetype,
-          size: imageFile.size
-        },
-        decoded_at: new Date().toISOString()
-      });
+    const data = new Uint8ClampedArray(img.bitmap.data);
+    const { width, height } = img.bitmap;
+
+    const qr = jsQR(data, width, height);
+    if (!qr) {
+      return res.status(400).json({ ok: false, error: 'Tidak dapat membaca QR code' });
     }
 
-    return res.status(400).json({ 
-      ok: false, 
-      error: 'Tidak dapat membaca QR code'
+    return res.json({
+      ok: true,
+      payload: qr.data,
+      file_info: {
+        name: imageFile.name,
+        type: imageFile.mimetype,
+        size: imageFile.size
+      },
+      decoded_at: new Date().toISOString()
     });
-
-  } catch (error) {
-    console.error('QR decode error:', error);
-    res.status(500).json({ 
-      ok: false, 
-      error: 'Terjadi kesalahan internal',
-      detail: error.message
-    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Terjadi kesalahan internal', detail: String(err.message || err) });
   }
 });
 
