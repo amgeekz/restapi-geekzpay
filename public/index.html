@@ -4,52 +4,29 @@
   <meta charset="UTF-8" />
   <title>GeekzPay REST API Docs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- highlight.js (dark) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
   <style>
-  :root { color-scheme: dark; }
-  html, body { max-width:100%; overflow-x:hidden; }
-  html { background:#0f172a; }
-  body {
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
-    color:#e2e8f0;
-  }
-
-  /* ===== FIX INTI ANTI-OVERFLOW ===== */
-  /* Flex & grid children boleh mengecil */
-  .flex > * { min-width: 0; }
-  .grid > * { min-width: 0; }
-
-  /* Inline code boleh wrap */
-  p code, li code, td code, th code, h1 code, h2 code, h3 code, a code {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  /* Blok code tidak mendorong halaman melebar */
-  pre { margin:0; }
-  pre code {
-    font-size:.92rem;
-    white-space: pre-wrap;   /* bungkus baris panjang */
-    word-break: break-word;  /* pecah base64/URL panjang */
-  }
-
-  /* Media & tabel responsif */
-  img { max-width:100%; height:auto; }
-  table { width:100%; border-collapse:separate; border-spacing:0; table-layout: fixed; } /* <- penting */
-  .input, .select, .textarea { font-size:16px; min-width:0; width:100%; }
-
-  @media (max-width:480px){
-    pre code { font-size:.86rem; }
-    .btn { padding:.75rem 1rem; font-size:.95rem; }
-  }
-</style>
+    :root { color-scheme: dark; }
+    html, body { max-width:100%; overflow-x:hidden; }
+    html { background:#0f172a; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial; color:#e2e8f0; }
+    .flex > * { min-width: 0; }
+    .grid > * { min-width: 0; }
+    p code, li code, td code, th code, h1 code, h2 code, h3 code, a code { overflow-wrap: anywhere; word-break: break-word; }
+    pre { margin:0; }
+    pre code { font-size:.92rem; white-space: pre-wrap; word-break: break-word; }
+    img { max-width:100%; height:auto; }
+    table { width:100%; border-collapse:separate; border-spacing:0; table-layout: fixed; }
+    .input, .select, .textarea { font-size:16px; min-width:0; width:100%; }
+    @media (max-width:480px){
+      pre code { font-size:.86rem; }
+      .btn { padding:.75rem 1rem; font-size:.95rem; }
+    }
+  </style>
 </head>
 <body class="bg-slate-900 text-slate-100">
-  <!-- Header -->
   <header class="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/90 backdrop-blur">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <button id="openMenu" class="md:hidden p-2 rounded-lg border border-slate-700" aria-label="Buka menu">☰</button>
@@ -63,7 +40,6 @@
 
   <div class="max-w-6xl mx-auto px-4 w-full max-w-full">
     <div class="flex w-full">
-      <!-- Sidebar (desktop) -->
       <aside class="hidden md:block w-64 shrink-0 pr-6 py-8">
         <nav class="space-y-3 text-sm">
           <a href="#setup" class="block hover:underline">⚙️ Setup</a>
@@ -75,37 +51,16 @@
         </nav>
       </aside>
 
-      <!-- Drawer (mobile) -->
-      <div id="drawer" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/50"></div>
-        <div class="absolute left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-800 shadow-xl p-6">
-          <div class="flex items-center justify-between mb-6">
-            <div class="text-base font-semibold">Menu</div>
-            <button id="closeMenu" class="p-2 rounded-lg border border-slate-700" aria-label="Tutup menu">✕</button>
-          </div>
-          <nav class="space-y-3">
-            <a href="#setup" class="block py-1" data-close>⚙️ Setup</a>
-            <a href="#auth" class="block py-1" data-close>🔑 Autentikasi</a>
-            <a href="#qris" class="block py-1" data-close>1. QRIS Dinamis</a>
-            <a href="#webhook" class="block py-1" data-close>2. Webhook Payment</a>
-            <a href="#history" class="block py-1" data-close>3. Riwayat Webhook</a>
-            <a href="#examples" class="block py-1" data-close>📦 Contoh cURL & Response</a>
-          </nav>
-        </div>
-      </div>
-
-      <!-- Main -->
       <main class="flex-1 py-8 md:py-10">
-        <!-- Setup -->
         <section id="setup" class="section mb-8">
           <h2 class="text-xl md:text-2xl font-semibold mb-3">⚙️ Setup</h2>
           <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4 grid gap-3 md:grid-cols-2">
             <label class="block">
               <span class="text-sm text-slate-300">Base URL API</span>
               <input id="baseUrl"
-                     value="https://restapi-geekzpay.replit.app"
+                     value="https://restapi-geekzpay.vercel.app"
                      class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100"
-                     placeholder="https://restapi-geekzpay.replit.app" inputmode="url" />
+                     placeholder="https://restapi-geekzpay.vercel.app" inputmode="url" />
             </label>
             <div class="flex items-end gap-2">
               <button id="saveBase" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Simpan</button>
@@ -117,7 +72,6 @@
           </div>
         </section>
 
-        <!-- Auth -->
         <section id="auth" class="section mb-10">
           <h2 class="text-xl md:text-2xl font-semibold mb-3">🔑 Autentikasi</h2>
           <p class="text-sm md:text-base">Endpoint <code>/webhook/payment</code> membutuhkan <code>token</code>:</p>
@@ -128,177 +82,68 @@
           </ul>
         </section>
 
-        <!-- QRIS Dynamic -->
         <section id="qris" class="section mb-12">
           <h2 class="text-xl md:text-2xl font-semibold mb-3">1) QRIS Dinamis</h2>
           <p class="text-sm md:text-base mb-3"><code>POST /qris/dynamic</code></p>
-
-          <!-- Parameter Table -->
-          <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900 mb-4">
-            <table class="min-w-full text-left text-sm md:text-base">
-              <thead class="text-slate-300">
-                <tr>
-                  <th class="py-2 px-3">Field</th>
-                  <th class="py-2 px-3">Tipe</th>
-                  <th class="py-2 px-3">Wajib</th>
-                  <th class="py-2 px-3">Keterangan</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800">
-                <tr><td class="py-2 px-3"><code>base_amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Ya*</td><td class="py-2 px-3">Jika pakai ini, wajib <code>unique_code</code></td></tr>
-                <tr><td class="py-2 px-3"><code>unique_code</code></td><td class="py-2 px-3">int (1–999)</td><td class="py-2 px-3">Ya*</td><td class="py-2 px-3">Bisa diacak di klien</td></tr>
-                <tr><td class="py-2 px-3"><code>amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Alternatif</td><td class="py-2 px-3">Total langsung</td></tr>
-                <tr><td class="py-2 px-3"><code>payload_static</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">Opsional</td><td class="py-2 px-3">QRIS static payload (override <code>QRIS_STATIC</code>)</td></tr>
-                <tr><td class="py-2 px-3"><code>qr</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">Opsional</td><td class="py-2 px-3"><code>png</code> untuk QR (Data-URL)</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- LIVE TEST: /qris/dynamic -->
           <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4 space-y-3">
             <h3 class="font-medium">🧪 Live Test — /qris/dynamic</h3>
-
+            <label class="block mb-2 text-sm">Isi form dan kirim request untuk generate QR dinamis.</label>
             <div class="grid gap-3 md:grid-cols-2">
-              <label class="block">
-                <span class="text-sm">Base amount (Rp)</span>
-                <input id="tiBase" type="number" min="1" class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="10000" inputmode="numeric">
-              </label>
-              <label class="block">
-                <span class="text-sm">Unique code (1–999)</span>
-                <input id="tiUnique" type="number" min="1" max="999" class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="338" inputmode="numeric">
-              </label>
-              <div class="flex items-center gap-2 md:col-span-2">
-                <input id="tiAutoUnique" type="checkbox" class="h-4 w-4">
-                <label for="tiAutoUnique" class="text-sm">Acak unique code otomatis (1–999)</label>
-              </div>
-              <label class="block md:col-span-2">
-                <span class="text-sm">Atau total langsung (amount)</span>
-                <input id="tiAmount" type="number" min="1" class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="10338" inputmode="numeric">
-              </label>
-              <label class="block md:col-span-2">
-                <span class="text-sm">QRIS Static payload (opsional — pakai punyamu sendiri)</span>
-                <textarea id="tiPayload" rows="3" class="textarea mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="00020101021126...6304XXXX"></textarea>
-                <p class="text-xs text-slate-400 mt-1">Jika diisi, server akan memakai <code>payload_static</code> ini untuk membuat QR dinamis.</p>
-              </label>
+              <input id="tiBase" placeholder="base_amount" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">
+              <input id="tiUnique" placeholder="unique_code" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">
+              <input id="tiAmount" placeholder="amount" class="input md:col-span-2 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">
             </div>
-            <div class="flex flex-wrap gap-2">
-              <button id="btnDynamic" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Kirim</button>
-              <button id="btnDynamicReset" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
-            </div>
-
-            <div id="outDynamic" class="mt-3 hidden">
-              <h4 class="font-medium mb-2">Hasil</h4>
-              <div class="text-xs text-slate-400 mb-2" id="metaDynamic"></div>
-              <div class="grid gap-3 md:grid-cols-2">
-                <div class="rounded-xl bg-slate-800 p-3">
-                  <div class="text-sm font-medium mb-1">JSON</div>
-                  <pre class="overflow-x-auto"><code id="jsonDynamic" class="language-json"></code></pre>
-                </div>
-                <div class="rounded-xl bg-slate-800 p-3">
-                  <div class="text-sm font-medium mb-2">QR</div>
-                  <img id="imgQR" class="w-full max-w-xs rounded-lg border border-slate-700" alt="QR preview">
-                </div>
-              </div>
+            <button id="btnDynamic" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Kirim</button>
+            <div id="outDynamic" class="hidden mt-3">
+              <pre><code id="jsonDynamic" class="language-json"></code></pre>
+              <img id="imgQR" class="mt-3 rounded-lg border border-slate-700" />
             </div>
           </div>
         </section>
 
-        <!-- Webhook Payment -->
         <section id="webhook" class="section mb-12">
           <h2 class="text-xl md:text-2xl font-semibold mb-3">2) Webhook Payment</h2>
-          <p class="text-sm md:text-base mb-3"><code>POST /webhook/payment</code> — menerima notifikasi dari DANA / ShopeePay / GoPay / OVO, dll. Server akan mem-parse nominal dari JSON / form / text.</p>
-
-        <!-- LIVE TEST: /webhook/payment -->
-          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4 space-y-3">
+          <p class="text-sm md:text-base mb-3"><code>POST /webhook/payment</code></p>
+          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4">
             <h3 class="font-medium">🧪 Live Test — /webhook/payment</h3>
-            <div class="grid gap-3 md:grid-cols-2">
-              <label class="block">
-                <span class="text-sm">Token</span>
-                <input id="tiToken" class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="USER123">
-              </label>
-              <label class="block">
-                <span class="text-sm">Kirim sebagai</span>
-                <select id="tiMode" class="select mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">
-                  <option value="json">JSON</option>
-                  <option value="form">x-www-form-urlencoded</option>
-                  <option value="text">text/plain</option>
-                </select>
-              </label>
-              <label class="block md:col-span-2">
-                <span class="text-sm">Isi (contoh pesan dari forwarder)</span>
-                <textarea id="tiBody" rows="4" class="textarea mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" }</textarea>
-              </label>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button id="btnWebhook" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Kirim</button>
-              <button id="btnWebhookReset" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
-            </div>
-
-            <div id="outWebhook" class="mt-3 hidden">
-              <h4 class="font-medium mb-2">Hasil</h4>
-              <div class="text-xs text-slate-400 mb-2" id="metaWebhook"></div>
-              <div class="rounded-xl bg-slate-800 p-3">
-                <pre class="overflow-x-auto"><code id="jsonWebhook" class="language-json"></code></pre>
-              </div>
+            <input id="tiToken" placeholder="Token" class="input mb-2 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">
+            <textarea id="tiBody" rows="3" class="textarea px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">{ "message": "Pembayaran masuk Rp 9.999 dari ShopeePay" }</textarea>
+            <button id="btnWebhook" class="btn mt-2 px-4 py-2 rounded-lg bg-indigo-600 text-white">Kirim</button>
+            <div id="outWebhook" class="hidden mt-3">
+              <pre><code id="jsonWebhook" class="language-json"></code></pre>
             </div>
           </div>
         </section>
 
-        <!-- History -->
         <section id="history" class="section mb-12">
           <h2 class="text-xl md:text-2xl font-semibold mb-3">3) Riwayat Webhook</h2>
           <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900">
             <table class="min-w-full text-left text-sm md:text-base">
-              <thead class="text-slate-300">
-                <tr><th class="py-2 px-3">Endpoint</th><th class="py-2 px-3">Contoh</th></tr>
-              </thead>
+              <thead class="text-slate-300"><tr><th class="py-2 px-3">Endpoint</th><th class="py-2 px-3">Contoh</th></tr></thead>
               <tbody class="divide-y divide-slate-800">
-                <tr><td class="py-2 px-3">Recent</td><td class="py-2 px-3"><code>GET /webhook/recent?token=USER123&amp;limit=5</code></td></tr>
                 <tr><td class="py-2 px-3">Summary</td><td class="py-2 px-3"><code>GET /webhook/summary?token=USER123&amp;limit=5</code></td></tr>
               </tbody>
             </table>
           </div>
         </section>
 
-        <!-- Examples -->
         <section id="examples" class="section mb-16">
           <h2 class="text-xl md:text-2xl font-semibold mb-3">📦 Contoh cURL & Response</h2>
-
-          <h3 class="font-medium mt-4 mb-2">/qris/dynamic — base_amount + unique_code</h3>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4"><code class="language-bash">curl -X POST https://restapi-geekzpay.replit.app/qris/dynamic \
-  -d base_amount=10000 \
-  -d unique_code=338 \
-  -d qr=png</code></pre>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4 mt-2"><code class="language-json">{
-  "base_amount": 10000,
-  "unique_code": 338,
-  "total": 10338,
-  "payload": "00020101021126...",
-  "qr_png_data_url": "data:image/png;base64,iVBOR..."
-}</code></pre>
-
-          <h3 class="font-medium mt-6 mb-2">/qris/dynamic — dengan payload_static</h3>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4"><code class="language-bash">curl -X POST https://restapi-geekzpay.replit.app/qris/dynamic \
-  -d base_amount=20000 \
-  -d unique_code=777 \
-  -d payload_static='00020101021126...6304ABCD' \
-  -d qr=png</code></pre>
-
-          <h3 class="font-medium mt-6 mb-2">/webhook/payment</h3>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4"><code class="language-bash">curl -X POST 'https://restapi-geekzpay.replit.app/webhook/payment?token=USER123' \
-  -H 'Content-Type: application/json' \
-  -d '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" }'</code></pre>
+          <h3 class="font-medium mt-6 mb-2">/webhook/summary</h3>
+          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4"><code class="language-bash">curl 'https://restapi-geekzpay.vercel.app/webhook/summary?token=USER123&amp;limit=5'</code></pre>
           <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4 mt-2"><code class="language-json">{
   "ok": true,
   "token": "USER123",
-  "event_id": "9e1a7c9f...",
-  "received_at": "2025-09-23T12:34:56.789Z",
-  "method": "POST",
-  "ip": "203.0.113.45",
-  "amount": 10338,
-  "body": { "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" },
-  "query": { "token": "USER123" },
-  "headers": { ... }
+  "count": 1,
+  "events": [
+    {
+      "id": "ab12cd34ef56...",
+      "time": "2025-09-23T19:28:09.212Z",
+      "amount": 2969,
+      "ip": "203.0.113.45",
+      "method": "POST"
+    }
+  ]
 }</code></pre>
         </section>
       </main>
