@@ -37,42 +37,61 @@ function extractToken(req) {
 }
 
 /* ================================
- *  Raw body capture (for webhook)
+ *  RAW BODY (kebal serverless)
  * ================================ */
 app.use((req, res, next) => {
-  let data = '';
-  let size = 0;
-  const maxSize = 1024 * 1024; // 1MB
-  req.setEncoding('utf8');
-  req.on('data', chunk => {
-    size += Buffer.byteLength(chunk, 'utf8');
-    if (size > maxSize) {
-      res.status(413).json({ error: 'Request entity too large' });
-      return req.destroy();
-    }
-    data += chunk;
-  });
-  req.on('end', () => {
-    if (res.headersSent) return;
-    req.rawBody = data || '';
-    const ct = (req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+  const hasBody = !['GET', 'HEAD'].includes(String(req.method || '').toUpperCase());
+  if (!hasBody) { req.rawBody = ''; req.body = {}; return next(); }
+
+  let chunks = [];
+  let length = 0;
+  const MAX = 1024 * 1024; // 1MB
+
+  req.on('data', (c) => {
     try {
-      if (req.method !== 'GET' && req.method !== 'HEAD') {
-        if (ct === 'application/json') {
-          req.body = req.rawBody ? JSON.parse(req.rawBody) : {};
-        } else if (ct === 'application/x-www-form-urlencoded') {
-          const params = new URLSearchParams(req.rawBody);
-          const obj = {}; for (const [k, v] of params) obj[k] = v;
+      if (!Buffer.isBuffer(c)) c = Buffer.from(String(c));
+      length += c.length;
+      if (length > MAX) {
+        try { req.destroy(); } catch {}
+        return res.status(413).json({ error: 'Request entity too large' });
+      }
+      chunks.push(c);
+    } catch {
+      // Jangan biarkan crash
+    }
+  });
+
+  req.on('end', () => {
+    try {
+      const buf = Buffer.concat(chunks);
+      const raw = buf.toString('utf8');
+      req.rawBody = raw;
+
+      const ct = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+      if (ct === 'application/json') {
+        try { req.body = raw ? JSON.parse(raw) : {}; } catch { req.body = {}; }
+      } else if (ct === 'application/x-www-form-urlencoded') {
+        try {
+          const params = new URLSearchParams(raw);
+          const obj = {};
+          for (const [k, v] of params) obj[k] = v;
           req.body = obj;
-        } else if (ct === 'text/plain') {
-          req.body = { text: req.rawBody };
-        } else {
-          try { req.body = JSON.parse(req.rawBody); } catch { req.body = {}; }
-        }
+        } catch { req.body = {}; }
+      } else if (ct === 'text/plain') {
+        req.body = { text: raw };
       } else {
         req.body = {};
       }
-    } catch { req.body = {}; }
+    } catch {
+      req.rawBody = '';
+      req.body = {};
+    }
+    next();
+  });
+
+  req.on('error', () => {
+    req.rawBody = '';
+    req.body = {};
     next();
   });
 });
@@ -116,7 +135,6 @@ app.post('/qris/dynamic', async (req, res) => {
       if (!Number.isFinite(baseAmount) || baseAmount <= 0) {
         return res.status(422).json({ error: 'Invalid base_amount' });
       }
-      // unique_code wajib saat base_amount dipakai (random bisa dilakukan di bot/klien)
       if (req.body.unique_code === undefined || req.body.unique_code === null || req.body.unique_code === '') {
         return res.status(422).json({ error: 'unique_code is required when using base_amount' });
       }
@@ -157,57 +175,43 @@ app.post('/qris/dynamic', async (req, res) => {
 /* ================================
  *  Generic Payment Webhook (DANA/ShopeePay/GoPay/OVO/...)
  *  Route: /webhook/payment
- *  Security:
- *   - Jika WEBHOOK_TOKEN di .env diisi -> semua request harus pakai token itu
- *   - Jika kosong -> setiap user wajib kirim token mereka (pemisah data per user)
- *  Token bisa dikirim via:
- *   - Header: X-Webhook-Token
- *   - Query:  ?token=...
- *   - Body:   { token: "..." }
  * ================================ */
 app.all('/webhook/payment', async (req, res) => {
   try {
     const expected = String(process.env.WEBHOOK_TOKEN || '').trim();
     const provided = String(extractToken(req));
 
-    if (expected) {
-      if (provided !== expected) {
-        return res.status(401).json({ error: 'Bad token' });
-      }
-    } else {
-      if (!provided) {
-        return res.status(401).json({
-          error: 'Token required (X-Webhook-Token / ?token= / body.token)'
-        });
-      }
+    if (expected ? (provided !== expected) : !provided) {
+      return res.status(401).json({ error: expected ? 'Bad token' : 'Token required (X-Webhook-Token / ?token= / body.token)' });
     }
 
-    const tokenForBucket = provided; 
-
-    const ip =
-      (req.headers['x-forwarded-for'] ||
-       req.headers['cf-connecting-ip'] ||
-       req.headers['x-real-ip'] ||
-       req.socket?.remoteAddress ||
-       ''
+    // IP aman
+    let ip = '0.0.0.0';
+    try {
+      ip = (
+        req.headers['x-forwarded-for'] ||
+        req.headers['cf-connecting-ip'] ||
+        req.headers['x-real-ip'] ||
+        (req.socket && req.socket.remoteAddress) ||
+        ''
       ).toString().split(',')[0].trim().replace(/^::ffff:/, '') || '0.0.0.0';
+    } catch {}
 
     const method = req.method;
-    const headers = req.headers;
+    const headers = req.headers || {};
     const body = req.body || {};
-    const raw = req.rawBody || '';
+    const raw = typeof req.rawBody === 'string' ? req.rawBody : '';
 
-    const amount = parseAmountFromAnything(body, raw);
+    let amount = null;
+    try { amount = parseAmountFromAnything(body, raw); } catch { amount = null; }
 
     const bucket = Math.floor(Date.now() / 10000);
-    const eventId = crypto
-      .createHash('sha1')
-      .update((raw || JSON.stringify(body)) + '|' + bucket)
-      .digest('hex');
+    const baseForHash = raw && raw.length ? raw : JSON.stringify(body || {});
+    const eventId = crypto.createHash('sha1').update(baseForHash + '|' + bucket).digest('hex');
 
     const payload = {
       ok: true,
-      token: tokenForBucket,
+      token: provided,
       event_id: eventId,
       received_at: new Date().toISOString(),
       method,
@@ -218,17 +222,18 @@ app.all('/webhook/payment', async (req, res) => {
       headers
     };
 
-    pushEvent(tokenForBucket, payload);
+    pushEvent(provided, payload);
 
     try {
-      const path = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
+      const p = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
       if (!process.env.VERCEL) fs.mkdirSync('./data', { recursive: true });
-      fs.appendFileSync(path, JSON.stringify(payload) + '\n');
+      fs.appendFileSync(p, JSON.stringify(payload) + '\n');
     } catch {}
 
     return res.json(payload);
   } catch (err) {
-    return res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
+    // Jangan biarkan crash jadi FUNCTION_INVOCATION_FAILED
+    return res.status(200).json({ ok: false, error: String(err && err.message || err || 'unknown') });
   }
 });
 
@@ -263,29 +268,47 @@ app.get('/webhook/summary', (req, res) => {
   res.json({ ok: true, token, count: events.length, events });
 });
 
-// Serve semua file di /public (opsional, untuk asset lain)
+/* ================================
+ *  DEBUG (opsional)
+ * ================================ */
+app.all('/__echo', (req, res) => {
+  res.json({
+    ok: true,
+    method: req.method,
+    ct: req.headers['content-type'] || null,
+    query: req.query || {},
+    body: req.body || null,
+    raw: (req.rawBody || '').slice(0, 512)
+  });
+});
+
+app.get('/__routes', (req, res) => {
+  const routes = [];
+  try {
+    app._router.stack.forEach((m) => {
+      if (m.route?.path) {
+        routes.push({ method: Object.keys(m.route.methods)[0]?.toUpperCase() || 'USE', path: m.route.path });
+      } else if (m.name === 'router' && m.handle?.stack) {
+        m.handle.stack.forEach((s) => {
+          if (s.route?.path) {
+            routes.push({ method: Object.keys(s.route.methods)[0]?.toUpperCase() || 'USE', path: s.route.path });
+          }
+        });
+      }
+    });
+  } catch {}
+  res.json({ ok: true, routes });
+});
+
+/* ================================
+ *  Static & Docs
+ * ================================ */
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1h',
   setHeaders: (res) => {
     res.setHeader('Cache-Control', 'public, max-age=3600');
   }
 }));
-
-app.get('/__routes', (req, res) => {
-  const routes = [];
-  app._router.stack.forEach((m) => {
-    if (m.route?.path) {
-      routes.push({ method: Object.keys(m.route.methods)[0]?.toUpperCase() || 'USE', path: m.route.path });
-    } else if (m.name === 'router' && m.handle?.stack) {
-      m.handle.stack.forEach((s) => {
-        if (s.route?.path) {
-          routes.push({ method: Object.keys(s.route.methods)[0]?.toUpperCase() || 'USE', path: s.route.path });
-        }
-      });
-    }
-  });
-  res.json({ ok: true, routes });
-});
 
 // Route khusus / dan /docs -> docs.html
 app.get(['/', '/docs'], (req, res) => {
