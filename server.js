@@ -53,6 +53,21 @@ function extractToken(req) {
   );
 }
 
+function publicize(ev, verbose) {
+  if (verbose) return ev;
+  return {
+    ok: ev.ok,
+    token: ev.token,
+    event_id: ev.event_id,
+    received_at: ev.received_at,
+    ip: ev.ip,
+    method: ev.method,
+    amount: ev.amount,
+    body: ev.body,
+    query: ev.query && Object.keys(ev.query).length ? ev.query : undefined
+  };
+}
+
 app.use((req, res, next) => {
   let data = '';
   let size = 0;
@@ -143,63 +158,102 @@ app.post('/qris/dynamic', async (req, res) => {
 app.all('/webhook/payment', async (req, res) => {
   try {
     const expected = String(process.env.WEBHOOK_TOKEN || '').trim();
-    const provided = String(extractToken(req));
-    if (expected) {
-      if (provided !== expected) return res.status(401).json({ error: 'Bad token' });
-    } else {
-      if (!provided) return res.status(401).json({ error: 'Token required (X-Webhook-Token / ?token= / body.token)' });
+    const provided = String(
+      req.headers['x-webhook-token'] ||
+      req.query.token ||
+      (req.body && req.body.token) ||
+      ''
+    );
+    if (expected ? (provided !== expected) : !provided) {
+      return res.status(401).json({ error: expected ? 'Bad token' : 'Token required (X-Webhook-Token / ?token= / body.token)' });
     }
+
     const tokenForBucket = provided;
-    const ip = (req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || req.headers['x-real-ip'] || req.socket?.remoteAddress || '').toString().split(',')[0].trim().replace(/^::ffff:/, '') || '0.0.0.0';
+    const ip = (
+      req.headers['x-forwarded-for'] ||
+      req.headers['cf-connecting-ip'] ||
+      req.headers['x-real-ip'] ||
+      req.socket?.remoteAddress ||
+      ''
+    ).toString().split(',')[0].trim().replace(/^::ffff:/, '') || '0.0.0.0';
+
     const method = req.method;
     const headers = req.headers;
     const body = req.body || {};
     const raw = req.rawBody || '';
+
     const amount = parseAmountFromAnything(body, raw);
     const bucket = Math.floor(Date.now() / 10000);
     const eventId = crypto.createHash('sha1').update((raw || JSON.stringify(body)) + '|' + bucket).digest('hex');
-    const payload = { ok: true, token: tokenForBucket, event_id: eventId, received_at: new Date().toISOString(), method, ip, amount, body, query: req.query || {}, headers };
-    pushEventLocal(tokenForBucket, payload);
+
+    const payload = {
+      ok: true,
+      token: tokenForBucket,
+      event_id: eventId,
+      received_at: new Date().toISOString(),
+      method,
+      ip,
+      amount,
+      body,
+      query: req.query || {},
+      headers
+    };
+
+    pushEvent(tokenForBucket, payload);
+
     try {
-      const p = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
+      const pathLog = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
       if (!process.env.VERCEL) fs.mkdirSync('./data', { recursive: true });
-      fs.appendFileSync(p, JSON.stringify(payload) + '\n');
+      fs.appendFileSync(pathLog, JSON.stringify(payload) + '\n');
     } catch {}
-    return res.json(payload);
+
+    const verbose = req.query.verbose === '1' || req.query.debug === '1';
+    return res.json(publicize(payload, verbose));
   } catch (err) {
     return res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
 });
 
 app.get('/webhook/recent', (req, res) => {
-  const token = String(extractToken(req));
+  const token = String(
+    req.headers['x-webhook-token'] ||
+    req.query.token ||
+    (req.body && req.body.token) ||
+    ''
+  );
   if (!token) return res.status(401).json({ error: 'Token required' });
+
   const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
-  const events = getRecentEvents(token, limit);
-  res.json({ ok: true, token, count: events.length, events });
+  const verbose = req.query.verbose === '1' || req.query.debug === '1';
+
+  const arr = EVENTS_BY_TOKEN.get(token) || [];
+  const out = arr.slice(0, limit).map(x => publicize(x.ev, verbose));
+
+  res.json({ ok: true, token, count: out.length, events: out });
 });
 
 app.get('/webhook/summary', (req, res) => {
-  const token = String(extractToken(req));
+  const token = String(
+    req.headers['x-webhook-token'] ||
+    req.query.token ||
+    (req.body && req.body.token) ||
+    ''
+  );
   if (!token) return res.status(401).json({ error: 'Token required' });
+
   const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
-  const events = getRecentEvents(token, limit).map(e => ({
-    id: e.event_id,
-    time: e.received_at,
-    amount: e.amount,
-    order_id: e.body?.order_id,
-    status: e.body?.status,
-    ip: e.ip
+  const arr = EVENTS_BY_TOKEN.get(token) || [];
+  const slice = arr.slice(0, limit);
+  const events = slice.map(x => ({
+    id: x.ev.event_id,
+    time: x.ev.received_at,
+    amount: x.ev.amount,
+    order_id: x.ev.body?.order_id,
+    status: x.ev.body?.status,
+    ip: x.ev.ip
   }));
   res.json({ ok: true, token, count: events.length, events });
 });
-
-app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '1h',
-  setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'public, max-age=3600');
-  }
-}));
 
 app.get(['/', '/docs'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
