@@ -199,7 +199,7 @@ app.all('/webhook/payment', async (req, res) => {
       headers
     };
 
-    pushEvent(tokenForBucket, payload);
+    pushEventLocal(tokenForBucket, payload);
 
     try {
       const pathLog = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
