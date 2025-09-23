@@ -1,16 +1,13 @@
 function onlyDigits(str) {
   return (str || '').replace(/[^0-9]/g, '');
 }
-
 function normalizeRupiahFragment(s) {
   if (!s) return null
   let t = String(s).trim()
   t = t.replace(/[^\d.,]/g, "")
   if (!t) return null
-
   const hasDot = t.includes(".")
   const hasComma = t.includes(",")
-
   if (hasDot && hasComma) {
     const lastSep = t.lastIndexOf(".") > t.lastIndexOf(",") ? "." : ","
     if (lastSep === "," && /,\d{1,2}$/.test(t)) {
@@ -27,7 +24,6 @@ function normalizeRupiahFragment(s) {
     const n = Number(t)
     return Number.isFinite(n) ? n : null
   }
-
   if (hasComma) {
     if (/,?\d{1,2}$/.test(t)) {
       t = t.replace(/\./g, "").replace(",", ".")
@@ -38,24 +34,20 @@ function normalizeRupiahFragment(s) {
     const n = Number(t)
     return Number.isFinite(n) ? n : null
   }
-
   if (hasDot) {
     t = t.replace(/\./g, "")
     const n = Number(t)
     return Number.isFinite(n) ? n : null
   }
-
   const n = Number(t)
   return Number.isFinite(n) ? n : null
 }
-
 function parseAmountLike(str) {
   if (!str) return null
   const m = String(str).match(/(?:rp\.?|idr)\s*([0-9][0-9.,]*)/i)
   if (!m) return null
   return normalizeRupiahFragment(m[1])
 }
-
 function flatStrings(obj, out = []) {
   if (obj == null) return out
   if (typeof obj === "string") {
@@ -76,7 +68,6 @@ function flatStrings(obj, out = []) {
   }
   return out
 }
-
 function parseAmountFromAnything(body = {}, raw = "") {
   const directKeys = ["amount", "total", "nominal", "value", "price"]
   for (const k of directKeys) {
@@ -86,10 +77,8 @@ function parseAmountFromAnything(body = {}, raw = "") {
     const n = parseAmountLike(String(v)) ?? normalizeRupiahFragment(String(v))
     if (Number.isFinite(n)) return n
   }
-
   const allTexts = flatStrings(body)
   if (raw) allTexts.push(String(raw))
-
   let tagged = []
   const rpRe = /(rp\.?|idr)\s*([0-9][0-9.,]*)/gi
   for (const s of allTexts) {
@@ -103,7 +92,6 @@ function parseAmountFromAnything(body = {}, raw = "") {
     const big = Math.max(...tagged)
     if (Number.isFinite(big)) return big
   }
-
   let nums = []
   const numRe = /\b\d[\d.,]{1,}\b/g
   for (const s of allTexts) {
@@ -118,8 +106,6 @@ function parseAmountFromAnything(body = {}, raw = "") {
     if (filtered.length) return Math.max(...filtered)
     return Math.max(...nums)
   }
-
   return null
 }
-
 module.exports = { parseAmountFromAnything }

@@ -1,6 +1,3 @@
-/**
- * QRIS tools: TLV (EMVCo) parsing/building + amount injection + CRC16-CCITT
- */
 function crc16ccitt(str) {
   let crc = 0xFFFF;
   for (let i = 0; i < str.length; i++) {
@@ -13,7 +10,6 @@ function crc16ccitt(str) {
   }
   return (crc.toString(16).toUpperCase()).padStart(4, '0');
 }
-
 function parseTLV(payload) {
   const fields = [];
   let i = 0;
@@ -31,11 +27,9 @@ function parseTLV(payload) {
   }
   return fields;
 }
-
 function buildTLV(fields) {
   return fields.map(f => f.tag + String(f.value.length).padStart(2, '0') + f.value).join('');
 }
-
 function setOrInsert(fields, tag, value, afterTag) {
   let found = false;
   for (const f of fields) {
@@ -56,36 +50,24 @@ function setOrInsert(fields, tag, value, afterTag) {
     }
   }
 }
-
 function removeTag(fields, tag) {
   for (let i = fields.length - 1; i >= 0; i--) {
     if (fields[i].tag === tag) fields.splice(i, 1);
   }
 }
-
-/**
- * Buat payload dinamis: inject amount (Tag '54') + CRC (Tag '63')
- * amount: integer rupiah → diformat 2 decimal (10338 -> "10338.00")
- */
 function makeDynamic(staticPayload, amount) {
   if (!staticPayload || typeof staticPayload !== 'string') {
     throw new Error('Invalid static payload');
   }
-  // Hapus CRC trailing jika ada
   let payload = staticPayload.replace(/6304[0-9A-Fa-f]{4}$/, '');
-  // Parse TLV
   let fields = parseTLV(payload);
-  // Hapus 54/63 lama
   removeTag(fields, '63');
   removeTag(fields, '54');
-  // Sisipkan amount setelah 53 (jika ada)
   const amtStr = Number(amount).toFixed(2);
   setOrInsert(fields, '54', amtStr, '53');
-  // Build + CRC
   const partial = buildTLV(fields);
   const beforeCRC = partial + '63' + '04';
   const crc = crc16ccitt(beforeCRC);
   return beforeCRC + crc;
 }
-
 module.exports = { makeDynamic, crc16ccitt, parseTLV, buildTLV };
