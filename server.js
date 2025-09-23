@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const fileUpload = require('express-fileupload');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -27,6 +28,13 @@ function extractToken(req) {
     ''
   );
 }
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload({
+  limits: { fileSize: 2 * 1024 * 1024 },
+  abortOnLimit: true
+}));
 
 app.use((req, res, next) => {
   let data = '';
@@ -114,6 +122,70 @@ app.post('/qris/dynamic', async (req, res) => {
     return res.json(response);
   } catch (err) {
     return res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
+  }
+});
+
+app.post('/qris/decode', async (req, res) => {
+  try {
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'File gambar diperlukan' 
+      });
+    }
+
+    const imageFile = req.files.image;    
+    if (!imageFile.mimetype.startsWith('image/')) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'File harus berupa gambar (PNG, JPG, JPEG)' 
+      });
+    }
+
+    if (imageFile.size > 2 * 1024 * 1024) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'Ukuran file maksimal 2MB' 
+      });
+    }
+    
+    console.log('Decoding QR code:', {
+      name: imageFile.name,
+      type: imageFile.mimetype,
+      size: imageFile.size
+    });
+
+    const payload = await QRCode.decode(imageFile.data);    
+    if (!payload) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'Tidak dapat membaca QR code dari gambar' 
+      });
+    }
+    res.json({ 
+      ok: true, 
+      payload: payload,
+      file_info: {
+        name: imageFile.name,
+        type: imageFile.mimetype,
+        size: imageFile.size
+      },
+      decoded_at: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('QR decode error:', error);    
+    if (error.message.includes('No QR code found')) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'Tidak ditemukan QR code dalam gambar' 
+      });
+    }
+    
+    res.status(500).json({ 
+      ok: false, 
+      error: 'Terjadi kesalahan saat memproses QR code' 
+    });
   }
 });
 
