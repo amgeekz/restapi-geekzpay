@@ -15,7 +15,6 @@ const { parseAmountFromAnything } = require('./src/utils');
 const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
 
 const app = express();
-app.set('json spaces', 2);
 
 const EVENT_TTL_SEC = Math.max(1, parseInt(process.env.EVENT_TTL_SEC || '30', 10));
 const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '5', 10));
@@ -29,8 +28,6 @@ function extractToken(req) {
   );
 }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload({
   limits: { fileSize: 2 * 1024 * 1024 },
   abortOnLimit: true
