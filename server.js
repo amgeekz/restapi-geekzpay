@@ -8,7 +8,6 @@ const crypto = require('crypto');
 const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
-
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
 
@@ -18,17 +17,24 @@ const EVENT_TTL_MS = Math.max(1000, parseInt(process.env.EVENT_TTL_MS || '30000'
 const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '5', 10));
 const EVENTS_BY_TOKEN = new Map();
 
-function pushEvent(token, ev) {
+function pushEventLocal(token, ev) {
   const key = String(token || 'default');
   const now = Date.now();
   if (!EVENTS_BY_TOKEN.has(key)) EVENTS_BY_TOKEN.set(key, []);
-  const arr = EVENTS_BY_TOKEN.get(key);
-  const fresh = arr.filter(x => (now - x.ts) <= EVENT_TTL_MS);
-  fresh.unshift({ ts: now, ev });
-  while (fresh.length > EVENT_MAX_KEEP) fresh.pop();
-  EVENTS_BY_TOKEN.set(key, fresh);
+  let arr = EVENTS_BY_TOKEN.get(key);
+  arr = arr.filter(x => (now - x.ts) <= EVENT_TTL_MS);
+  arr.unshift({ ts: now, ev });
+  if (arr.length > EVENT_MAX_KEEP) arr = arr.slice(0, EVENT_MAX_KEEP);
+  EVENTS_BY_TOKEN.set(key, arr);
 }
-
+function getRecentEvents(token, limit) {
+  const key = String(token || 'default');
+  const now = Date.now();
+  let arr = EVENTS_BY_TOKEN.get(key) || [];
+  arr = arr.filter(x => (now - x.ts) <= EVENT_TTL_MS).slice(0, limit);
+  EVENTS_BY_TOKEN.set(key, arr);
+  return arr.map(x => x.ev);
+}
 setInterval(() => {
   const now = Date.now();
   for (const [key, arr] of EVENTS_BY_TOKEN.entries()) {
@@ -45,21 +51,6 @@ function extractToken(req) {
     (req.body && req.body.token) ||
     ''
   );
-}
-
-function publicize(ev, verbose) {
-  if (verbose) return ev;
-  return {
-    ok: ev.ok,
-    token: ev.token,
-    event_id: ev.event_id,
-    received_at: ev.received_at,
-    ip: ev.ip,
-    method: ev.method,
-    amount: ev.amount,
-    body: ev.body,
-    query: ev.query && Object.keys(ev.query).length ? ev.query : undefined
-  };
 }
 
 app.use((req, res, next) => {
@@ -109,8 +100,7 @@ app.get('/diag', (req, res) => {
     ok: true,
     time: new Date().toISOString(),
     hasQRIS: !!process.env.QRIS_STATIC,
-    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-    tokens_cached: EVENTS_BY_TOKEN.size
+    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
   });
 });
 
@@ -118,13 +108,11 @@ app.post('/qris/dynamic', async (req, res) => {
   try {
     const payloadStatic = (req.body.payload_static || process.env.QRIS_STATIC || '').trim();
     if (!payloadStatic) return res.status(400).json({ error: 'QRIS_STATIC not set and payload_static missing' });
-
     const hasBase = req.body.base_amount !== undefined && req.body.base_amount !== null && req.body.base_amount !== '';
     const hasAmount = req.body.amount !== undefined && req.body.amount !== null && req.body.amount !== '';
     if (!hasBase && !hasAmount) return res.status(422).json({ error: 'Provide either base_amount + unique_code, or amount' });
 
     let baseAmount = null, uniq = null, directAmount = null;
-
     if (hasBase) {
       baseAmount = parseInt(req.body.base_amount, 10);
       if (!Number.isFinite(baseAmount) || baseAmount <= 0) return res.status(422).json({ error: 'Invalid base_amount' });
@@ -134,7 +122,6 @@ app.post('/qris/dynamic', async (req, res) => {
       uniq = parseInt(req.body.unique_code, 10);
       if (!Number.isFinite(uniq) || uniq < 1 || uniq > 999) return res.status(422).json({ error: 'unique_code must be 1..999' });
     }
-
     if (hasAmount) {
       directAmount = parseInt(req.body.amount, 10);
       if (!Number.isFinite(directAmount) || directAmount <= 0) return res.status(422).json({ error: 'Invalid amount' });
@@ -142,19 +129,11 @@ app.post('/qris/dynamic', async (req, res) => {
 
     const total = hasAmount ? directAmount : (baseAmount + uniq);
     const dynamicPayload = makeDynamic(payloadStatic, total);
-
-    const response = {
-      base_amount: hasBase ? baseAmount : null,
-      unique_code: hasBase ? uniq : null,
-      total,
-      payload: dynamicPayload
-    };
-
+    const response = { base_amount: hasBase ? baseAmount : null, unique_code: hasBase ? uniq : null, total, payload: dynamicPayload };
     const wantsQR = String(req.body.qr || '').toLowerCase();
     if (wantsQR === 'png' || wantsQR === 'true' || wantsQR === '1') {
       response.qr_png_data_url = await QRCode.toDataURL(dynamicPayload, { width: 480, margin: 2 });
     }
-
     return res.json(response);
   } catch (err) {
     return res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
@@ -164,30 +143,41 @@ app.post('/qris/dynamic', async (req, res) => {
 app.all('/webhook/payment', async (req, res) => {
   try {
     const expected = String(process.env.WEBHOOK_TOKEN || '').trim();
-    const provided = String(extractToken(req));
-    if (expected ? (provided !== expected) : !provided) {
-      return res.status(401).json({ error: expected ? 'Bad token' : 'Token required (X-Webhook-Token / ?token= / body.token)' });
+    const provided = String(
+      req.headers['x-webhook-token'] ||
+      req.query.token ||
+      (req.body && req.body.token) ||
+      ''
+    );
+
+    if (expected) {
+      if (provided !== expected) return res.status(401).json({ error: 'Bad token' });
+    } else {
+      if (!provided) {
+        return res.status(401).json({ error: 'Token required (X-Webhook-Token / ?token= / body.token)' });
+      }
     }
 
     const tokenForBucket = provided;
-    const ip = (
-      req.headers['x-forwarded-for'] ||
-      req.headers['cf-connecting-ip'] ||
-      req.headers['x-real-ip'] ||
-      req.socket?.remoteAddress ||
-      ''
-    ).toString().split(',')[0].trim().replace(/^::ffff:/, '') || '0.0.0.0';
+    const ip = (req.headers['x-forwarded-for'] ||
+                req.headers['cf-connecting-ip'] ||
+                req.headers['x-real-ip'] ||
+                req.socket?.remoteAddress ||
+                ''
+               ).toString().split(',')[0].trim().replace(/^::ffff:/, '') || '0.0.0.0';
 
     const method = req.method;
-    const headers = req.headers;
     const body = req.body || {};
     const raw = req.rawBody || '';
-
     const amount = parseAmountFromAnything(body, raw);
-    const bucket = Math.floor(Date.now() / 10000);
-    const eventId = crypto.createHash('sha1').update((raw || JSON.stringify(body)) + '|' + bucket).digest('hex');
 
-    const payload = {
+    const bucket = Math.floor(Date.now() / 10000);
+    const eventId = crypto
+      .createHash('sha1')
+      .update((raw || JSON.stringify(body)) + '|' + bucket)
+      .digest('hex');
+
+    const eventPayload = {
       ok: true,
       token: tokenForBucket,
       event_id: eventId,
@@ -197,19 +187,41 @@ app.all('/webhook/payment', async (req, res) => {
       amount,
       body,
       query: req.query || {},
-      headers
+      headers: req.headers
     };
 
-    pushEvent(tokenForBucket, payload);
+    // simpan ke TTL store kamu (tetap sama)
+    pushEventLocal(tokenForBucket, eventPayload);
 
+    // log file opsional (tetap sama)
     try {
-      const pathLog = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
+      const p = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
       if (!process.env.VERCEL) fs.mkdirSync('./data', { recursive: true });
-      fs.appendFileSync(pathLog, JSON.stringify(payload) + '\n');
+      fs.appendFileSync(p, JSON.stringify(eventPayload) + '\n');
     } catch {}
 
-    const verbose = req.query.verbose === '1' || req.query.debug === '1';
-    return res.json(publicize(payload, verbose));
+    // === Respons RINGKAS (tidak raw) ===
+    const compact = {
+      ok: true,
+      token: tokenForBucket,
+      event_id: eventId,
+      received_at: eventPayload.received_at,
+      amount,
+      method,
+      ip
+    };
+
+    // Kalau butuh raw untuk debugging → ?debug=1
+    const wantsDebug = String(req.query.debug || '0') === '1';
+    if (wantsDebug) {
+      compact.debug = {
+        body,
+        query: req.query || {},
+        headers: req.headers
+      };
+    }
+
+    return res.json(compact);
   } catch (err) {
     return res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
@@ -219,25 +231,21 @@ app.get('/webhook/recent', (req, res) => {
   const token = String(extractToken(req));
   if (!token) return res.status(401).json({ error: 'Token required' });
   const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
-  const verbose = req.query.verbose === '1' || req.query.debug === '1';
-  const arr = EVENTS_BY_TOKEN.get(token) || [];
-  const out = arr.slice(0, limit).map(x => publicize(x.ev, verbose));
-  res.json({ ok: true, token, count: out.length, events: out });
+  const events = getRecentEvents(token, limit);
+  res.json({ ok: true, token, count: events.length, events });
 });
 
 app.get('/webhook/summary', (req, res) => {
   const token = String(extractToken(req));
   if (!token) return res.status(401).json({ error: 'Token required' });
   const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
-  const arr = EVENTS_BY_TOKEN.get(token) || [];
-  const slice = arr.slice(0, limit);
-  const events = slice.map(x => ({
-    id: x.ev.event_id,
-    time: x.ev.received_at,
-    amount: x.ev.amount,
-    order_id: x.ev.body?.order_id,
-    status: x.ev.body?.status,
-    ip: x.ev.ip
+  const events = getRecentEvents(token, limit).map(e => ({
+    id: e.event_id,
+    time: e.received_at,
+    amount: e.amount,
+    order_id: e.body?.order_id,
+    status: e.body?.status,
+    ip: e.ip
   }));
   res.json({ ok: true, token, count: events.length, events });
 });
