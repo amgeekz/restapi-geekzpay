@@ -135,6 +135,7 @@ app.post('/qris/dynamic', async (req, res) => {
 });
 
 app.post('/qris/decode', async (req, res) => {
+  const { default: Jimp } = await import('jimp');
   try {
     if (!req.files || !req.files.image) {
       return res.status(400).json({ 
