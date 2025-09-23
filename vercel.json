@@ -1,9 +1,11 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/webhook/(.*)", "destination": "/api/server/webhook/$1" },
-    { "source": "/qris/(.*)", "destination": "/api/server/qris/$1" },
-    { "source": "/diag", "destination": "/api/server/diag" },
-    { "source": "/", "destination": "/public/index.html" }
+    { "source": "/qris/(.*)",     "destination": "/api?u=/qris/$1" },
+    { "source": "/webhook/(.*)",  "destination": "/api?u=/webhook/$1" },
+    { "source": "/diag",          "destination": "/api?u=/diag" },
+
+    { "source": "/docs",          "destination": "/public/index.html" },
+    { "source": "/",              "destination": "/public/index.html" }
   ]
 }
