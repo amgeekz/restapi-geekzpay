@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
-const Jimp = require('jimp');
+const Jimp = require('jimp-compact');
 const jsqr = require('jsqr');
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
@@ -135,7 +135,6 @@ app.post('/qris/dynamic', async (req, res) => {
 });
 
 app.post('/qris/decode', async (req, res) => {
-  const { default: Jimp } = await import('jimp');
   try {
     if (!req.files || !req.files.image) {
       return res.status(400).json({ 

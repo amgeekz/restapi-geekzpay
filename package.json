@@ -14,7 +14,7 @@
     "express": "^4.19.2",
     "express-fileupload": "^1.5.2",
     "helmet": "^7.1.0",
-    "jimp": "^1.6.0",
+    "jimp-compact": "^0.16.1-2",
     "jsqr": "^0.2.2",
     "morgan": "^1.10.0",
     "qrcode": "^1.5.4"
