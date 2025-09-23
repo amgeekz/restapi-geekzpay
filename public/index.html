@@ -2,422 +2,373 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>GeekzPay REST API Docs</title>
+  <title>GeekzPay API Docs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- highlight.js (dark) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
   <style>
   :root { color-scheme: dark; }
   html, body { max-width:100%; overflow-x:hidden; }
   html { background:#0f172a; }
-  body {
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
-    color:#e2e8f0;
-  }
-  /* ===== FIX INTI ANTI-OVERFLOW ===== */
-  /* Flex & grid children boleh mengecil */
+  body { font-family: system-ui, sans-serif; color:#e2e8f0; }
+  
   .flex > * { min-width: 0; }
   .grid > * { min-width: 0; }
-
-  /* Inline code boleh wrap */
+  
   p code, li code, td code, th code, h1 code, h2 code, h3 code, a code {
     overflow-wrap: anywhere;
     word-break: break-word;
   }
-
-  /* Blok code tidak mendorong halaman melebar */
+  
   pre { margin:0; }
   pre code {
     font-size:.92rem;
-    white-space: pre-wrap;   /* bungkus baris panjang */
-    word-break: break-word;  /* pecah base64/URL panjang */
+    white-space: pre-wrap;
+    word-break: break-word;
   }
-
-  /* Media & tabel responsif */
+  
   img { max-width:100%; height:auto; }
-  table { width:100%; border-collapse:separate; border-spacing:0; table-layout: fixed; /* <- penting */ }
+  table { width:100%; border-collapse:separate; border-spacing:0; table-layout: fixed; }
   .input, .select, .textarea { font-size:16px; min-width:0; width:100%; }
-
+  
   @media (max-width:480px){
     pre code { font-size:.86rem; }
     .btn { padding:.75rem 1rem; font-size:.95rem; }
   }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+  
+  .card {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100">
-  <!-- Header -->
+<body class="gradient-bg">
   <header class="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/90 backdrop-blur">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <button id="openMenu" class="md:hidden p-2 rounded-lg border border-slate-700" aria-label="Buka menu">☰</button>
+      <button id="openMenu" class="md:hidden p-2 rounded-lg border border-slate-700">☰</button>
       <div class="flex items-center gap-2">
-        <span class="text-lg font-semibold">📘 GeekzPay REST API</span>
-        <span class="text-xs ml-2 px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">Docs</span>
+        <span class="text-lg font-bold">🚀 GeekzPay API</span>
+        <span class="text-xs px-2 py-0.5 rounded bg-green-500/15 text-green-300 border border-green-500/30">v1.0</span>
       </div>
-      <span class="text-sm text-slate-400 hidden sm:block">v1</span>
+      <span class="text-sm text-slate-400 hidden sm:block">Simple & Powerful</span>
     </div>
   </header>
 
   <div class="max-w-6xl mx-auto px-4 w-full max-w-full">
     <div class="flex w-full">
-      <!-- Sidebar (desktop) -->
       <aside class="hidden md:block w-64 shrink-0 pr-6 py-8">
         <nav class="space-y-3 text-sm">
-          <a href="#setup" class="block hover:underline">⚙️ Setup</a>
-          <a href="#auth" class="block hover:underline">🔑 Autentikasi</a>
-          <a href="#qris" class="block hover:underline">1. QRIS Dinamis</a>
-          <a href="#webhook" class="block hover:underline">2. Webhook Payment</a>
-          <a href="#history" class="block hover:underline">3. Riwayat Webhook</a>
-          <a href="#examples" class="block hover:underline">📦 Contoh cURL & Response</a>
+          <a href="#hero" class="block font-medium hover:text-indigo-300">🏠 Overview</a>
+          <a href="#quickstart" class="block font-medium hover:text-indigo-300">⚡ Quick Start</a>
+          <a href="#qris" class="block font-medium hover:text-indigo-300">💳 QRIS Dinamis</a>
+          <a href="#webhook" class="block font-medium hover:text-indigo-300">🔔 Webhook</a>
+          <a href="#history" class="block font-medium hover:text-indigo-300">📊 Riwayat</a>
+          <a href="#examples" class="block font-medium hover:text-indigo-300">📚 Contoh</a>
         </nav>
       </aside>
 
-      <!-- Drawer (mobile) -->
       <div id="drawer" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-black/50"></div>
         <div class="absolute left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-800 shadow-xl p-6">
           <div class="flex items-center justify-between mb-6">
             <div class="text-base font-semibold">Menu</div>
-            <button id="closeMenu" class="p-2 rounded-lg border border-slate-700" aria-label="Tutup menu">✕</button>
+            <button id="closeMenu" class="p-2 rounded-lg border border-slate-700">✕</button>
           </div>
           <nav class="space-y-3">
-            <a href="#setup" class="block py-1" data-close>⚙️ Setup</a>
-            <a href="#auth" class="block py-1" data-close>🔑 Autentikasi</a>
-            <a href="#qris" class="block py-1" data-close>1. QRIS Dinamis</a>
-            <a href="#webhook" class="block py-1" data-close>2. Webhook Payment</a>
-            <a href="#history" class="block py-1" data-close>3. Riwayat Webhook</a>
-            <a href="#examples" class="block py-1" data-close>📦 Contoh cURL & Response</a>
+            <a href="#hero" class="block py-1" data-close>🏠 Overview</a>
+            <a href="#quickstart" class="block py-1" data-close>⚡ Quick Start</a>
+            <a href="#qris" class="block py-1" data-close>💳 QRIS Dinamis</a>
+            <a href="#webhook" class="block py-1" data-close>🔔 Webhook</a>
+            <a href="#history" class="block py-1" data-close>📊 Riwayat</a>
+            <a href="#examples" class="block py-1" data-close>📚 Contoh</a>
           </nav>
         </div>
       </div>
 
-      <!-- Main -->
       <main class="flex-1 py-8 md:py-10">
-        <!-- Setup -->
-        <section id="setup" class="section mb-8">
-          <h2 class="text-xl md:text-2xl font-semibold mb-3">⚙️ Setup</h2>
-          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4 grid gap-3 md:grid-cols-2">
-            <label class="block">
-              <span class="text-sm text-slate-300">Base URL API</span>
-              <input id="baseUrl"
-                     value="https://restapi-geekzpay.replit.app"
-                     class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100"
-                     placeholder="https://restapi-geekzpay.replit.app" inputmode="url" />
-            </label>
-            <div class="flex items-end gap-2">
-              <button id="saveBase" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Simpan</button>
-              <button id="useLocal" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Pakai origin</button>
+        <section id="hero" class="mb-12 text-center">
+          <h1 class="text-3xl md:text-4xl font-bold mb-4">GeekzPay REST API</h1>
+          <p class="text-lg text-slate-300 mb-6">Integrasikan pembayaran QRIS dengan mudah dalam aplikasi Anda</p>
+          <div class="flex flex-wrap justify-center gap-4">
+            <div class="feature-icon bg-indigo-500/20 text-indigo-300">💳</div>
+            <div class="feature-icon bg-green-500/20 text-green-300">🔔</div>
+            <div class="feature-icon bg-blue-500/20 text-blue-300">📊</div>
+          </div>
+        </section>
+
+        <section id="quickstart" class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">⚡ Quick Start</h2>
+          <div class="card rounded-2xl p-6 mb-6">
+            <h3 class="font-semibold mb-3">Base URL</h3>
+            <div class="flex flex-col md:flex-row gap-4">
+              <input id="baseUrl" value="https://restapi-geekzpay.replit.app" 
+                     class="flex-1 px-4 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" />
+              <button id="saveBase" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Simpan</button>
             </div>
-            <p class="text-xs text-slate-400 md:col-span-2">
-              Base URL adalah alamat server API kamu. Form <b>Live Test</b> menembak endpoint ke alamat ini.
-            </p>
+            <p class="text-sm text-slate-400 mt-2">Simpan Base URL untuk digunakan di Live Test</p>
           </div>
         </section>
 
-        <!-- Auth -->
-        <section id="auth" class="section mb-10">
-          <h2 class="text-xl md:text-2xl font-semibold mb-3">🔑 Autentikasi</h2>
-          <p class="text-sm md:text-base">Endpoint <code>/webhook/payment</code> membutuhkan <code>token</code>:</p>
-          <ul class="list-disc ml-6 mt-2 space-y-1 text-sm md:text-base">
-            <li>Query: <code>?token=USER123</code></li>
-            <li>Header: <code>X-Webhook-Token: USER123</code></li>
-            <li>Body JSON: <code>{ "token": "USER123" }</code></li>
-          </ul>
-        </section>
-
-        <!-- QRIS Dynamic -->
-        <section id="qris" class="section mb-12">
-          <h2 class="text-xl md:text-2xl font-semibold mb-3">1) QRIS Dinamis</h2>
-          <p class="text-sm md:text-base mb-3"><code>POST /qris/dynamic</code></p>
-
-          <!-- Parameter Table -->
-          <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900 mb-4">
-            <table class="min-w-full text-left text-sm md:text-base">
-              <thead class="text-slate-300">
-                <tr>
-                  <th class="py-2 px-3">Field</th>
-                  <th class="py-2 px-3">Tipe</th>
-                  <th class="py-2 px-3">Wajib</th>
-                  <th class="py-2 px-3">Keterangan</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800">
-                <tr><td class="py-2 px-3"><code>base_amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Ya*</td><td class="py-2 px-3">Jika pakai ini, wajib <code>unique_code</code></td></tr>
-                <tr><td class="py-2 px-3"><code>unique_code</code></td><td class="py-2 px-3">int (1–999)</td><td class="py-2 px-3">Ya*</td><td class="py-2 px-3">Bisa diacak di klien</td></tr>
-                <tr><td class="py-2 px-3"><code>amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Alternatif</td><td class="py-2 px-3">Total langsung</td></tr>
-                <tr><td class="py-2 px-3"><code>payload_static</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">Opsional</td><td class="py-2 px-3">QRIS static payload (override <code>QRIS_STATIC</code>)</td></tr>
-                <tr><td class="py-2 px-3"><code>qr</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">Opsional</td><td class="py-2 px-3"><code>png</code> untuk QR (Data-URL)</td></tr>
-              </tbody>
-            </table>
+        <section id="qris" class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">💳 QRIS Dinamis</h2>
+          <p class="mb-4">Buat kode QRIS dinamis dengan jumlah yang dapat disesuaikan</p>
+          
+          <div class="card rounded-2xl p-6 mb-6">
+            <h3 class="font-semibold mb-4">Parameter</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="text-slate-300">
+                  <tr><th class="py-2 px-3">Field</th><th class="py-2 px-3">Tipe</th><th class="py-2 px-3">Keterangan</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                  <tr><td class="py-2 px-3"><code>base_amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Jumlah dasar (wajib dengan unique_code)</td></tr>
+                  <tr><td class="py-2 px-3"><code>unique_code</code></td><td class="py-2 px-3">int (1-999)</td><td class="py-2 px-3">Kode unik untuk total</td></tr>
+                  <tr><td class="py-2 px-3"><code>amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Jumlah langsung (alternatif)</td></tr>
+                  <tr><td class="py-2 px-3"><code>payload_static</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">Payload QRIS static custom (opsional)</td></tr>
+                  <tr><td class="py-2 px-3"><code>qr</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">"png" untuk mendapatkan gambar QR</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <!-- LIVE TEST: /qris/dynamic -->
-          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4 space-y-3">
-            <h3 class="font-medium">🧪 Live Test — /qris/dynamic</h3>
-
-            <div class="grid gap-3 md:grid-cols-2">
-              <label class="block">
-                <span class="text-sm">Base amount (Rp)</span>
-                <input id="tiBase" type="number" min="1" class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="10000" inputmode="numeric">
-              </label>
-              <label class="block">
-                <span class="text-sm">Unique code (1–999)</span>
-                <input id="tiUnique" type="number" min="1" max="999" class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="338" inputmode="numeric">
-              </label>
-              <div class="flex items-center gap-2 md:col-span-2">
-                <input id="tiAutoUnique" type="checkbox" class="h-4 w-4">
-                <label for="tiAutoUnique" class="text-sm">Acak unique code otomatis (1–999)</label>
+          <div class="card rounded-2xl p-6">
+            <h3 class="font-semibold mb-4">🧪 Live Test - QRIS Dinamis</h3>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <label class="block text-sm mb-1">Jumlah Dasar (Rp)</label>
+                <input id="tiBase" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="10000">
               </div>
-              <label class="block md:col-span-2">
-                <span class="text-sm">Atau total langsung (amount)</span>
-                <input id="tiAmount" type="number" min="1" class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="10338" inputmode="numeric">
-              </label>
-              <label class="block md:col-span-2">
-                <span class="text-sm">QRIS Static payload (opsional — pakai punyamu sendiri)</span>
-                <textarea id="tiPayload" rows="3" class="textarea mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="00020101021126...6304XXXX"></textarea>
-                <p class="text-xs text-slate-400 mt-1">Jika diisi, server akan memakai <code>payload_static</code> ini untuk membuat QR dinamis.</p>
-              </label>
+              <div>
+                <label class="block text-sm mb-1">Kode Unik (1-999)</label>
+                <input id="tiUnique" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="338">
+              </div>
+              <div class="md:col-span-2 flex items-center gap-2">
+                <input id="tiAutoUnique" type="checkbox">
+                <label for="tiAutoUnique" class="text-sm">Acak kode unik otomatis</label>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm mb-1">Atau Jumlah Langsung</label>
+                <input id="tiAmount" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="10338">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm mb-1">Payload Static (Opsional)</label>
+                <textarea id="tiPayload" rows="3" class="textarea px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="00020101021126...6304XXXX"></textarea>
+                <p class="text-xs text-slate-400 mt-1">Gunakan payload QRIS static custom jika ingin override default</p>
+              </div>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <button id="btnDynamic" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Kirim</button>
+            <div class="flex gap-2 mt-4">
+              <button id="btnDynamic" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Buat QRIS</button>
               <button id="btnDynamicReset" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
             </div>
 
-            <div id="outDynamic" class="mt-3 hidden">
+            <div id="outDynamic" class="mt-4 hidden">
               <h4 class="font-medium mb-2">Hasil</h4>
               <div class="text-xs text-slate-400 mb-2" id="metaDynamic"></div>
-              <div class="grid gap-3 md:grid-cols-2">
-                <div class="rounded-xl bg-slate-800 p-3">
-                  <div class="text-sm font-medium mb-1">JSON</div>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div class="rounded-xl bg-slate-800 p-4">
+                  <div class="text-sm font-medium mb-1">Response JSON</div>
                   <pre class="overflow-x-auto"><code id="jsonDynamic" class="language-json"></code></pre>
                 </div>
-                <div class="rounded-xl bg-slate-800 p-3">
-                  <div class="text-sm font-medium mb-2">QR</div>
-                  <img id="imgQR" class="w-full max-w-xs rounded-lg border border-slate-700" alt="QR preview">
+                <div class="rounded-xl bg-slate-800 p-4">
+                  <div class="text-sm font-medium mb-2">Kode QR</div>
+                  <img id="imgQR" class="w-full max-w-xs rounded-lg border border-slate-700 mx-auto">
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Webhook Payment -->
-        <section id="webhook" class="section mb-12">
-          <h2 class="text-xl md:text-2xl font-semibold mb-3">2) Webhook Payment</h2>
-          <p class="text-sm md:text-base mb-3"><code>POST /webhook/payment</code> — menerima notifikasi dari DANA / ShopeePay / GoPay / OVO, dll. Server akan mem-parse nominal dari JSON / form / text.</p>
-
-          <!-- LIVE TEST: /webhook/payment -->
-          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-4 space-y-3">
-            <h3 class="font-medium">🧪 Live Test — /webhook/payment</h3>
-            <div class="grid gap-3 md:grid-cols-2">
-              <label class="block">
-                <span class="text-sm">Token</span>
-                <input id="tiToken" class="input mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" placeholder="USER123">
-              </label>
-              <label class="block">
-                <span class="text-sm">Kirim sebagai</span>
-                <select id="tiMode" class="select mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">
+        <section id="webhook" class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">🔔 Webhook Payment</h2>
+          <p class="mb-4">Terima notifikasi pembayaran dari berbagai dompet digital</p>
+          
+          <div class="card rounded-2xl p-6">
+            <h3 class="font-semibold mb-4">🧪 Live Test - Webhook</h3>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <label class="block text-sm mb-1">Token</label>
+                <input id="tiToken" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="USER123">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Format Data</label>
+                <select id="tiMode" class="select px-3 py-2 rounded-lg border border-slate-700 bg-slate-800">
                   <option value="json">JSON</option>
-                  <option value="form">x-www-form-urlencoded</option>
-                  <option value="text">text/plain</option>
+                  <option value="form">Form Data</option>
+                  <option value="text">Plain Text</option>
                 </select>
-              </label>
-              <label class="block md:col-span-2">
-                <span class="text-sm">Isi (contoh pesan dari forwarder)</span>
-                <textarea id="tiBody" rows="4" class="textarea mt-1 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100">{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" }</textarea>
-              </label>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm mb-1">Pesan Notifikasi</label>
+                <textarea id="tiBody" rows="3" class="textarea px-3 py-2 rounded-lg border border-slate-700 bg-slate-800">{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }</textarea>
+              </div>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <button id="btnWebhook" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Kirim</button>
+            <div class="flex gap-2 mt-4">
+              <button id="btnWebhook" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Test Webhook</button>
               <button id="btnWebhookReset" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
             </div>
 
-            <div id="outWebhook" class="mt-3 hidden">
+            <div id="outWebhook" class="mt-4 hidden">
               <h4 class="font-medium mb-2">Hasil</h4>
               <div class="text-xs text-slate-400 mb-2" id="metaWebhook"></div>
-              <div class="rounded-xl bg-slate-800 p-3">
+              <div class="rounded-xl bg-slate-800 p-4">
                 <pre class="overflow-x-auto"><code id="jsonWebhook" class="language-json"></code></pre>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- History -->
-        <section id="history" class="section mb-12">
-          <h2 class="text-xl md:text-2xl font-semibold mb-3">3) Riwayat Webhook</h2>
-          <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900">
-            <table class="min-w-full text-left text-sm md:text-base">
-              <thead class="text-slate-300">
-                <tr><th class="py-2 px-3">Endpoint</th><th class="py-2 px-3">Contoh</th></tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800">
-                <tr><td class="py-2 px-3">Cek Status</td><td class="py-2 px-3"><code>GET /webhook/summary?token=USER123&amp;limit=5</code></td></tr>
-              </tbody>
-            </table>
+        <section id="history" class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">📊 Riwayat Pembayaran</h2>
+          <div class="card rounded-2xl p-6">
+            <h3 class="font-semibold mb-4">Endpoint</h3>
+            <div class="bg-slate-800 rounded-lg p-4">
+              <code>GET /webhook/summary?token=USER123&limit=5</code>
+            </div>
+            <p class="text-sm text-slate-400 mt-2">Mendapatkan ringkasan pembayaran terbaru</p>
           </div>
         </section>
 
-        <!-- Examples -->
-        <section id="examples" class="section mb-16">
-          <h2 class="text-xl md:text-2xl font-semibold mb-3">📦 Contoh cURL & Response</h2>
-
-          <h3 class="font-medium mt-6 mb-2">/qris/dynamic — dengan payload_static</h3>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4"><code class="language-bash">curl -X POST https://restapi-geekzpay.replit.app/qris/dynamic \
+        <section id="examples" class="mb-16">
+          <h2 class="text-2xl font-bold mb-4">📚 Contoh Penggunaan</h2>
+          
+          <div class="space-y-6">
+            <div class="card rounded-2xl p-6">
+              <h3 class="font-semibold mb-2">Membuat QRIS Dinamis dengan Payload Custom</h3>
+              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST https://restapi-geekzpay.replit.app/qris/dynamic \
   -d base_amount=20000 \
   -d unique_code=777 \
   -d payload_static='00020101021126...6304ABCD' \
   -d qr=png</code></pre>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4 mt-2"><code class="language-json">{
-  "base_amount": 10000,
-  "unique_code": 338,
-  "total": 10338,
+              <pre class="bg-slate-800 rounded-lg p-4 mt-2"><code class="language-json">{
+  "base_amount": 20000,
+  "unique_code": 777,
+  "total": 20777,
   "payload": "00020101021126...",
-  "qr_png_data_url": "data:image/png;base64,iVBOR..."
+  "qr_png_data_url": "data:image/png;base64,..."
 }</code></pre>
-
-          <h3 class="font-medium mt-6 mb-2">/webhook/payment</h3>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4"><code class="language-bash">curl -X POST 'https://restapi-geekzpay.replit.app/webhook/payment?token=USER123' \
+            </div>
+            
+            <div class="card rounded-2xl p-6">
+              <h3 class="font-semibold mb-2">Mengirim Webhook</h3>
+              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST 'https://restapi-geekzpay.replit.app/webhook/payment?token=USER123' \
   -H 'Content-Type: application/json' \
-  -d '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" }'</code></pre>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4 mt-2"><code class="language-json">{
+  -d '{ "message": "Pembayaran Rp 15.250 diterima" }'</code></pre>
+            </div>
+            
+            <div class="card rounded-2xl p-6">
+              <h3 class="font-semibold mb-2">Melihat Riwayat</h3>
+              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X GET 'https://restapi-geekzpay.replit.app/webhook/summary?token=USER123&limit=3'</code></pre>
+              <pre class="bg-slate-800 rounded-lg p-4 mt-2"><code class="language-json">{
   "ok": true,
   "token": "USER123",
-  "event_id": "9e1a7c9f...",
-  "received_at": "2025-09-23T12:34:56.789Z",
-  "method": "POST",
-  "ip": "203.0.113.45",
-  "amount": 10338,
-  "body": { "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" },
-  "query": { "token": "USER123" },
-  "headers": { ... }
-}</code></pre>
-
-          <h3 class="font-medium mt-6 mb-2">/webhook/summary</h3>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4"><code class="language-bash">curl -X GET 'https://restapi-geekzpay.replit.app/webhook/summary?token=USER123&limit=5'</code></pre>
-          <pre class="overflow-x-auto rounded-xl bg-slate-800 p-4 mt-2"><code class="language-json">{
-  "ok": true,
-  "token": "USER123",
-  "count": 3,
-  "total_amount": 45250,
+  "count": 2,
+  "total_amount": 25500,
   "events": [
     {
-      "id": "a1b2c3d4e5f6g7h8i9j0",
+      "id": "abc123...",
       "time": "2025-09-24T10:15:30.456Z",
       "amount": 15000,
       "ip": "192.168.1.100",
       "method": "POST"
-    },
-    {
-      "id": "z9y8x7w6v5u4t3s2r1q0",
-      "time": "2025-09-24T09:45:22.123Z",
-      "amount": 20250,
-      "ip": "192.168.1.101",
-      "method": "POST"
-    },
-    {
-      "id": "p0o9i8u7y6t5r4e3w2q1",
-      "time": "2025-09-24T08:30:15.789Z",
-      "amount": 10000,
-      "ip": "192.168.1.102",
-      "method": "POST"
     }
   ]
 }</code></pre>
+            </div>
+          </div>
         </section>
       </main>
     </div>
   </div>
 
-  <!-- Back to top (mobile) -->
-  <button id="toTop" class="fixed bottom-5 right-5 md:hidden rounded-full bg-indigo-600 text-white px-4 py-2 shadow-lg hidden">Top</button>
+  <button id="toTop" class="fixed bottom-5 right-5 md:hidden rounded-full bg-indigo-600 text-white px-4 py-2 shadow-lg hidden">↑</button>
 
   <script>
   hljs.highlightAll();
 
-  // Drawer Mobile (tetap)
   const drawer = document.getElementById('drawer');
-  document.getElementById('openMenu').addEventListener('click', () => drawer.classList.remove('hidden'));
-  document.getElementById('closeMenu').addEventListener('click', () => drawer.classList.add('hidden'));
-  drawer.addEventListener('click', (e) => { if (e.target === drawer.firstElementChild) drawer.classList.add('hidden'); });
-  drawer.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', () => drawer.classList.add('hidden')));
+  document.getElementById('openMenu').onclick = () => drawer.classList.remove('hidden');
+  document.getElementById('closeMenu').onclick = () => drawer.classList.add('hidden');
+  drawer.onclick = (e) => { if (e.target === drawer.firstElementChild) drawer.classList.add('hidden'); };
+  drawer.querySelectorAll('[data-close]').forEach(a => a.onclick = () => drawer.classList.add('hidden'));
 
-  // Back to top (tetap)
   const toTop = document.getElementById('toTop');
-  const toggleTop = () => { if (window.scrollY > 400) toTop.classList.remove('hidden'); else toTop.classList.add('hidden'); };
-  window.addEventListener('scroll', toggleTop);
-  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  window.onscroll = () => { toTop.classList.toggle('hidden', window.scrollY < 400); };
+  toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  /* ===== Base URL helpers =====
-     Jika domain mengandung "vercel.app" → default pakai origin (proxy Vercel).
-     Selain itu → default ke Replit. */
   const baseInput = document.getElementById('baseUrl');
   const saveBase = document.getElementById('saveBase');
-  const useLocal = document.getElementById('useLocal');
-
-  function defaultBase() {
-    return window.location.origin;
-  }
-  function getBase(){
-    const v = (localStorage.getItem('geekzpay_base') || '').trim();
-    return v || defaultBase();
-  }
+  
+  function getBase(){ return localStorage.getItem('geekzpay_base') || baseInput.value; }
   function setBase(v){ localStorage.setItem('geekzpay_base', v); }
   baseInput.value = getBase();
-  saveBase.onclick = () => { setBase(baseInput.value.trim() || defaultBase()); alert('Base URL disimpan'); };
-  useLocal.onclick = () => { const o = window.location.origin; baseInput.value = o; setBase(o); };
+  saveBase.onclick = () => { setBase(baseInput.value); alert('Base URL disimpan!'); };
 
-  // Util tampilan hasil
   function showJSON(el, text) {
     try { el.textContent = JSON.stringify(JSON.parse(text), null, 2); }
     catch { el.textContent = text; }
     hljs.highlightElement(el);
   }
 
-  /* ========== Live Test: /qris/dynamic ========== */
   const btnDyn = document.getElementById('btnDynamic');
   const btnDynReset = document.getElementById('btnDynamicReset');
   const outDyn = document.getElementById('outDynamic');
   const jsonDyn = document.getElementById('jsonDynamic');
   const metaDyn = document.getElementById('metaDynamic');
   const imgQR = document.getElementById('imgQR');
-  function rand1to999(){ return Math.floor(Math.random()*999)+1; }
 
-  btnDyn.addEventListener('click', async () => {
-    const base = document.getElementById('tiBase').value.trim();
-    const uniqIn = document.getElementById('tiUnique').value.trim();
+  btnDyn.onclick = async () => {
+    const base = document.getElementById('tiBase').value;
+    const uniqIn = document.getElementById('tiUnique').value;
     const auto = document.getElementById('tiAutoUnique').checked;
-    const amount = document.getElementById('tiAmount').value.trim();
-    const payloadStatic = document.getElementById('tiPayload').value.trim();
+    const amount = document.getElementById('tiAmount').value;
+    const payloadStatic = document.getElementById('tiPayload').value;
 
-    const url = (baseInput.value || defaultBase()).replace(/\/$/, '') + '/qris/dynamic';
+    const url = getBase().replace(/\/$/, '') + '/qris/dynamic';
     const form = new URLSearchParams();
 
     if (amount) {
       form.append('amount', amount);
     } else {
-      if (!base) { alert('Isi base_amount atau amount.'); return; }
+      if (!base) { alert('Isi base_amount atau amount'); return; }
       form.append('base_amount', base);
-      const uniq = auto ? rand1to999() : (uniqIn || '');
-      if (!uniq) { alert('unique_code wajib (atau centang auto random).'); return; }
+      const uniq = auto ? Math.floor(Math.random()*999)+1 : (uniqIn || '');
+      if (!uniq) { alert('unique_code wajib'); return; }
       form.append('unique_code', uniq);
     }
-    if (payloadStatic) form.append('payload_static', payloadStatic);
+    
+    if (payloadStatic) {
+      form.append('payload_static', payloadStatic);
+    }
+    
     form.append('qr', 'png');
 
-    btnDyn.disabled = true; btnDyn.textContent = 'Mengirim...';
+    btnDyn.disabled = true;
+    btnDyn.textContent = 'Membuat QR...';
+    
     try {
-      const started = performance.now();
-      const r = await fetch(url, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
-        body:form,
-        mode: 'cors',
-        credentials: 'omit',
-      });
+      const start = performance.now();
+      const r = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:form });
       const text = await r.text();
-      const dur = Math.round(performance.now() - started);
-      metaDyn.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
+      const dur = Math.round(performance.now() - start);
+      
+      metaDyn.textContent = `Status: ${r.status} • ${dur} ms`;
       showJSON(jsonDyn, text);
 
       try {
@@ -426,81 +377,84 @@
       } catch { imgQR.src = ''; }
 
       outDyn.classList.remove('hidden');
-      window.scrollTo({ top: outDyn.offsetTop - 80, behavior: 'smooth' });
+      outDyn.scrollIntoView({ behavior: 'smooth' });
     } catch (err) {
-      metaDyn.textContent = `Gagal fetch: ${url}`;
-      showJSON(jsonDyn, String(err && err.message || err));
-      imgQR.src = '';
+      metaDyn.textContent = `Error: ${err.message}`;
+      showJSON(jsonDyn, String(err));
       outDyn.classList.remove('hidden');
     } finally {
-      btnDyn.disabled = false; btnDyn.textContent = 'Kirim';
+      btnDyn.disabled = false;
+      btnDyn.textContent = 'Buat QRIS';
     }
-  });
+  };
 
-  btnDynReset.addEventListener('click', () => {
+  btnDynReset.onclick = () => {
     document.getElementById('tiBase').value = '';
     document.getElementById('tiUnique').value = '';
     document.getElementById('tiAutoUnique').checked = false;
     document.getElementById('tiAmount').value = '';
     document.getElementById('tiPayload').value = '';
     outDyn.classList.add('hidden');
-  });
+  };
 
-  /* ========== Live Test: /webhook/payment ========== */
   const btnWh = document.getElementById('btnWebhook');
   const btnWhReset = document.getElementById('btnWebhookReset');
   const outWh = document.getElementById('outWebhook');
   const jsonWh = document.getElementById('jsonWebhook');
-  const metaWh = document.getElementById('metaWebhook');
+  const metaWh = document.getElementById('metaWh');
 
-  btnWh.addEventListener('click', async () => {
-    const token = document.getElementById('tiToken').value.trim();
+  btnWh.onclick = async () => {
+    const token = document.getElementById('tiToken').value;
     const mode = document.getElementById('tiMode').value;
     const body = document.getElementById('tiBody').value;
-    if (!token) { alert('Isi token.'); return; }
+    
+    if (!token) { alert('Isi token'); return; }
 
-    const base = (baseInput.value || defaultBase()).replace(/\/$/, '');
-    const url = `${base}/webhook/payment?token=${encodeURIComponent(token)}`;
-
+    const url = `${getBase().replace(/\/$/, '')}/webhook/payment?token=${encodeURIComponent(token)}`;
     let headers = {};
     let payload;
+
     if (mode === 'json') {
       headers['Content-Type'] = 'application/json';
-      try { JSON.parse(body); } catch { alert('Body bukan JSON valid'); return; }
+      try { JSON.parse(body); } catch { alert('Invalid JSON'); return; }
       payload = body;
     } else if (mode === 'form') {
       headers['Content-Type'] = 'application/x-www-form-urlencoded';
-      payload = new URLSearchParams(Object.entries({ message: body }));
+      payload = new URLSearchParams({ message: body });
     } else {
       headers['Content-Type'] = 'text/plain';
       payload = body;
     }
 
-    btnWh.disabled = true; btnWh.textContent = 'Mengirim...';
+    btnWh.disabled = true;
+    btnWh.textContent = 'Mengirim...';
+    
     try {
-      const started = performance.now();
-      const r = await fetch(url, { method:'POST', headers, body: payload, mode:'cors', credentials:'omit' });
+      const start = performance.now();
+      const r = await fetch(url, { method:'POST', headers, body: payload });
       const text = await r.text();
-      const dur = Math.round(performance.now() - started);
-      metaWh.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
+      const dur = Math.round(performance.now() - start);
+      
+      metaWh.textContent = `Status: ${r.status} • ${dur} ms`;
       showJSON(jsonWh, text);
       outWh.classList.remove('hidden');
-      window.scrollTo({ top: outWh.offsetTop - 80, behavior: 'smooth' });
+      outWh.scrollIntoView({ behavior: 'smooth' });
     } catch (err) {
-      metaWh.textContent = `Gagal fetch: ${url}`;
-      showJSON(jsonWh, String(err && err.message || err));
+      metaWh.textContent = `Error: ${err.message}`;
+      showJSON(jsonWh, String(err));
       outWh.classList.remove('hidden');
     } finally {
-      btnWh.disabled = false; btnWh.textContent = 'Kirim';
+      btnWh.disabled = false;
+      btnWh.textContent = 'Test Webhook';
     }
-  });
+  };
 
-  btnWhReset.addEventListener('click', () => {
+  btnWhReset.onclick = () => {
     document.getElementById('tiToken').value = '';
     document.getElementById('tiMode').value = 'json';
-    document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay INV001" }';
+    document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }';
     outWh.classList.add('hidden');
-  });
+  };
   </script>
 </body>
 </html>
