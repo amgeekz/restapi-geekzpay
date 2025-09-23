@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
-const Jimp = require('jimp-compact');
+const FormData = require('form-data');
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
 const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
@@ -26,25 +26,6 @@ function extractToken(req) {
     (req.body && req.body.token) ||
     ''
   );
-}
-
-async function loadJsQR() {
-  let mod;
-  try {
-    mod = require('jsqr');
-    if (typeof mod === 'function') return mod;
-    if (mod && typeof mod.default === 'function') return mod.default;
-  } catch {}
-  try {
-    mod = require('jsqr/dist/jsQR.js');
-    if (typeof mod === 'function') return mod;
-    if (mod && typeof mod.default === 'function') return mod.default;
-  } catch {}
-  try {
-    const esm = await import('jsqr');
-    if (esm && typeof esm.default === 'function') return esm.default;
-  } catch {}
-  throw new Error('jsQR module not found as a function');
 }
 
 app.use(fileUpload({
@@ -155,34 +136,52 @@ app.post('/qris/dynamic', async (req, res) => {
 app.post('/qris/decode', async (req, res) => {
   try {
     if (!req.files || !req.files.image) {
-      return res.status(400).json({ ok: false, error: 'File gambar diperlukan (field name: image)' });
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'File gambar diperlukan' 
+      });
     }
-
-    const jsQR = await loadJsQR();
 
     const imageFile = req.files.image;
-    const img = await Jimp.read(imageFile.data);
-    const { width, height, data } = img.bitmap;
+    const formData = new FormData();
+    formData.append('file', imageFile.data, {
+      filename: imageFile.name,
+      contentType: imageFile.mimetype
+    });
 
-    const rgba = (data instanceof Uint8ClampedArray) ? data : new Uint8ClampedArray(data);
+    const response = await fetch('https://api.qrserver.com/v1/read-qr-code/', {
+      method: 'POST',
+      body: formData
+    });
 
-    const qr = jsQR(rgba, width, height);
-    if (!qr || !qr.data) {
-      return res.status(400).json({ ok: false, error: 'Tidak dapat membaca QR code' });
+    const result = await response.json();
+    
+    if (result && result[0] && result[0].symbol && result[0].symbol[0] && result[0].symbol[0].data) {
+      const payload = result[0].symbol[0].data;
+      return res.json({ 
+        ok: true, 
+        payload: payload,
+        file_info: {
+          name: imageFile.name,
+          type: imageFile.mimetype,
+          size: imageFile.size
+        },
+        decoded_at: new Date().toISOString()
+      });
     }
 
-    return res.json({
-      ok: true,
-      payload: qr.data,
-      file_info: {
-        name: imageFile.name,
-        type: imageFile.mimetype,
-        size: imageFile.size
-      },
-      decoded_at: new Date().toISOString()
+    return res.status(400).json({ 
+      ok: false, 
+      error: 'Tidak dapat membaca QR code dari gambar'
     });
-  } catch (err) {
-    return res.status(500).json({ ok: false, error: 'Terjadi kesalahan internal', detail: String(err.message || err) });
+
+  } catch (error) {
+    console.error('QR decode error:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'Terjadi kesalahan internal',
+      detail: error.message
+    });
   }
 });
 
