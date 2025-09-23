@@ -12,6 +12,7 @@ const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything, toCompact } = require('./src/utils');
 
 const app = express();
+app.set('json spaces', 2);
 
 const EVENT_TTL_MS = Math.max(1000, parseInt(process.env.EVENT_TTL_MS || '30000', 10));
 const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '5', 10));
