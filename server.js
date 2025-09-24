@@ -339,7 +339,7 @@ app.get('/webhook/summary', async (req, res) => {
     
     const events = rows.map(ev => toCompact(ev, false));
 
-    res.json({ ok: true, token, count: events.length, events });
+    res.json({ events });
   } catch (err) {
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
