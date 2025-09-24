@@ -391,6 +391,16 @@
     if (baseInput) baseInput.value = val;
   }
 
+  // Utility functions - TAMBAHKAN INI
+  function showJSON(el, text) {
+    try { 
+      el.textContent = JSON.stringify(JSON.parse(text), null, 2); 
+    } catch { 
+      el.textContent = text; 
+    }
+    hljs.highlightElement(el);
+  }
+
   (function initBase() {
     if (baseInput) {
       baseInput.placeholder = DEFAULT_BASE;
@@ -405,8 +415,6 @@
     };
   }
 
-  window.__getGeekzBase = getBase;
-
   // QRIS Dynamic Test
   const btnDyn = document.getElementById('btnDynamic');
   const btnDynReset = document.getElementById('btnDynamicReset');
@@ -415,70 +423,72 @@
   const metaDyn = document.getElementById('metaDynamic');
   const imgQR = document.getElementById('imgQR');
 
-  btnDyn.onclick = async () => {
-    const base = document.getElementById('tiBase').value;
-    const uniqIn = document.getElementById('tiUnique').value;
-    const auto = document.getElementById('tiAutoUnique').checked;
-    const amount = document.getElementById('tiAmount').value;
-    const payloadStatic = document.getElementById('tiPayload').value;
+  if (btnDyn) {
+    btnDyn.onclick = async () => {
+      const base = document.getElementById('tiBase').value;
+      const uniqIn = document.getElementById('tiUnique').value;
+      const auto = document.getElementById('tiAutoUnique').checked;
+      const amount = document.getElementById('tiAmount').value;
+      const payloadStatic = document.getElementById('tiPayload').value;
 
-    const url = getBase().replace(/\/$/, '') + '/qris/dynamic';
-    const form = new URLSearchParams();
+      const url = getBase().replace(/\/$/, '') + '/qris/dynamic';
+      const form = new URLSearchParams();
 
-    if (amount) {
-      form.append('amount', amount);
-    } else {
-      if (!base) { alert('Isi base_amount atau amount'); return; }
-      form.append('base_amount', base);
-      const uniq = auto ? Math.floor(Math.random()*999)+1 : (uniqIn || '');
-      if (!uniq) { alert('unique_code wajib'); return; }
-      form.append('unique_code', uniq);
-    }
-    
-    if (payloadStatic) form.append('payload_static', payloadStatic);
-    form.append('qr', 'png');
-
-    btnDyn.disabled = true;
-    btnDyn.textContent = 'Membuat QR...';
-    
-    try {
-      const start = performance.now();
-      const r = await fetch(url, { 
-        method:'POST', 
-        headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, 
-        body:form 
-      });
-      const text = await r.text();
-      const dur = Math.round(performance.now() - start);
+      if (amount) {
+        form.append('amount', amount);
+      } else {
+        if (!base) { alert('Isi base_amount atau amount'); return; }
+        form.append('base_amount', base);
+        const uniq = auto ? Math.floor(Math.random()*999)+1 : (uniqIn || '');
+        if (!uniq) { alert('unique_code wajib'); return; }
+        form.append('unique_code', uniq);
+      }
       
-      metaDyn.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
-      showJSON(jsonDyn, text);
+      if (payloadStatic) form.append('payload_static', payloadStatic);
+      form.append('qr', 'png');
 
+      btnDyn.disabled = true;
+      btnDyn.textContent = 'Membuat QR...';
+      
       try {
-        const obj = JSON.parse(text);
-        imgQR.src = obj.qr_png_data_url || '';
-      } catch { imgQR.src = ''; }
+        const start = performance.now();
+        const r = await fetch(url, { 
+          method:'POST', 
+          headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, 
+          body:form 
+        });
+        const text = await r.text();
+        const dur = Math.round(performance.now() - start);
+        
+        metaDyn.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
+        showJSON(jsonDyn, text);
 
-      outDyn.classList.remove('hidden');
-      outDyn.scrollIntoView({ behavior: 'smooth' });
-    } catch (err) {
-      metaDyn.textContent = `Error: ${err.message}`;
-      showJSON(jsonDyn, String(err));
-      outDyn.classList.remove('hidden');
-    } finally {
-      btnDyn.disabled = false;
-      btnDyn.textContent = 'Buat QRIS';
-    }
-  };
+        try {
+          const obj = JSON.parse(text);
+          imgQR.src = obj.qr_png_data_url || '';
+        } catch { imgQR.src = ''; }
 
-  btnDynReset.onclick = () => {
-    document.getElementById('tiBase').value = '';
-    document.getElementById('tiUnique').value = '';
-    document.getElementById('tiAutoUnique').checked = false;
-    document.getElementById('tiAmount').value = '';
-    document.getElementById('tiPayload').value = '';
-    outDyn.classList.add('hidden');
-  };
+        outDyn.classList.remove('hidden');
+        outDyn.scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        metaDyn.textContent = `Error: ${err.message}`;
+        showJSON(jsonDyn, String(err));
+        outDyn.classList.remove('hidden');
+      } finally {
+        btnDyn.disabled = false;
+        btnDyn.textContent = 'Buat QRIS';
+      }
+    };
+
+    btnDynReset.onclick = () => {
+      document.getElementById('tiBase').value = '';
+      document.getElementById('tiUnique').value = '';
+      document.getElementById('tiAutoUnique').checked = false;
+      document.getElementById('tiAmount').value = '';
+      document.getElementById('tiPayload').value = '';
+      outDyn.classList.add('hidden');
+    };
+  }
 
   // QR Converter
   const dropZone = document.getElementById('dropZone');
@@ -494,244 +504,268 @@
 
   let currentFile = null;
 
-  // Drag and drop functionality
-  dropZone.addEventListener('click', () => fileInput.click());
-  
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-  });
-
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('dragover');
-  });
-
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  });
-
-  fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) {
-      handleFile(e.target.files[0]);
-    }
-  });
-
-  function handleFile(file) {
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
-      return;
-    }
-
-    if (file.size > 2 * 1024 * 1024) {
-      alert('File size should be less than 2MB');
-      return;
-    }
-
-    currentFile = file;
+  if (dropZone) {
+    // Drag and drop functionality
+    dropZone.addEventListener('click', () => fileInput.click());
     
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreview.src = e.target.result;
-      previewSection.classList.remove('hidden');
-      btnConvert.disabled = false;
-    };
-    reader.readAsDataURL(file);
-  }
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
 
-btnConvert.onclick = async () => {
-    if (!currentFile) {
-        metaConverter.textContent = 'Error: Pilih file gambar terlebih dahulu';
-        showJSON(jsonConverter, JSON.stringify({ 
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size should be less than 2MB');
+        return;
+      }
+
+      currentFile = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        previewSection.classList.remove('hidden');
+        btnConvert.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    if (btnConvert) {
+      btnConvert.onclick = async () => {
+        if (!currentFile) {
+          metaConverter.textContent = 'Error: Pilih file gambar terlebih dahulu';
+          showJSON(jsonConverter, JSON.stringify({ 
             error: 'Tidak ada file yang dipilih',
             instruction: 'Klik area upload dan pilih gambar QR code'
-        }, null, 2));
-        outConverter.classList.remove('hidden');
-        return;
-    }
+          }, null, 2));
+          outConverter.classList.remove('hidden');
+          return;
+        }
 
-    btnConvert.disabled = true;
-    btnConvert.textContent = 'Converting...';
+        btnConvert.disabled = true;
+        btnConvert.textContent = 'Converting...';
 
-    const formData = new FormData();
-    formData.append('image', currentFile);
+        const formData = new FormData();
+        formData.append('image', currentFile);
 
-    try {
-        const start = performance.now();
-        const url = getBase().replace(/\/$/, '') + '/qris/decode';
-        
-        console.log('Sending request to:', url);
-        console.log('File:', currentFile.name, currentFile.size, currentFile.type);
-
-        const response = await fetch(url, {
+        try {
+          const start = performance.now();
+          const url = getBase().replace(/\/$/, '') + '/qris/decode';
+          
+          const response = await fetch(url, {
             method: 'POST',
             body: formData,
-            // Tambahkan timeout dan error handling
-            signal: AbortSignal.timeout(30000) // 30 detik timeout
-        });
-        
-        if (!response.ok) {
+            signal: AbortSignal.timeout(30000)
+          });
+          
+          if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const responseText = await response.text();
-        const dur = Math.round(performance.now() - start);
+          }
+          
+          const responseText = await response.text();
+          const dur = Math.round(performance.now() - start);
 
-        console.log('Response received:', response.status, responseText.substring(0, 100));
-
-        let result;
-        try {
+          let result;
+          try {
             result = JSON.parse(responseText);
-        } catch (parseError) {
+          } catch (parseError) {
             metaConverter.textContent = `Status: ${response.status} • Response tidak valid`;
             showJSON(jsonConverter, JSON.stringify({ 
-                error: 'Response server tidak valid',
-                response: responseText.substring(0, 200),
-                url: url,
-                note: 'Server mengembalikan response bukan JSON'
+              error: 'Response server tidak valid',
+              response: responseText.substring(0, 200),
+              url: url
             }, null, 2));
             outConverter.classList.remove('hidden');
             return;
-        }
+          }
 
-        metaConverter.textContent = `Status: ${response.status} • ${dur} ms`;
-        
-        if (result.ok && result.payload) {
+          metaConverter.textContent = `Status: ${response.status} • ${dur} ms`;
+          
+          if (result.ok && result.payload) {
             showJSON(jsonConverter, JSON.stringify({ 
-                success: true,
-                payload: result.payload,
-                file_info: result.file_info,
-                decoded_at: result.decoded_at,
-                note: result.note || ''
+              success: true,
+              payload: result.payload,
+              file_info: result.file_info,
+              decoded_at: result.decoded_at,
+              note: result.note || ''
             }, null, 2));
             
-            // Auto-copy payload
             navigator.clipboard.writeText(result.payload).then(() => {
-                console.log('Payload copied to clipboard');
-            }).catch(err => {
-                console.log('Copy failed:', err);
+              console.log('Payload copied to clipboard');
             });
-        } else {
+          } else {
             showJSON(jsonConverter, JSON.stringify({ 
-                error: result.error || 'Gagal decode QR code',
-                response: result
+              error: result.error || 'Gagal decode QR code',
+              response: result
             }, null, 2));
-        }
-        
-        outConverter.classList.remove('hidden');
-        outConverter.scrollIntoView({ behavior: 'smooth' });
-        
-    } catch (err) {
-        console.error('Fetch error:', err);
-        metaConverter.textContent = `Network Error: ${err.message}`;
-        
-        // Berikan solusi spesifik berdasarkan error
-        let errorNote = '';
-        if (err.name === 'TimeoutError') {
+          }
+          
+          outConverter.classList.remove('hidden');
+          outConverter.scrollIntoView({ behavior: 'smooth' });
+          
+        } catch (err) {
+          metaConverter.textContent = `Error: ${err.message}`;
+          
+          let errorNote = '';
+          if (err.name === 'TimeoutError') {
             errorNote = 'Request timeout. Server mungkin sedang sibuk.';
-        } else if (err.message.includes('CORS')) {
+          } else if (err.message.includes('CORS')) {
             errorNote = 'CORS error. Periksa konfigurasi server.';
-        } else if (err.message.includes('Failed to fetch')) {
+          } else if (err.message.includes('Failed to fetch')) {
             errorNote = 'Tidak dapat terhubung ke server. Periksa koneksi internet.';
-        } else {
+          } else {
             errorNote = 'Pastikan endpoint /qris/decode tersedia di server.';
-        }
-        
-        showJSON(jsonConverter, JSON.stringify({ 
+          }
+          
+          showJSON(jsonConverter, JSON.stringify({ 
             error: err.message,
-            type: err.name,
-            note: errorNote,
-            solution: 'Coba refresh halaman dan ulangi lagi'
-        }, null, 2));
-        outConverter.classList.remove('hidden');
-    } finally {
-        btnConvert.disabled = false;
-        btnConvert.textContent = 'Convert ke Payload';
+            note: errorNote
+          }, null, 2));
+          outConverter.classList.remove('hidden');
+        } finally {
+          btnConvert.disabled = false;
+          btnConvert.textContent = 'Convert ke Payload';
+        }
+      };
     }
-};
 
-  btnCopyPayload.onclick = () => {
-    const payloadText = jsonConverter.textContent;
-    navigator.clipboard.writeText(payloadText).then(() => {
-      alert('Payload berhasil disalin!');
-    });
-  };
+    if (btnCopyPayload) {
+      btnCopyPayload.onclick = () => {
+        const payloadText = jsonConverter.textContent;
+        navigator.clipboard.writeText(payloadText).then(() => {
+          alert('Payload berhasil disalin!');
+        });
+      };
+    }
 
-  btnResetConverter.onclick = () => {
-    fileInput.value = '';
-    previewSection.classList.add('hidden');
-    outConverter.classList.add('hidden');
-    btnConvert.disabled = true;
-    currentFile = null;
-  };
+    if (btnResetConverter) {
+      btnResetConverter.onclick = () => {
+        fileInput.value = '';
+        previewSection.classList.add('hidden');
+        outConverter.classList.add('hidden');
+        btnConvert.disabled = true;
+        currentFile = null;
+      };
+    }
+  }
 
-  // Webhook Test (FIXED)
+  // Webhook Test - PERBAIKAN BESAR DI SINI
   const btnWh = document.getElementById('btnWebhook');
   const btnWhReset = document.getElementById('btnWebhookReset');
   const outWh = document.getElementById('outWebhook');
   const jsonWh = document.getElementById('jsonWebhook');
   const metaWh = document.getElementById('metaWebhook');
 
-  btnWh.onclick = async () => {
-    const token = document.getElementById('tiToken').value;
-    const mode = document.getElementById('tiMode').value;
-    const body = document.getElementById('tiBody').value;
-    
-    if (!token) { alert('Isi token'); return; }
-    
-    const url = `${getBase().replace(/\/$/, '')}/webhook/payment?token=${encodeURIComponent(token)}`;
-    const urlstatus = `${getBase().replace(/\/$/, '')}/webhook/summary?token=${encodeURIComponent(token)}&limit=5`;
-    let headers = {};
-    let payload;
-
-    if (mode === 'json') {
-      headers['Content-Type'] = 'application/json';
-      try { JSON.parse(body); } catch { alert('Invalid JSON'); return; }
-      payload = body;
-    } else if (mode === 'form') {
-      headers['Content-Type'] = 'application/x-www-form-urlencoded';
-      payload = new URLSearchParams({ message: body });
-    } else {
-      headers['Content-Type'] = 'text/plain';
-      payload = body;
-    }
-
-    btnWh.disabled = true;
-    btnWh.textContent = 'Mengirim...';
-    
-    try {
-      const start = performance.now();
-      const r = await fetch(url, { 
-        method:'POST', 
-        headers, 
-        body: payload 
-      });
-      const text = await r.text();
-      const dur = Math.round(performance.now() - start);
+  if (btnWh) {
+    btnWh.onclick = async () => {
+      const token = document.getElementById('tiToken').value;
+      const mode = document.getElementById('tiMode').value;
+      const body = document.getElementById('tiBody').value;
       
-      metaWh.textContent = `Status: ${r.status} • ${dur} ms • Cek Riwayat Pembayaran ${urlstatus}`;
-      showJSON(jsonWh, text);
-      outWh.classList.remove('hidden');
-      outWh.scrollIntoView({ behavior: 'smooth' });
-    } catch (err) {
-      metaWh.textContent = `Error: ${err.message}`;
-      showJSON(jsonWh, String(err));
-      outWh.classList.remove('hidden');
-    } finally {
-      btnWh.disabled = false;
-      btnWh.textContent = 'Test Webhook';
-    }
-  };
+      if (!token) { 
+        alert('Isi token terlebih dahulu'); 
+        return; 
+      }
+      
+      const url = `${getBase().replace(/\/$/, '')}/webhook/payment?token=${encodeURIComponent(token)}`;
+      let headers = {};
+      let payload;
 
-  btnWhReset.onclick = () => {
-    document.getElementById('tiToken').value = '';
-    document.getElementById('tiMode').value = 'json';
-    document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }';
-    outWh.classList.add('hidden');
-  };
-  </script>
+      // Persiapan payload berdasarkan mode
+      if (mode === 'json') {
+        headers['Content-Type'] = 'application/json';
+        try { 
+          JSON.parse(body); 
+        } catch { 
+          alert('Format JSON tidak valid'); 
+          return; 
+        }
+        payload = body;
+      } else if (mode === 'form') {
+        headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        // Untuk form data, kita perlu membuat URLSearchParams yang benar
+        try {
+          const bodyObj = JSON.parse(body);
+          const params = new URLSearchParams();
+          for (const [key, value] of Object.entries(bodyObj)) {
+            params.append(key, value);
+          }
+          payload = params;
+        } catch {
+          // Jika bukan JSON, gunakan sebagai plain text
+          payload = new URLSearchParams();
+          payload.append('message', body);
+        }
+      } else {
+        headers['Content-Type'] = 'text/plain';
+        payload = body;
+      }
+
+      btnWh.disabled = true;
+      btnWh.textContent = 'Mengirim...';
+      
+      try {
+        const start = performance.now();
+        const response = await fetch(url, { 
+          method: 'POST', 
+          headers, 
+          body: payload 
+        });
+        
+        const responseText = await response.text();
+        const dur = Math.round(performance.now() - start);
+        
+        // Tampilkan hasil
+        metaWh.textContent = `Status: ${response.status} • ${dur} ms`;
+        showJSON(jsonWh, responseText);
+        outWh.classList.remove('hidden');
+        outWh.scrollIntoView({ behavior: 'smooth' });
+        
+      } catch (err) {
+        metaWh.textContent = `Error: ${err.message}`;
+        showJSON(jsonWh, JSON.stringify({ 
+          error: err.message,
+          note: 'Periksa koneksi internet dan Base URL'
+        }, null, 2));
+        outWh.classList.remove('hidden');
+      } finally {
+        btnWh.disabled = false;
+        btnWh.textContent = 'Test Webhook';
+      }
+    };
+
+    if (btnWhReset) {
+      btnWhReset.onclick = () => {
+        document.getElementById('tiToken').value = '';
+        document.getElementById('tiMode').value = 'json';
+        document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }';
+        outWh.classList.add('hidden');
+      };
+    }
+  }
+</script>
 </body>
 </html>
