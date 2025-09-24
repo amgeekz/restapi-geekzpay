@@ -10,6 +10,7 @@ const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
 const FormData = require('form-data');
+const stream = require('stream');
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
 const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
@@ -135,54 +136,50 @@ app.post('/qris/dynamic', async (req, res) => {
 
 app.post('/qris/decode', async (req, res) => {
   try {
-    if (!req.files || !req.files.image) return res.status(400).json({ ok:false, error:'File gambar diperlukan (field: image)' });
-
-    const f = req.files.image;
-    const tmpPath = `/tmp/qr_${Date.now()}_${Math.random().toString(36).slice(2,8)}.tmp`;
-    require('fs').writeFileSync(tmpPath, f.data);
+    const f = req.files?.image;
+    if (!f) return res.status(400).json({ ok:false, error:'File gambar diperlukan (field: image)' });
 
     const fd = new FormData();
-fd.append('file', f.data, {
-  filename: f.name || 'qr.jpg',
-  contentType: f.mimetype
-});
+    // ZXing expects field name "f"
+    fd.append('f', stream.Readable.from(f.data), {
+      filename: f.name || 'qr.jpg',
+      contentType: f.mimetype || 'image/jpeg',
+      knownLength: f.size
+    });
 
-const r = await fetch('https://decode.qrplus.com.br/api/Decode/UploadImage', {
-  method: 'POST',
-  body: fd,
-  headers: {
-    ...fd.getHeaders(),
-    'Accept': '*/*',
-    'Referer': 'https://www.qrplus.com.br/',
-  }
-});
+    const r = await fetch('https://zxing.org/w/decode', {
+      method: 'POST',
+      headers: {
+        ...fd.getHeaders(),
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'user-agent': 'Mozilla/5.0 (compatible; GeekzPay/1.0)'
+      },
+      body: fd,
+      redirect: 'follow'
+    });
 
-    const txt = await r.text();
-    let json;
-    try { json = JSON.parse(txt); } catch { json = null; }
+    const html = await r.text();
+    if (!r.ok) {
+      return res.status(r.status).json({ ok:false, error:`ZXing HTTP ${r.status}`, detail: html.slice(0,200) });
+    }
 
-    try { require('fs').unlinkSync(tmpPath); } catch {}
+    let m =
+      html.match(/<td>\s*Raw text\s*<\/td>\s*<td><pre>([\s\S]*?)<\/pre>/i) ||
+      html.match(/<td>\s*Parsed Result\s*<\/td>\s*<td><pre>([\s\S]*?)<\/pre>/i);
 
-    if (!r.ok) return res.status(r.status).json({ ok:false, error:`qrplus HTTP ${r.status}`, detail: txt.slice(0,200) });
+    if (!m || !m[1]) {
+      return res.status(422).json({ ok:false, error:'Tidak menemukan payload QR pada respon ZXing' });
+    }
 
-    if (!json) return res.status(422).json({ ok:false, error:'qrplus returned non-json', raw: txt.slice(0,1000) });
-
-    const parsed = json.parsedResult || json[0]?.parsedResult || null;
-    const rawText = json.rawText || parsed?.text || (Array.isArray(json) && json[0]?.rawText) || null;
-    const payload = (rawText && String(rawText).trim()) || (parsed && parsed.text && String(parsed.text).trim()) || null;
-
-    if (!payload) return res.status(422).json({ ok:false, error:'QR tidak berhasil di-decode dari qrplus', details: json });
-
+    const payload = m[1].trim();
     return res.json({
       ok: true,
-      payload: payload,
+      payload,
       file_info: { name: f.name, type: f.mimetype, size: f.size },
-      decoded_at: new Date().toISOString(),
-      source: 'decode.qrplus.com.br'
+      decoded_at: new Date().toISOString()
     });
   } catch (err) {
-    try { require('fs').unlinkSync(tmpPath); } catch {}
-    return res.status(500).json({ ok:false, error: String(err && err.message ? err.message : err) });
+    return res.status(500).json({ ok:false, error: err.message || String(err) });
   }
 });
 
