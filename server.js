@@ -318,7 +318,7 @@ app.all('/webhook/payment', async (req, res) => {
   }
 });
 
-app.get('/webhook/recent', async (req, res) => {
+app.get('/webhook/summary', async (req, res) => {
   try {
     const token = String(extractToken(req));
     if (!token) return res.status(401).json({ error: 'Token required' });
@@ -327,68 +327,20 @@ app.get('/webhook/recent', async (req, res) => {
     const key = `ev:${token}`;
 
     const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-    console.log('Raw data from Redis:', JSON.stringify(rowsRaw, null, 2));
     
     const rows = [];
     for (let i = 0; i < rowsRaw.length; i++) {
       const item = rowsRaw[i];
-      console.log('Item before parse:', typeof item, item);
-      
       const parsed = safeParseMaybeString(item);
-      console.log('Item after parse:', typeof parsed, parsed);
-      
       if (parsed && typeof parsed === 'object') {
         rows.push(parsed);
       }
     }
     
-    console.log('Valid rows count:', rows.length);
-    
-    const events = rows.map(ev => {
-      console.log('Event data for toCompact:', ev);
-      const compact = toCompact(ev, false);
-      console.log('Compact result:', compact);
-      return compact;
-    });
+    const events = rows.map(ev => toCompact(ev, false));
 
     res.json({ ok: true, token, count: events.length, events });
   } catch (err) {
-    console.error('Recent events error:', err);
-    res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
-  }
-});
-
-app.get('/webhook/summary', async (req, res) => {
-  try {
-    const token = String(extractToken(req));
-    if (!token) return res.status(401).json({ error: 'Token required' });
-
-    const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
-    const key = `ev:${token}`;
-
-    const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-
-    const rows = [];
-    for (let item of rowsRaw) {
-      const parsed = safeParseMaybeString(item);
-      if (parsed && parsed.token) {
-        rows.push(parsed);
-      }
-    }
-
-    const events = rows.map(e => ({
-      id: e.event_id || 'unknown',
-      time: e.received_at || new Date().toISOString(),
-      amount: Number(e.amount) || 0,
-      ip: e.ip || '0.0.0.0',
-      method: e.method || 'UNKNOWN',
-      order_id: e.body?.order_id,
-      status: e.body?.status
-    }));
-
-    res.json({ ok: true, token, count: events.length, events });
-  } catch (err) {
-    console.error('Summary error:', err);
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
 });
