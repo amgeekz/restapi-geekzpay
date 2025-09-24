@@ -318,7 +318,42 @@ app.all('/webhook/payment', async (req, res) => {
   }
 });
 
-app.get('/webhook/status', async (req, res) => {
+app.get('/webhook/recent', async (req, res) => {
+  try {
+    const token = String(extractToken(req));
+    if (!token) return res.status(401).json({ error: 'Token required' });
+
+    const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
+    const key = `ev:${token}`;
+
+    const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
+
+    const rows = [];
+    for (let i = 0; i < rowsRaw.length; i++) {
+      const parsed = safeParseMaybeString(rowsRaw[i]);
+      if (parsed && typeof parsed === 'object') {
+        const rawText =
+          parsed.raw ||
+          parsed.text ||
+          parsed.body?.message ||
+          parsed.message ||
+          '';
+        const amt = parseAmountFromAnything(parsed, rawText);
+        rows.push({
+          ...parsed,
+          amount: Number.isFinite(amt) ? amt : parsed.amount ?? null,
+        });
+      }
+    }
+
+    const events = rows.map(ev => toCompact(ev, false));
+    res.json(events[0] || {});
+  } catch (err) {
+    res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
+  }
+});
+
+/*app.get('/webhook/status', async (req, res) => {
   try {
     const token = String(extractToken(req));
     if (!token) return res.status(401).json({ error: 'Token required' });
@@ -339,11 +374,11 @@ app.get('/webhook/status', async (req, res) => {
     
     const events = rows.map(ev => toCompact(ev, false));
 
-    res.json(events[0] || {});
+    
   } catch (err) {
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
-});
+});*/
 
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1h',
