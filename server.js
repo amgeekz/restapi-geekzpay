@@ -138,86 +138,48 @@ app.post('/qris/decode', async (req, res) => {
     if (!req.files || !req.files.image) return res.status(400).json({ ok:false, error:'File gambar diperlukan (field: image)' });
 
     const f = req.files.image;
-    const tmp = `/tmp/qr_${Date.now()}_${Math.random().toString(36).slice(2,8)}.tmp`;
-    require('fs').writeFileSync(tmp, f.data);
+    const tmpPath = `/tmp/qr_${Date.now()}_${Math.random().toString(36).slice(2,8)}.tmp`;
+    require('fs').writeFileSync(tmpPath, f.data);
 
-    const FormData = require('form-data');
     const fd = new FormData();
-    fd.append('file', require('fs').createReadStream(tmp));
+    fd.append('file', require('fs').createReadStream(tmpPath), { filename: f.name || 'qr.jpg' });
 
-    const r = await fetch('https://www.qrplus.com.br/decode?culture=id', {
+    const r = await fetch('https://decode.qrplus.com.br/api/Decode/UploadImage', {
       method: 'POST',
       body: fd,
-      headers: fd.getHeaders(),
+      headers: {
+        Accept: '*/*',
+        Referer: 'https://www.qrplus.com.br/',
+        ...fd.getHeaders()
+      },
       redirect: 'follow'
     });
 
-    const html = await r.text();
-    try { require('fs').writeFileSync(`/tmp/qrplus_debug_${Date.now()}.html`, html); } catch {}
+    const txt = await r.text();
+    let json;
+    try { json = JSON.parse(txt); } catch { json = null; }
 
-    const byTextarea = html.match(/<textarea[^>]*id=["']?decodedText["']?[^>]*>([\s\S]*?)<\/textarea>/i);
-    if (byTextarea && byTextarea[1] && byTextarea[1].trim()) {
-      const payload = byTextarea[1].trim();
-      try { require('fs').unlinkSync(tmp); } catch {}
-      return res.json({ ok:true, payload, file_info:{ name:f.name, type:f.mimetype, size:f.size }, decoded_at:new Date().toISOString() });
-    }
+    try { require('fs').unlinkSync(tmpPath); } catch {}
 
-    function htmlToText(s){
-      const t = s.replace(/<script[\s\S]*?<\/script>/gi, ' ')
-                 .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-                 .replace(/<\/(div|p|li|br|h[1-6])>/gi,'\n')
-                 .replace(/<[^>]+>/g,' ')
-                 .replace(/&nbsp;/gi,' ')
-                 .replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&amp;/gi,'&')
-                 .replace(/\s+/g,' ').trim();
-      return t;
-    }
+    if (!r.ok) return res.status(r.status).json({ ok:false, error:`qrplus HTTP ${r.status}`, detail: txt.slice(0,200) });
 
-    const textOnly = htmlToText(html);
+    if (!json) return res.status(422).json({ ok:false, error:'qrplus returned non-json', raw: txt.slice(0,1000) });
 
-    let payload = null;
-    const trySlice = (labelStart, labelStopCandidates=[]) => {
-      const a = textOnly.toLowerCase().indexOf(labelStart.toLowerCase());
-      if (a === -1) return null;
-      let endIdx = textOnly.length;
-      for (const stop of labelStopCandidates) {
-        const si = textOnly.toLowerCase().indexOf(stop.toLowerCase(), a+1);
-        if (si !== -1 && si < endIdx) endIdx = si;
-      }
-      const p = textOnly.slice(a + labelStart.length, endIdx).trim();
-      return p || null;
-    };
+    const parsed = json.parsedResult || json[0]?.parsedResult || null;
+    const rawText = json.rawText || parsed?.text || (Array.isArray(json) && json[0]?.rawText) || null;
+    const payload = (rawText && String(rawText).trim()) || (parsed && parsed.text && String(parsed.text).trim()) || null;
 
-    payload = trySlice('Raw text:', ['Barcode format', 'Parsed Result', 'Parsed Result Type', 'Barcode format:']);
-    if (!payload) payload = trySlice('Plain Text:', ['Barcode format', 'Parsed Result']);
-    if (!payload) payload = trySlice('Parsed Result:', ['Barcode format', 'Parsed Result Type']);
-    if (!payload) {
-      const pre = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i) || html.match(/<code[^>]*>([\s\S]*?)<\/code>/i);
-      if (pre && pre[1]) payload = pre[1].replace(/<[^>]+>/g,'').trim();
-    }
-
-    if (!payload) {
-      const candidates = textOnly.split(/\n/).map(s => s.trim()).filter(Boolean);
-      for (const c of candidates) {
-        if (c.length > 30 && /0002|ID\.CO|Q R I S|IDR|Q R I S/i.test(c)) { payload = c; break; }
-      }
-    }
-
-    if (!payload) {
-      try { require('fs').unlinkSync(tmp); } catch {}
-      return res.status(422).json({ ok:false, error:'QR tidak berhasil di-decode dari response qrplus', debug_sample:textOnly.slice(0,800) });
-    }
-
-    payload = payload.replace(/^\s*Raw bytes:\s*/i, '').trim();
-    try { require('fs').unlinkSync(tmp); } catch {}
+    if (!payload) return res.status(422).json({ ok:false, error:'QR tidak berhasil di-decode dari qrplus', details: json });
 
     return res.json({
       ok: true,
-      payload,
+      payload: payload,
       file_info: { name: f.name, type: f.mimetype, size: f.size },
-      decoded_at: new Date().toISOString()
+      decoded_at: new Date().toISOString(),
+      source: 'decode.qrplus.com.br'
     });
   } catch (err) {
+    try { require('fs').unlinkSync(tmpPath); } catch {}
     return res.status(500).json({ ok:false, error: String(err && err.message ? err.message : err) });
   }
 });
