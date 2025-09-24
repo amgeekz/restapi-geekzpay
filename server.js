@@ -86,7 +86,7 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
 
-app.get('/diag', (req, res) => {
+app.all('/diag', (req, res) => {
   res.json({
     ok: true,
     time: new Date().toISOString(),
