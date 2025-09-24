@@ -1,4 +1,3 @@
-// src/redis.js
 const BASE  = String(process.env.UPSTASH_REDIS_REST_URL || "").replace(/\/+$/, "");
 const TOKEN = String(process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_TOKEN || "");
 
@@ -24,9 +23,10 @@ async function callRedis(method, path, body){
   return await res.text();
 }
 
-async function redisLPushTrimExpire(key, value, maxKeep, ttlSec){
+async function redisLPushTrimExpire(key, valueObj, maxKeep, ttlSec){
   if (!BASE || !TOKEN) throw new Error("Redis env missing");
-  await callRedis("POST", `/lpush/${enc(key)}`, JSON.stringify([value]));
+  const element = JSON.stringify(valueObj);
+  await callRedis("POST", `/lpush/${enc(key)}`, JSON.stringify([element]));
   const stop = Math.max(0, Number(maxKeep) - 1);
   await callRedis("POST", `/ltrim/${enc(key)}/0/${stop}`);
   await callRedis("POST", `/expire/${enc(key)}/${Math.max(1, Number(ttlSec))}`);
@@ -37,8 +37,15 @@ async function redisLRangeJSON(key, start, stop){
   const out = await callRedis("GET", `/lrange/${enc(key)}/${Number(start)}/${Number(stop)}`);
   const arr = out && out.result ? out.result : [];
   const parsed = [];
-  for (const s of arr){
-    try { parsed.push(JSON.parse(s)); } catch {}
+  for (const it of arr){
+    let v = it;
+    if (typeof v === "string") {
+      try { v = JSON.parse(v); } catch {}
+      if (typeof v === "string" && v.trim().startsWith("{")) {
+        try { v = JSON.parse(v); } catch {}
+      }
+    }
+    if (v && typeof v === "object") parsed.push(v);
   }
   return parsed;
 }
