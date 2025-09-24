@@ -29,38 +29,29 @@ function extractToken(req) {
   );
 }
 
-function parseZXingHTML(html) {
-  const pick = (re) => (html.match(re)?.[1] || '').trim();
-  const rawText =
-    pick(/<td>Raw text<\/td><td><pre>([\s\S]*?)<\/pre>/i) ||
-    pick(/<td>Parsed Result<\/td><td><pre>([\s\S]*?)<\/pre>/i) ||
-    pick(/<pre>([\s\S]*?)<\/pre>/i);
-  const barcodeFormat = pick(/<td>Barcode format<\/td><td>([^<]+)<\/td>/i) || 'QR_CODE';
-  return { rawText, barcodeFormat };
+function extractZXingText(html) {
+  const rx1 = /<td>Raw text<\/td>\s*<td><pre>([\s\S]*?)<\/pre>/i;
+  const rx2 = /<td>Parsed Result<\/td>\s*<td><pre>([\s\S]*?)<\/pre>/i;
+  const m1 = html.match(rx1);
+  if (m1 && m1[1]) return m1[1].trim();
+  const m2 = html.match(rx2);
+  if (m2 && m2[1]) return m2[1].trim();
+  return '';
 }
 
-async function postToZXing(buffer, filename, mime) {
-  const fd = new FormData();
-  fd.append('f', buffer, { filename, contentType: mime });
-
-  const headers = {
-    ...fd.getHeaders(),
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-    'Referer': 'https://zxing.org/w/decode.jspx',
-  };
-
+async function postToZXing(buf, filename, mime) {
+  const fd = new FormData();                            // Web FormData bawaan Node 18
+  fd.append('f', new Blob([buf], { type: mime }), filename); // field *f* wajib
   const r = await fetch('https://zxing.org/w/decode', {
     method: 'POST',
-    body: fd,
-    headers
+    body: fd
   });
-  const html = await r.text();
-  return { ok: r.ok, status: r.status, html };
+  const text = await r.text();
+  return { status: r.status, text };
 }
 
 app.use(fileUpload({
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 8 * 1024 * 1024 },
   useTempFiles: false
 }));
 
@@ -166,71 +157,56 @@ app.post('/qris/dynamic', async (req, res) => {
 
 app.post('/qris/decode', async (req, res) => {
   try {
-    const f = req.files?.image || req.files?.file || req.files?.qr;
-    if (!f || !f.data?.length) {
-      console.log('Decode: no file');
-      return res.status(400).json({ ok:false, error:'File gambar diperlukan (field: image)' });
-    }
-    console.log('Decode: got file ->', f.name, f.mimetype, f.size);
-
-    // Try #1: kirim apa adanya
-    let attempt = await postToZXing(Buffer.from(f.data), f.name || 'qr.jpg', f.mimetype || 'image/jpeg');
-    console.log('ZXing attempt#1 status:', attempt.status);
-
-    let rawText = null, barcodeFormat = null;
-    if (attempt.ok) {
-      const parsed = parseZXingHTML(attempt.html);
-      rawText = parsed.rawText;
-      barcodeFormat = parsed.barcodeFormat;
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ ok: false, error: 'File gambar diperlukan (field: image)' });
     }
 
-    // Try #2: kalau kosong/400, transcode -> PNG 1000px grayscale + sedikit kontras
-    if (!rawText) {
+    const f = req.files.image;
+    const name = f.name || 'qr.jpg';
+    const mime = f.mimetype || 'image/jpeg';
+    const buf = Buffer.isBuffer(f.data) ? f.data : Buffer.from(f.data);
+
+    console.log('Decode: got file ->', name, mime, buf.length);
+
+    // Attempt #1: kirim original
+    let r1 = await postToZXing(buf, name, mime);
+    console.log('ZXing attempt#1 status:', r1.status);
+
+    let payload = '';
+    if (r1.status === 200) {
+      payload = extractZXingText(r1.text);
+    }
+
+    // Attempt #2: preprocess kalau 400/empty
+    if (!payload) {
       console.log('ZXing attempt#1 failed/empty, try preprocessing with sharp');
-      let pngBuf;
-      try {
-        pngBuf = await sharp(Buffer.from(f.data))
-          .rotate()                // auto-orient
-          .resize({ width: 1000, withoutEnlargement: true })
-          .grayscale()
-          .linear(1.1, -10)        // sedikit kontras/brightness
-          .png({ compressionLevel: 9 })
-          .toBuffer();
-      } catch (e) {
-        console.log('sharp failed:', e.message);
-      }
+      const png = await sharp(buf)
+        .rotate()
+        .grayscale()
+        .resize({ width: 1024, height: 1024, fit: 'inside', withoutEnlargement: true })
+        .png({ compressionLevel: 6 })
+        .toBuffer();
 
-      if (pngBuf?.length) {
-        attempt = await postToZXing(pngBuf, 'qr.png', 'image/png');
-        console.log('ZXing attempt#2 status:', attempt.status);
-        if (attempt.ok) {
-          const parsed2 = parseZXingHTML(attempt.html);
-          rawText = parsed2.rawText;
-          barcodeFormat = parsed2.barcodeFormat;
-        }
+      let r2 = await postToZXing(png, (name.replace(/\.[^.]+$/, '') || 'qr') + '.png', 'image/png');
+      console.log('ZXing attempt#2 status:', r2.status);
+      if (r2.status === 200) {
+        payload = extractZXingText(r2.text);
       }
     }
 
-    if (!rawText) {
-      console.log('ZXing failed, returning 422');
-      return res.status(422).json({
-        ok:false,
-        error:'Gagal decode QR (Bad Image/Raw text kosong)',
-        detail: attempt.html?.slice(0, 800)
-      });
+    if (!payload) {
+      return res.status(422).json({ ok: false, error: 'QR tidak terbaca oleh ZXing' });
     }
 
-    console.log('Decoded OK:', rawText.slice(0, 120));
     return res.json({
       ok: true,
-      payload: rawText,
-      barcode_format: barcodeFormat,
-      file_info: { name: f.name, type: f.mimetype, size: f.size },
+      payload,
+      file_info: { name, type: mime, size: buf.length },
       decoded_at: new Date().toISOString()
     });
   } catch (err) {
     console.error('Decode error:', err);
-    return res.status(500).json({ ok:false, error:String(err.message || err) });
+    return res.status(500).json({ ok: false, error: 'Internal error', detail: String(err.message || err) });
   }
 });
 
