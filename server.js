@@ -236,27 +236,139 @@ function toCompact(ev, debug = false) {
   return base;
 }
 
+// redis.js - Perbaiki fungsi redisLRangeJSON
+async function redisLRangeJSON(key, start, stop){
+  try {
+    const out = await callRedis("GET", `/lrange/${enc(key)}/${Number(start)}/${Number(stop)}`);
+    console.log('Redis raw response type:', typeof out);
+    
+    // Fix: Handle different response formats
+    let arr = [];
+    if (Array.isArray(out)) {
+      arr = out;
+    } else if (out && Array.isArray(out.result)) {
+      arr = out.result;
+    } else if (out && typeof out === 'object') {
+      arr = Object.values(out);
+    } else if (typeof out === 'string') {
+      try {
+        const parsed = JSON.parse(out);
+        if (Array.isArray(parsed)) arr = parsed;
+        else if (Array.isArray(parsed.result)) arr = parsed.result;
+      } catch {
+        arr = [out];
+      }
+    }
+    
+    console.log('Parsed array length:', arr.length);
+    
+    const parsed = [];
+    for (let v of arr) {
+      let item = v;
+      
+      // Handle nested JSON strings
+      if (typeof item === 'string') {
+        try {
+          // Remove extra escaping if exists
+          let cleanString = item.replace(/\\"/g, '"').replace(/^"+|"+$/g, '');
+          item = JSON.parse(cleanString);
+        } catch (parseError) {
+          console.log('JSON parse failed, trying direct parse:', parseError.message);
+          try {
+            item = JSON.parse(item);
+          } catch {
+            console.log('Using raw string value');
+            item = { raw: item };
+          }
+        }
+      }
+      
+      // If we get another string after first parse, try parse again
+      if (typeof item === 'string') {
+        try {
+          item = JSON.parse(item);
+        } catch {
+          // Keep as string object
+          item = { raw: item };
+        }
+      }
+      
+      if (item && typeof item === 'object') {
+        parsed.push(item);
+      } else {
+        console.log('Skipping invalid item:', typeof item);
+        parsed.push({});
+      }
+    }
+    
+    console.log('Final parsed events:', parsed.length);
+    return parsed;
+  } catch (error) {
+    console.error('redisLRangeJSON error:', error);
+    return [];
+  }
+}
+
+// server.js - Perbaiki safeParseMaybeString
 function safeParseMaybeString(v) {
   if (!v) return null;
   
+  console.log('safeParseMaybeString input type:', typeof v);
+  
   if (typeof v === 'object' && !Array.isArray(v)) {
-    console.log('Already object:', Object.keys(v));
+    console.log('Already object, keys:', Object.keys(v));
+    // Check if it's actually a string masquerading as object
+    if (v.raw && typeof v.raw === 'string') {
+      console.log('Found raw string, attempting parse');
+      try {
+        return JSON.parse(v.raw);
+      } catch {
+        return v;
+      }
+    }
     return v;
   }
   
   if (typeof v === 'string') {
-    try { 
-      const parsed = JSON.parse(v);
-      console.log('Parsed string to object:', Object.keys(parsed));
+    console.log('Processing string:', v.substring(0, 200));
+    try {
+      // Handle double-escaped JSON
+      let clean = v;
+      if (v.includes('\\"')) {
+        clean = v.replace(/\\"/g, '"');
+      }
+      // Remove surrounding quotes if present
+      if (clean.startsWith('"') && clean.endsWith('"')) {
+        clean = clean.slice(1, -1);
+      }
+      
+      const parsed = JSON.parse(clean);
+      console.log('Successfully parsed string to object');
       return parsed;
-    } catch { 
-      console.log('Failed to parse string, using as text:', v.substring(0, 100));
-      return { raw: v };
+    } catch (parseError) { 
+      console.log('Parse failed, trying alternative:', parseError.message);
+      try {
+        // Try parsing the original string directly
+        return JSON.parse(v);
+      } catch {
+        console.log('All parse attempts failed, using as text');
+        return { raw: v };
+      }
     }
   }
   
-  console.log('Unknown type:', typeof v, v);
+  console.log('Unknown type:', typeof v);
   return null;
+}
+
+function debugObject(obj, prefix = '') {
+  console.log(`${prefix}Type:`, typeof obj);
+  if (obj && typeof obj === 'object') {
+    console.log(`${prefix}Keys:`, Object.keys(obj));
+    Object.keys(obj).forEach(key => {
+      console.log(`${prefix}${key}:`, typeof obj[key], Array.isArray(obj[key]) ? 'array' : obj[key]);
+    });
+  }
 }
 
 app.all('/webhook/payment', async (req, res) => {
@@ -323,22 +435,36 @@ app.get('/webhook/recent', async (req, res) => {
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
     const key = `ev:${token}`;
 
+    console.log('=== RECENT EVENTS DEBUG START ===');
     console.log('Fetching recent events for token:', token.substring(0, 10) + '...');
+    
     const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-    console.log('Raw rows from Redis:', rowsRaw.length, 'items');
+    console.log('Raw rows count:', rowsRaw.length);
     
-    const rows = (rowsRaw || []).map((item, index) => {
-      console.log(`Item ${index}:`, typeof item, Object.keys(item || {}));
-      return safeParseMaybeString(item);
-    }).filter(Boolean);
+    const rows = [];
+    for (let i = 0; i < rowsRaw.length; i++) {
+      console.log(`\n--- Processing item ${i} ---`);
+      const item = rowsRaw[i];
+      debugObject(item, 'Before parse: ');
+      
+      const parsed = safeParseMaybeString(item);
+      debugObject(parsed, 'After parse: ');
+      
+      if (parsed) {
+        rows.push(parsed);
+      }
+    }
     
-    console.log('Filtered rows:', rows.length);
+    console.log('Final filtered rows:', rows.length);
+    
     const events = rows.map(ev => {
       const compact = toCompact(ev, false);
-      console.log('Compact event:', Object.keys(compact));
+      console.log('Compact event keys:', Object.keys(compact));
       return compact;
     });
 
+    console.log('=== RECENT EVENTS DEBUG END ===');
+    
     res.json({ ok: true, token, count: events.length, events });
   } catch (err) {
     console.error('Recent events error:', err);
