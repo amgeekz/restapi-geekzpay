@@ -215,9 +215,6 @@ function toCompact(ev, debug = false) {
   }
   
   const base = {
-    ok: true,
-    token: ev.token || 'unknown',
-    event_id: ev.event_id || 'unknown',
     received_at: ev.received_at || new Date().toISOString(),
     amount: ev.amount || 0,
     method: ev.method || 'UNKNOWN',
@@ -339,7 +336,7 @@ app.get('/webhook/status', async (req, res) => {
     
     const events = rows.map(ev => toCompact(ev, false));
 
-    res.json({ events });
+    res.json({ ok: true, token, count: events.length, events });
   } catch (err) {
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
