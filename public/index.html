@@ -374,21 +374,38 @@
   window.onscroll = () => { toTop.classList.toggle('hidden', window.scrollY < 400); };
   toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Base URL management
   const baseInput = document.getElementById('baseUrl');
-  const saveBase = document.getElementById('saveBase');
-  
-  function getBase(){ return localStorage.getItem('geekzpay_base') || baseInput.value; }
-  function setBase(v){ localStorage.setItem('geekzpay_base', v); }
-  baseInput.value = getBase();
-  saveBase.onclick = () => { setBase(baseInput.value); alert('Base URL disimpan!'); };
+  const saveBase  = document.getElementById('saveBase');
 
-  // Utility functions
-  function showJSON(el, text) {
-    try { el.textContent = JSON.stringify(JSON.parse(text), null, 2); }
-    catch { el.textContent = text; }
-    hljs.highlightElement(el);
+  const DEFAULT_BASE = window.location.origin.replace(/\/$/, '');
+
+  function getBase() {
+    const stored = (localStorage.getItem('geekzpay_base') || '').trim();
+    const current = (baseInput?.value || '').trim();
+    return stored || current || DEFAULT_BASE;
   }
+
+  function setBase(v) {
+    const val = String(v || '').trim() || DEFAULT_BASE;
+    localStorage.setItem('geekzpay_base', val);
+    if (baseInput) baseInput.value = val;
+  }
+
+  (function initBase() {
+    if (baseInput) {
+      baseInput.placeholder = DEFAULT_BASE;
+      baseInput.value = getBase();
+    }
+  })();
+
+  if (saveBase) {
+    saveBase.onclick = () => {
+      setBase(baseInput.value);
+      alert('Base URL disimpan!');
+    };
+  }
+
+  window.__getGeekzBase = getBase;
 
   // QRIS Dynamic Test
   const btnDyn = document.getElementById('btnDynamic');
