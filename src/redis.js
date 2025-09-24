@@ -30,26 +30,36 @@ async function redisLRangeJSON(key, start, stop){
   try {
     const out = await callRedis("GET", `/lrange/${enc(key)}/${Number(start)}/${Number(stop)}`);
     
-    let arr = Array.isArray(out) ? out
-      : (out && Array.isArray(out.result)) ? out.result
-      : (out && typeof out === 'object') ? Object.values(out)
-      : [];
-
-    const parsed = [];
-    for (let v of arr) {
-      let item = v;
-      // Parse recursively until it's not a string
-      while (typeof item === 'string') {
-        try {
-          item = JSON.parse(item);
-        } catch {
-          break;
-        }
+    console.log('Redis response structure:', Array.isArray(out) ? `Array with ${out.length} items` : typeof out);
+    
+    let items = [];
+    if (Array.isArray(out)) {
+      if (out.length > 0 && Array.isArray(out[0])) {
+        items = out.flat();
+      } else {
+        items = out;
       }
-      if (item && typeof item === 'object' && !Array.isArray(item)) {
+    } else {
+      items = [out];
+    }
+    
+    console.log('Items to parse:', items.length);
+    
+    const parsed = [];
+    for (let item of items) {
+      if (typeof item === 'string') {
+        try {
+          const parsedItem = JSON.parse(item);
+          parsed.push(parsedItem);
+        } catch (error) {
+          console.log('Parse error, using raw:', error.message);
+          parsed.push({ raw: item });
+        }
+      } else if (item && typeof item === 'object') {
         parsed.push(item);
       }
     }
+    
     return parsed;
   } catch (error) {
     console.error('redisLRangeJSON error:', error);
