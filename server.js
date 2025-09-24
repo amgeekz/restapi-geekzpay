@@ -15,6 +15,7 @@ const { parseAmountFromAnything } = require('./src/utils');
 const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
 
 const app = express();
+app.set('json spaces', 2);
 
 const EVENT_TTL_SEC = Math.max(1, parseInt(process.env.EVENT_TTL_SEC || '30', 10));
 const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '5', 10));
@@ -223,15 +224,24 @@ function toCompact(ev, debug = false) {
   if (debug) {
     base.debug = { body: ev.body, query: ev.query, headers: ev.headers };
   } else if (ev.body && (ev.body.message || ev.body.text || ev.body.amount || ev.body.total || ev.body.order_id || ev.body.status)) {
-    base.body = {};
-    if (ev.body.message) base.body.message = ev.body.message;
-    if (ev.body.text) base.body.text = ev.body.text;
-    if (ev.body.amount) base.body.amount = ev.body.amount;
-    if (ev.body.total) base.body.total = ev.body.total;
-    if (ev.body.order_id) base.body.order_id = ev.body.order_id;
-    if (ev.body.status) base.body.status = ev.body.status;
+    const b = {};
+    if (ev.body.message)  b.message  = ev.body.message;
+    if (ev.body.text)     b.text     = ev.body.text;
+    if (ev.body.amount)   b.amount   = ev.body.amount;
+    if (ev.body.total)    b.total    = ev.body.total;
+    if (ev.body.order_id) b.order_id = ev.body.order_id;
+    if (ev.body.status)   b.status   = ev.body.status;
+    base.body = b;
   }
   return base;
+}
+
+function safeParseMaybeString(v) {
+  if (v && typeof v === 'object') return v;
+  if (typeof v === 'string') {
+    try { return JSON.parse(v); } catch { return null; }
+  }
+  return null;
 }
 
 app.all('/webhook/payment', async (req, res) => {
@@ -291,57 +301,48 @@ app.all('/webhook/payment', async (req, res) => {
 });
 
 app.get('/webhook/recent', async (req, res) => {
-  const token = String(
-    req.headers['x-webhook-token'] || req.query.token || (req.body && req.body.token) || ''
-  );
-  if (!token) return res.status(401).json({ error: 'Token required' });
+  try {
+    const token = String(extractToken(req));
+    if (!token) return res.status(401).json({ error: 'Token required' });
 
-  const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
-  const key = `ev:${token}`;
+    const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
+    const key = `ev:${token}`;
 
-  const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-  const rows = (rowsRaw || []).map(x => (typeof x === 'string' ? JSON.parse(x) : x));
+    const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
+    const rows = (rowsRaw || []).map(safeParseMaybeString).filter(Boolean);
+    const events = rows.map(ev => toCompact(ev, false));
 
-  const events = rows.map(ev => ({
-    ok: true,
-    token: ev.token,
-    event_id: ev.event_id,
-    received_at: ev.received_at,
-    amount: ev.amount,
-    method: ev.method,
-    ip: ev.ip,
-    body: ev.body && (ev.body.message || ev.body.text || ev.body.amount || ev.body.total || ev.body.order_id || ev.body.status)
-      ? (() => {
-          const b = {};
-          if (ev.body.message) b.message = ev.body.message;
-          if (ev.body.text) b.text = ev.body.text;
-          if (ev.body.amount) b.amount = ev.body.amount;
-          if (ev.body.total) b.total = ev.body.total;
-          if (ev.body.order_id) b.order_id = ev.body.order_id;
-          if (ev.body.status) b.status = ev.body.status;
-          return b;
-        })()
-      : undefined
-  }));
-
-  res.json({ ok: true, token, count: events.length, events });
+    res.json({ ok: true, token, count: events.length, events });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
+  }
 });
 
 app.get('/webhook/summary', async (req, res) => {
-  const token = String(req.headers['x-webhook-token'] || req.query.token || (req.body && req.body.token) || '');
-  if (!token) return res.status(401).json({ error: 'Token required' });
-  const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
-  const rows = await redisLRangeJSON(`ev:${token}`, 0, limit - 1);
-  const events = rows.map(e => ({
-    id: e.event_id,
-    time: e.received_at,
-    amount: e.amount,
-    ip: e.ip,
-    method: e.method,
-    order_id: e.body?.order_id,
-    status: e.body?.status
-  }));
-  res.json({ ok: true, token, count: events.length, events });
+  try {
+    const token = String(extractToken(req));
+    if (!token) return res.status(401).json({ error: 'Token required' });
+
+    const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
+    const key = `ev:${token}`;
+
+    const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
+    const rows = (rowsRaw || []).map(safeParseMaybeString).filter(Boolean);
+
+    const events = rows.map(e => ({
+      id: e.event_id,
+      time: e.received_at,
+      amount: e.amount,
+      ip: e.ip,
+      method: e.method,
+      order_id: e.body?.order_id,
+      status: e.body?.status
+    }));
+
+    res.json({ ok: true, token, count: events.length, events });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
+  }
 });
 
 app.use(express.static(path.join(__dirname, 'public'), {
