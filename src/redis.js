@@ -36,35 +36,23 @@ async function redisLRangeJSON(key, start, stop){
     } else if (out && Array.isArray(out.result)) {
       arr = out.result;
     } else if (out && typeof out === 'object') {
-      arr = Object.keys(out)
-        .sort((a, b) => parseInt(a) - parseInt(b))
-        .map(key => out[key]);
+      arr = Object.values(out);
     }
     
     const parsed = [];
     for (let v of arr) {
       let item = v;
       
-      if (typeof item === 'string') {
+      while (typeof item === 'string') {
         try {
-          let cleanString = item;
-          if (cleanString.includes('\\"')) {
-            cleanString = cleanString.replace(/\\"/g, '"');
-          }
-          if (cleanString.startsWith('"') && cleanString.endsWith('"')) {
-            cleanString = cleanString.slice(1, -1);
-          }
-          
-          item = JSON.parse(cleanString);
-        } catch (parseError) {
-          item = { raw: item };
+          item = JSON.parse(item);
+        } catch {
+          break;
         }
       }
       
       if (item && typeof item === 'object') {
         parsed.push(item);
-      } else {
-        parsed.push({});
       }
     }
     
