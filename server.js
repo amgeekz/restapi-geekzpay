@@ -169,7 +169,6 @@ app.post('/qris/decode', async (req, res) => {
 
     console.log('Decode: got file ->', name, mime, buf.length);
 
-    // Attempt #1: kirim original
     let r1 = await postToZXing(buf, name, mime);
     console.log('ZXing attempt#1 status:', r1.status);
 
@@ -178,7 +177,6 @@ app.post('/qris/decode', async (req, res) => {
       payload = extractZXingText(r1.text);
     }
 
-    // Attempt #2: preprocess kalau 400/empty
     if (!payload) {
       console.log('ZXing attempt#1 failed/empty, try preprocessing with sharp');
       const png = await sharp(buf)
@@ -212,27 +210,37 @@ app.post('/qris/decode', async (req, res) => {
 });
 
 function toCompact(ev, debug = false) {
+  if (!ev || typeof ev !== 'object') {
+    return { ok: true };
+  }
+  
   const base = {
     ok: true,
-    token: ev.token,
-    event_id: ev.event_id,
-    received_at: ev.received_at,
-    amount: ev.amount,
-    method: ev.method,
-    ip: ev.ip
+    token: ev.token || 'unknown',
+    event_id: ev.event_id || 'unknown',
+    received_at: ev.received_at || new Date().toISOString(),
+    amount: ev.amount || 0,
+    method: ev.method || 'UNKNOWN',
+    ip: ev.ip || '0.0.0.0'
   };
+  
   if (debug) {
-    base.debug = { body: ev.body, query: ev.query, headers: ev.headers };
-  } else if (ev.body && (ev.body.message || ev.body.text || ev.body.amount || ev.body.total || ev.body.order_id || ev.body.status)) {
+    base.debug = { 
+      body: ev.body || {}, 
+      query: ev.query || {}, 
+      headers: ev.headers || {} 
+    };
+  } else if (ev.body && typeof ev.body === 'object') {
     const b = {};
-    if (ev.body.message)  b.message  = ev.body.message;
-    if (ev.body.text)     b.text     = ev.body.text;
-    if (ev.body.amount)   b.amount   = ev.body.amount;
-    if (ev.body.total)    b.total    = ev.body.total;
+    if (ev.body.message) b.message = ev.body.message;
+    if (ev.body.text) b.text = ev.body.text;
+    if (ev.body.amount) b.amount = ev.body.amount;
+    if (ev.body.total) b.total = ev.body.total;
     if (ev.body.order_id) b.order_id = ev.body.order_id;
-    if (ev.body.status)   b.status   = ev.body.status;
-    base.body = b;
+    if (ev.body.status) b.status = ev.body.status;
+    if (Object.keys(b).length > 0) base.body = b;
   }
+  
   return base;
 }
 
@@ -253,19 +261,20 @@ function safeParseMaybeString(v) {
     }
     
     const keys = Object.keys(v);
-    const numericKeys = keys.filter(k => !isNaN(parseInt(k)));
-    if (numericKeys.length > 0) {
-      const firstKey = numericKeys.sort()[0];
-      const firstValue = v[firstKey];
-      
-      if (typeof firstValue === 'string') {
+    for (let key of keys) {
+      const value = v[key];
+      if (typeof value === 'string') {
         try {
-          return JSON.parse(firstValue);
+          const parsed = JSON.parse(value);
+          if (parsed && typeof parsed === 'object') {
+            return parsed;
+          }
         } catch {
-          return { raw: firstValue };
+          continue;
         }
+      } else if (value && typeof value === 'object') {
+        return value;
       }
-      return firstValue;
     }
     
     return v;
@@ -275,7 +284,7 @@ function safeParseMaybeString(v) {
     try {
       const parsed = JSON.parse(v);
       return parsed;
-    } catch (parseError) { 
+    } catch {
       return { raw: v };
     }
   }
@@ -348,31 +357,28 @@ app.get('/webhook/recent', async (req, res) => {
     const key = `ev:${token}`;
 
     const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
+    console.log('Raw data from Redis:', JSON.stringify(rowsRaw, null, 2));
     
     const rows = [];
     for (let i = 0; i < rowsRaw.length; i++) {
       const item = rowsRaw[i];
+      console.log('Item before parse:', typeof item, item);
+      
       const parsed = safeParseMaybeString(item);
+      console.log('Item after parse:', typeof parsed, parsed);
+      
       if (parsed && typeof parsed === 'object') {
         rows.push(parsed);
       }
     }
     
+    console.log('Valid rows count:', rows.length);
+    
     const events = rows.map(ev => {
-      try {
-        const compact = toCompact(ev, false);
-        return compact;
-      } catch (error) {
-        return {
-          ok: true,
-          token: ev.token || token,
-          event_id: ev.event_id || 'unknown',
-          received_at: ev.received_at || new Date().toISOString(),
-          amount: ev.amount || 0,
-          method: ev.method || 'UNKNOWN',
-          ip: ev.ip || '0.0.0.0'
-        };
-      }
+      console.log('Event data for toCompact:', ev);
+      const compact = toCompact(ev, false);
+      console.log('Compact result:', compact);
+      return compact;
     });
 
     res.json({ ok: true, token, count: events.length, events });
