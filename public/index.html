@@ -374,36 +374,55 @@
   window.onscroll = () => { toTop.classList.toggle('hidden', window.scrollY < 400); };
   toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Base URL management - DIUBAH untuk pakai window.location.origin
   const baseInput = document.getElementById('baseUrl');
   const saveBase = document.getElementById('saveBase');
   const useLocal = document.getElementById('useLocal');
-  
-  function defaultBase() {
-    return window.location.origin;
-  }
-  
-  function getBase(){ 
+
+  function defaultBase(){ return window.location.origin; }
+  function normalizeBase(u){ return String(u || '').replace(/\/+$/,''); }
+  function getBase(){
     const v = (localStorage.getItem('geekzpay_base') || '').trim();
     return v || defaultBase();
   }
-  
-  function setBase(v){ localStorage.setItem('geekzpay_base', v); }
-  
+  function setBase(v){ localStorage.setItem('geekzpay_base', normalizeBase(v || defaultBase())); }
+
+  function rewriteExamplesWithBase() {
+    const base = normalizeBase(getBase());
+    document.querySelectorAll('code.language-bash').forEach(code => {
+      let txt = code.textContent;
+
+      txt = txt.replace(/https?:\/\/[^\s'"]+\/qris\/dynamic/g, `${base}/qris/dynamic`);
+      txt = txt.replace(/https?:\/\/[^\s'"]+\/webhook\/payment\?token=[^'"\s]+/g, `${base}/webhook/payment?token=USER123`);
+      txt = txt.replace(/https?:\/\/[^\s'"]+\/webhook\/summary\?token=[^'"\s]+(?:&limit=\d+)?/g, `${base}/webhook/summary?token=USER123&limit=3`);
+
+      code.textContent = txt;
+      if (window.hljs) hljs.highlightElement(code);
+    });
+  }
+
   baseInput.value = getBase();
-  
-  saveBase.onclick = () => { 
-    setBase(baseInput.value.trim() || defaultBase()); 
-    alert('Base URL disimpan!'); 
-  };
-  
-  useLocal.onclick = () => { 
-    const o = window.location.origin; 
-    baseInput.value = o; 
-    setBase(o); 
+  rewriteExamplesWithBase();
+
+  saveBase.onclick = () => {
+    setBase(baseInput.value.trim() || defaultBase());
+    baseInput.value = getBase();
+    rewriteExamplesWithBase();
+    alert('Base URL disimpan!');
   };
 
-  // Utility functions
+  useLocal.onclick = () => {
+    const o = defaultBase();
+    baseInput.value = o;
+    setBase(o);
+    rewriteExamplesWithBase();
+  };
+
+  baseInput.addEventListener('change', () => {
+    setBase(baseInput.value.trim() || defaultBase());
+    baseInput.value = getBase();
+    rewriteExamplesWithBase();
+  });
+
   function showJSON(el, text) {
     try { el.textContent = JSON.stringify(JSON.parse(text), null, 2); }
     catch { el.textContent = text; }
@@ -545,7 +564,7 @@
     reader.readAsDataURL(file);
   }
 
-  btnConvert.onclick = async () => {
+btnConvert.onclick = async () => {
     if (!currentFile) {
         metaConverter.textContent = 'Error: Pilih file gambar terlebih dahulu';
         showJSON(jsonConverter, JSON.stringify({ 
@@ -572,7 +591,8 @@
         const response = await fetch(url, {
             method: 'POST',
             body: formData,
-            signal: AbortSignal.timeout(30000)
+            // Tambahkan timeout dan error handling
+            signal: AbortSignal.timeout(30000) // 30 detik timeout
         });
         
         if (!response.ok) {
@@ -610,6 +630,7 @@
                 note: result.note || ''
             }, null, 2));
             
+            // Auto-copy payload
             navigator.clipboard.writeText(result.payload).then(() => {
                 console.log('Payload copied to clipboard');
             }).catch(err => {
@@ -629,6 +650,7 @@
         console.error('Fetch error:', err);
         metaConverter.textContent = `Network Error: ${err.message}`;
         
+        // Berikan solusi spesifik berdasarkan error
         let errorNote = '';
         if (err.name === 'TimeoutError') {
             errorNote = 'Request timeout. Server mungkin sedang sibuk.';
@@ -651,7 +673,7 @@
         btnConvert.disabled = false;
         btnConvert.textContent = 'Convert ke Payload';
     }
-  };
+};
 
   btnCopyPayload.onclick = () => {
     const payloadText = jsonConverter.textContent;
@@ -668,7 +690,7 @@
     currentFile = null;
   };
 
-  // Webhook Test
+  // Webhook Test (FIXED)
   const btnWh = document.getElementById('btnWebhook');
   const btnWhReset = document.getElementById('btnWebhookReset');
   const outWh = document.getElementById('outWebhook');
@@ -732,6 +754,6 @@
     document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }';
     outWh.classList.add('hidden');
   };
-</script>
+  </script>
 </body>
 </html>
