@@ -68,45 +68,53 @@ function flatStrings(obj, out = []) {
   }
   return out
 }
+
 function parseAmountFromAnything(body = {}, raw = "") {
-  const directKeys = ["amount", "total", "nominal", "value", "price"]
+  const directKeys = ["amount", "total", "nominal", "value", "price"];
   for (const k of directKeys) {
-    const v = body?.[k]
-    if (v == null) continue
-    if (typeof v === "number" && Number.isFinite(v)) return Math.round(v)
-    const n = parseAmountLike(String(v)) ?? normalizeRupiahFragment(String(v))
-    if (Number.isFinite(n)) return n
-  }
-  const allTexts = flatStrings(body)
-  if (raw) allTexts.push(String(raw))
-  let tagged = []
-  const rpRe = /(rp\.?|idr)\s*([0-9][0-9.,]*)/gi
-  for (const s of allTexts) {
-    let m
-    while ((m = rpRe.exec(String(s))) !== null) {
-      const n = normalizeRupiahFragment(m[2])
-      if (Number.isFinite(n)) tagged.push(n)
+    const v = body?.[k];
+    if (v == null) continue;
+    
+    if (typeof v === "number") return Math.round(v);
+    if (typeof v === "string") {
+      const n = normalizeRupiahFragment(v);
+      if (n !== null) return n;
     }
   }
-  if (tagged.length) {
-    const big = Math.max(...tagged)
-    if (Number.isFinite(big)) return big
+
+  const allText = JSON.stringify(body) + " " + String(raw);
+  
+  const rpMatch = allText.match(/(?:rp\.?|idr)[\s:]*([0-9,]+(?:\.\d{1,2})?)/i);
+  if (rpMatch) {
+    const n = normalizeRupiahFragment(rpMatch[1]);
+    if (n !== null) return n;
   }
-  let nums = []
-  const numRe = /\b\d[\d.,]{1,}\b/g
-  for (const s of allTexts) {
-    let m
-    while ((m = numRe.exec(String(s))) !== null) {
-      const n = normalizeRupiahFragment(m[0])
-      if (Number.isFinite(n)) nums.push(n)
+
+  const numberPatterns = [
+    /(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?)/g,
+    /(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?)/g,
+    /(\d+[\.,]?\d*)/g
+  ];
+
+  const foundNumbers = [];
+  
+  for (const pattern of numberPatterns) {
+    const matches = allText.match(pattern);
+    if (matches) {
+      for (const match of matches) {
+        const n = normalizeRupiahFragment(match);
+        if (n !== null && n >= 100) { // Filter reasonable amounts
+          foundNumbers.push(n);
+        }
+      }
     }
   }
-  if (nums.length) {
-    const filtered = nums.filter(n => n >= 100 && n <= 1e12)
-    if (filtered.length) return Math.max(...filtered)
-    return Math.max(...nums)
+
+  if (foundNumbers.length > 0) {
+    return Math.max(...foundNumbers);
   }
-  return null
+
+  return 0;
 }
 
 module.exports = { parseAmountFromAnything }
