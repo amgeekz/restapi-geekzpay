@@ -141,17 +141,12 @@ app.post('/qris/decode', async (req, res) => {
 
     const f = req.files.image;
     const fd = new FormData();
-    fd.append('fileToUpload', f.data, {
-      filename: f.name || 'qr.png',
-      contentType: f.mimetype
-    });
-    fd.append('decode', 'Decode');
+    fd.append('file', f.data, { filename: f.name || 'qr.png', contentType: f.mimetype });
 
     const r = await fetch('https://www.qrplus.com.br/decode?culture=id', {
       method: 'POST',
       body: fd,
       headers: fd.getHeaders(),
-      redirect: 'follow'
     });
 
     if (!r.ok) {
@@ -159,18 +154,16 @@ app.post('/qris/decode', async (req, res) => {
     }
 
     const html = await r.text();
-console.log("=== QRPLUS RAW RESPONSE START ===");
-console.log(html.substring(0, 1000)); // print 1000 karakter pertama
-console.log("=== QRPLUS RAW RESPONSE END ===");
-    const m = html.match(/<textarea[^>]*id=["']?decodedText["']?[^>]*>([\s\S]*?)<\/textarea>/i)
-             || html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)
-             || html.match(/<code[^>]*>([\s\S]*?)<\/code>/i);
+
+    const m = html.match(/Raw text:\s*([\s\S]*?)<\/div>/i)
+             || html.match(/Parsed Result[^:]*:\s*([\s\S]*?)<\/div>/i);
 
     if (!m || !m[1]) {
       return res.status(422).json({ ok: false, error: 'QR tidak berhasil di-decode dari response qrplus' });
     }
 
-    const payload = m[1].trim();
+    const payload = m[1].replace(/<[^>]+>/g, '').trim();
+
     return res.json({
       ok: true,
       payload,
