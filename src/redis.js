@@ -30,19 +30,15 @@ async function redisLRangeJSON(key, start, stop){
   try {
     const out = await callRedis("GET", `/lrange/${enc(key)}/${Number(start)}/${Number(stop)}`);
     
-    let arr = [];
-    if (Array.isArray(out)) {
-      arr = out;
-    } else if (out && Array.isArray(out.result)) {
-      arr = out.result;
-    } else if (out && typeof out === 'object') {
-      arr = Object.values(out);
-    }
-    
+    let arr = Array.isArray(out) ? out
+      : (out && Array.isArray(out.result)) ? out.result
+      : (out && typeof out === 'object') ? Object.values(out)
+      : [];
+
     const parsed = [];
     for (let v of arr) {
       let item = v;
-      
+      // Parse recursively until it's not a string
       while (typeof item === 'string') {
         try {
           item = JSON.parse(item);
@@ -50,12 +46,10 @@ async function redisLRangeJSON(key, start, stop){
           break;
         }
       }
-      
-      if (item && typeof item === 'object') {
+      if (item && typeof item === 'object' && !Array.isArray(item)) {
         parsed.push(item);
       }
     }
-    
     return parsed;
   } catch (error) {
     console.error('redisLRangeJSON error:', error);
