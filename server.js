@@ -142,18 +142,20 @@ app.post('/qris/decode', async (req, res) => {
     require('fs').writeFileSync(tmpPath, f.data);
 
     const fd = new FormData();
-    fd.append('file', require('fs').createReadStream(tmpPath), { filename: f.name || 'qr.jpg' });
+fd.append('file', f.data, {
+  filename: f.name || 'qr.jpg',
+  contentType: f.mimetype
+});
 
-    const r = await fetch('https://decode.qrplus.com.br/api/Decode/UploadImage', {
-      method: 'POST',
-      body: fd,
-      headers: {
-        Accept: '*/*',
-        Referer: 'https://www.qrplus.com.br/',
-        ...fd.getHeaders()
-      },
-      redirect: 'follow'
-    });
+const r = await fetch('https://decode.qrplus.com.br/api/Decode/UploadImage', {
+  method: 'POST',
+  body: fd,
+  headers: {
+    ...fd.getHeaders(),
+    'Accept': '*/*',
+    'Referer': 'https://www.qrplus.com.br/',
+  }
+});
 
     const txt = await r.text();
     let json;
