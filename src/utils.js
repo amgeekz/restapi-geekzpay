@@ -2,46 +2,53 @@ function onlyDigits(str) {
   return (str || '').replace(/[^0-9]/g, '');
 }
 function normalizeRupiahFragment(s) {
-  if (!s) return null
-  let t = String(s).trim()
-  t = t.replace(/[^\d.,]/g, "")
-  if (!t) return null
-  const hasDot = t.includes(".")
-  const hasComma = t.includes(",")
+  if (!s) return null;
+  let t = String(s).trim();
+  t = t.replace(/[^\d.,]/g, "");
+  if (!t) return null;
+
+  const hasDot = t.includes(".");
+  const hasComma = t.includes(",");
+
   if (hasDot && hasComma) {
-    const lastSep = t.lastIndexOf(".") > t.lastIndexOf(",") ? "." : ","
+    const lastSep = t.lastIndexOf(".") > t.lastIndexOf(",") ? "." : ",";
     if (lastSep === "," && /,\d{1,2}$/.test(t)) {
-      t = t.replace(/\./g, "").replace(",", ".")
-      const f = Number(t)
-      return Number.isFinite(f) ? Math.round(f) : null
+      t = t.replace(/\./g, "").replace(",", ".");
+      const f = Number(t);
+      return Number.isFinite(f) ? Math.round(f) : null;
     }
     if (lastSep === "." && /\.\d{1,2}$/.test(t)) {
-      t = t.replace(/,/g, "")
-      const f = Number(t)
-      return Number.isFinite(f) ? Math.round(f) : null
+      t = t.replace(/,/g, "");
+      const f = Number(t);
+      return Number.isFinite(f) ? Math.round(f) : null;
     }
-    t = t.replace(/[.,]/g, "")
-    const n = Number(t)
-    return Number.isFinite(n) ? n : null
+    t = t.replace(/[.,]/g, "");
+    const n = Number(t);
+    return Number.isFinite(n) ? n : null;
   }
+
   if (hasComma) {
-    if (/,?\d{1,2}$/.test(t)) {
-      t = t.replace(/\./g, "").replace(",", ".")
-      const f = Number(t)
-      return Number.isFinite(f) ? Math.round(f) : null
+    // PERBAIKAN: koma HARUS diikuti 1–2 digit di akhir agar dianggap desimal
+    if (/,\d{1,2}$/.test(t)) {
+      t = t.replace(/\./g, "").replace(",", ".");
+      const f = Number(t);
+      return Number.isFinite(f) ? Math.round(f) : null;
     }
-    t = t.replace(/,/g, "")
-    const n = Number(t)
-    return Number.isFinite(n) ? n : null
+    t = t.replace(/,/g, "");
+    const n = Number(t);
+    return Number.isFinite(n) ? n : null;
   }
+
   if (hasDot) {
-    t = t.replace(/\./g, "")
-    const n = Number(t)
-    return Number.isFinite(n) ? n : null
+    t = t.replace(/\./g, "");
+    const n = Number(t);
+    return Number.isFinite(n) ? n : null;
   }
-  const n = Number(t)
-  return Number.isFinite(n) ? n : null
+
+  const n = Number(t);
+  return Number.isFinite(n) ? n : null;
 }
+
 function parseAmountLike(str) {
   if (!str) return null
   const m = String(str).match(/(?:rp\.?|idr)\s*([0-9][0-9.,]*)/i)
