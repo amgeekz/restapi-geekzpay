@@ -17,9 +17,10 @@ async function callRedis(method, path, body){
   return ct.includes("application/json") ? res.json() : res.text();
 }
 
-async function redisLPushTrimExpire(key, valueObj, maxKeep, ttlSec){
-  const element = JSON.stringify(valueObj);                          // stringify SEKALI
-  await callRedis("POST", `/lpush/${enc(key)}`, JSON.stringify([element])); // Upstash expects array body
+async function redisLPushTrimExpire(key, valueObj, maxKeep, ttlSec) {
+  const data = JSON.stringify(valueObj);
+  await callRedis("POST", `/lpush/${enc(key)}`, JSON.stringify([data]));
+
   const stop = Math.max(0, Number(maxKeep) - 1);
   await callRedis("POST", `/ltrim/${enc(key)}/0/${stop}`);
   await callRedis("POST", `/expire/${enc(key)}/${Math.max(1, Number(ttlSec))}`);
