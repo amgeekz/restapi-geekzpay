@@ -275,7 +275,7 @@ app.all('/webhook/payment', async (req, res) => {
     };
 
     const key = `ev:${tokenForBucket}`;
-    await redisLPushTrimExpire(key, JSON.stringify(eventPayload), EVENT_MAX_KEEP, EVENT_TTL_SEC);
+    await redisLPushTrimExpire(key, eventPayload, EVENT_MAX_KEEP, EVENT_TTL_SEC);
 
     try {
       const p = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
