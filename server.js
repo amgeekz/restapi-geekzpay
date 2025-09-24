@@ -17,8 +17,8 @@ const { redisLPushTrimExpire, redisLRangeJSON } = require('./src/redis');
 const app = express();
 app.set('json spaces', 2);
 
-const EVENT_TTL_SEC = Math.max(1, parseInt(process.env.EVENT_TTL_SEC || '30', 10));
-const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '5', 10));
+const EVENT_TTL_SEC = Math.max(1, parseInt(process.env.EVENT_TTL_SEC || '300', 10));
+const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '10', 10));
 
 function extractToken(req) {
   return (
