@@ -135,102 +135,43 @@ app.post('/qris/dynamic', async (req, res) => {
 
 app.post('/qris/decode', async (req, res) => {
   try {
-    console.log('QR decode endpoint called');
-    
     if (!req.files || !req.files.image) {
-      console.log('No file uploaded');
-      return res.status(400).json({ 
-        ok: false, 
-        error: 'File gambar diperlukan' 
-      });
+      return res.status(400).json({ ok: false, error: 'File gambar diperlukan (field: image)' });
     }
 
-    const imageFile = req.files.image;
-    console.log('File received:', imageFile.name, imageFile.size, imageFile.mimetype);
+    const f = req.files.image;
+    const fd = new FormData();
+    fd.append('file', f.data, { filename: f.name || 'qr.png', contentType: f.mimetype });
 
-    // Sample payloads untuk fallback
-    const samplePayloads = [
-      "00020101021126650014ID.CO.QRIS.WWW011893600911000000000002152000110303UME51440014ID.CO.QRIS.WWW0205IDR0304ABCD",
-      "00020101021226650014ID.CO.QRIS.WWW021589600911000000000003152000110303UME51440014ID.CO.QRIS.WWW0205IDR0304EFGH",
-      "00020101021326650014ID.CO.QRIS.WWW031289600911000000000004152000110303UME51440014ID.CO.QRIS.WWW0205IDR0304IJKL"
-    ];
-
-    // Simpan file ke temporary storage dulu
-    const tempFilePath = `/tmp/${Date.now()}_${imageFile.name}`;
-    
-    try {
-      // Pindahkan file ke temporary location
-      await imageFile.mv(tempFilePath);
-      console.log('File saved to:', tempFilePath);
-      
-      // Coba decode dengan external API
-      const formData = new FormData();
-      formData.append('file', require('fs').createReadStream(tempFilePath));
-      
-      const apiResponse = await fetch('https://api.qrserver.com/v1/read-qr-code/', {
-        method: 'POST',
-        body: formData,
-        timeout: 10000
-      });
-      
-      if (!apiResponse.ok) {
-        throw new Error(`API response: ${apiResponse.status}`);
-      }
-      
-      const apiResult = await apiResponse.json();
-      console.log('API result:', JSON.stringify(apiResult).substring(0, 200));
-      
-      if (apiResult && apiResult[0] && apiResult[0].symbol && apiResult[0].symbol[0] && apiResult[0].symbol[0].data) {
-        const payload = apiResult[0].symbol[0].data;
-        console.log('QR decoded successfully');
-        
-        // Clean up temp file
-        require('fs').unlinkSync(tempFilePath);
-        
-        return res.json({ 
-          ok: true, 
-          payload: payload,
-          file_info: {
-            name: imageFile.name,
-            type: imageFile.mimetype,
-            size: imageFile.size
-          },
-          decoded_at: new Date().toISOString()
-        });
-      }
-      
-      throw new Error('QR code not detected in image');
-      
-    } catch (apiError) {
-      console.log('External API failed, using sample:', apiError.message);
-      
-      // Clean up temp file
-      try { require('fs').unlinkSync(tempFilePath); } catch {}
-      
-      // Fallback ke sample payload
-      const randomPayload = samplePayloads[Math.floor(Math.random() * samplePayloads.length)];
-      return res.json({ 
-        ok: true, 
-        payload: randomPayload,
-        file_info: {
-          name: imageFile.name,
-          type: imageFile.mimetype,
-          size: imageFile.size
-        },
-        decoded_at: new Date().toISOString(),
-        note: "Demo mode - menggunakan sample payload"
-      });
-    }
-
-  } catch (error) {
-    console.error('QR decode endpoint error:', error);
-    
-    // Return error response yang konsisten
-    res.status(500).json({ 
-      ok: false, 
-      error: 'Terjadi kesalahan internal',
-      detail: error.message
+    const r = await fetch('https://www.qrplus.com.br/decode?culture=id', {
+      method: 'POST',
+      body: fd,
+      headers: fd.getHeaders(),
+      redirect: 'follow'
     });
+
+    if (!r.ok) {
+      return res.status(r.status).json({ ok: false, error: `qrplus HTTP ${r.status}` });
+    }
+
+    const html = await r.text();
+    const m = html.match(/<textarea[^>]*id=["']?decodedText["']?[^>]*>([\s\S]*?)<\/textarea>/i)
+             || html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)
+             || html.match(/<code[^>]*>([\s\S]*?)<\/code>/i);
+
+    if (!m || !m[1]) {
+      return res.status(422).json({ ok: false, error: 'QR tidak berhasil di-decode dari response qrplus' });
+    }
+
+    const payload = m[1].trim();
+    return res.json({
+      ok: true,
+      payload,
+      file_info: { name: f.name, type: f.mimetype, size: f.size },
+      decoded_at: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message || String(err) });
   }
 });
 
