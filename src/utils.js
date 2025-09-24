@@ -71,23 +71,30 @@ function flatStrings(obj, out = []) {
 
 function parseAmountFromAnything(body = {}, raw = "") {
   const directKeys = ["amount", "total", "nominal", "value", "price"];
+  let numericCandidate = null;
+
   for (const k of directKeys) {
     const v = body?.[k];
     if (v == null) continue;
-    
-    if (typeof v === "number") return Math.round(v);
+    if (typeof v === "number" && Number.isFinite(v)) {
+      numericCandidate = Math.round(v);
+      continue;
+    }
     if (typeof v === "string") {
       const n = normalizeRupiahFragment(v);
-      if (n !== null) return n;
+      if (Number.isFinite(n)) return n;
     }
   }
 
   const allText = JSON.stringify(body) + " " + String(raw);
-  
-  const rpMatch = allText.match(/(?:rp\.?|idr)[\s:]*([0-9,]+(?:\.\d{1,2})?)/i);
+
+  const rpMatch = allText.match(/(?:rp\.?|idr)[\s:]*([0-9][0-9.,]*)/i);
   if (rpMatch) {
     const n = normalizeRupiahFragment(rpMatch[1]);
-    if (n !== null) return n;
+    if (Number.isFinite(n)) {
+      if (numericCandidate != null && numericCandidate < 100 && n >= 100) return n;
+      return n;
+    }
   }
 
   const numberPatterns = [
@@ -97,24 +104,25 @@ function parseAmountFromAnything(body = {}, raw = "") {
   ];
 
   const foundNumbers = [];
-  
   for (const pattern of numberPatterns) {
     const matches = allText.match(pattern);
     if (matches) {
       for (const match of matches) {
         const n = normalizeRupiahFragment(match);
-        if (n !== null && n >= 100) { // Filter reasonable amounts
-          foundNumbers.push(n);
-        }
+        if (Number.isFinite(n)) foundNumbers.push(n);
       }
     }
   }
 
-  if (foundNumbers.length > 0) {
-    return Math.max(...foundNumbers);
+  if (foundNumbers.length) {
+    const big = Math.max(...foundNumbers);
+    if (Number.isFinite(big)) {
+      if (numericCandidate != null && numericCandidate < 100 && big >= 100) return big;
+      return big;
+    }
   }
 
-  return 0;
+  return numericCandidate != null ? numericCandidate : null;
 }
 
 module.exports = { parseAmountFromAnything }
