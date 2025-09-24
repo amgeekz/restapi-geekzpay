@@ -30,32 +30,42 @@ async function redisLRangeJSON(key, start, stop){
   try {
     const out = await callRedis("GET", `/lrange/${enc(key)}/${Number(start)}/${Number(stop)}`);
     
-    console.log('Redis response structure:', Array.isArray(out) ? `Array with ${out.length} items` : typeof out);
-    
-    let items = [];
-    if (Array.isArray(out)) {
-      if (out.length > 0 && Array.isArray(out[0])) {
-        items = out.flat();
-      } else {
-        items = out;
-      }
-    } else {
-      items = [out];
-    }
-    
-    console.log('Items to parse:', items.length);
+    // Handle Upstash Redis response format: { result: [...] }
+    const rawItems = out && out.result ? out.result : (Array.isArray(out) ? out : [out]);
     
     const parsed = [];
-    for (let item of items) {
+    for (let rawItem of rawItems) {
+      let item = rawItem;
+      
+      // Handle triple-nested JSON: "[\"json_string\"]"
       if (typeof item === 'string') {
         try {
-          const parsedItem = JSON.parse(item);
-          parsed.push(parsedItem);
+          // First parse: remove array wrapper
+          const firstParse = JSON.parse(item);
+          if (Array.isArray(firstParse) && firstParse.length > 0) {
+            item = firstParse[0];
+          } else {
+            item = firstParse;
+          }
+          
+          // Second parse: if still string, parse the actual JSON
+          if (typeof item === 'string') {
+            item = JSON.parse(item);
+          }
         } catch (error) {
-          console.log('Parse error, using raw:', error.message);
-          parsed.push({ raw: item });
+          // Fallback: clean and parse directly
+          try {
+            const clean = item.replace(/\\"/g, '"')
+                             .replace(/^\["/, '')
+                             .replace(/"\]$/, '');
+            item = JSON.parse(clean);
+          } catch {
+            item = { raw: item };
+          }
         }
-      } else if (item && typeof item === 'object') {
+      }
+      
+      if (item && typeof item === 'object') {
         parsed.push(item);
       }
     }
