@@ -138,48 +138,46 @@ app.post('/qris/decode', async (req, res) => {
   try {
     const f = req.files?.image;
     if (!f) return res.status(400).json({ ok:false, error:'File gambar diperlukan (field: image)' });
+    if (!f.data?.length) return res.status(400).json({ ok:false, error:'File kosong' });
 
     const fd = new FormData();
-    // ZXing expects field name "f"
-    fd.append('f', stream.Readable.from(f.data), {
-      filename: f.name || 'qr.jpg',
-      contentType: f.mimetype || 'image/jpeg',
-      knownLength: f.size
-    });
+    fd.append(
+      'f',
+      Buffer.from(f.data),
+      { filename: path.basename(f.name || 'qr.jpg'), contentType: f.mimetype || 'image/jpeg' }
+    );
+    fd.append('submit', 'Upload');
 
     const r = await fetch('https://zxing.org/w/decode', {
       method: 'POST',
-      headers: {
-        ...fd.getHeaders(),
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'user-agent': 'Mozilla/5.0 (compatible; GeekzPay/1.0)'
-      },
       body: fd,
-      redirect: 'follow'
+      headers: fd.getHeaders()
     });
 
-    const html = await r.text();
     if (!r.ok) {
-      return res.status(r.status).json({ ok:false, error:`ZXing HTTP ${r.status}`, detail: html.slice(0,200) });
+      const snippet = (await r.text().catch(()=>'')).slice(0, 300);
+      return res.status(r.status).json({ ok:false, error:`ZXing HTTP ${r.status}`, detail: snippet });
     }
 
-    let m =
-      html.match(/<td>\s*Raw text\s*<\/td>\s*<td><pre>([\s\S]*?)<\/pre>/i) ||
-      html.match(/<td>\s*Parsed Result\s*<\/td>\s*<td><pre>([\s\S]*?)<\/pre>/i);
+    const html = await r.text();
 
-    if (!m || !m[1]) {
-      return res.status(422).json({ ok:false, error:'Tidak menemukan payload QR pada respon ZXing' });
+    // ambil "Raw text" atau fallback ke "Parsed Result"
+    const mRaw = html.match(/<td>\s*Raw text\s*<\/td>\s*<td>\s*<pre>([\s\S]*?)<\/pre>/i);
+    const mParsed = html.match(/<td>\s*Parsed Result\s*<\/td>\s*<td>\s*<pre>([\s\S]*?)<\/pre>/i);
+    const payload = (mRaw?.[1] || mParsed?.[1] || '').trim();
+
+    if (!payload) {
+      return res.status(422).json({ ok:false, error:'QR tidak berhasil di-decode dari response ZXing' });
     }
 
-    const payload = m[1].trim();
-    return res.json({
+    res.json({
       ok: true,
       payload,
       file_info: { name: f.name, type: f.mimetype, size: f.size },
       decoded_at: new Date().toISOString()
     });
   } catch (err) {
-    return res.status(500).json({ ok:false, error: err.message || String(err) });
+    res.status(500).json({ ok:false, error: err.message || String(err) });
   }
 });
 
