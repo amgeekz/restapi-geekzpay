@@ -215,6 +215,9 @@ function toCompact(ev, debug = false) {
   }
   
   const base = {
+    ok: true,
+    token: ev.token || 'unknown',
+    event_id: ev.event_id || 'unknown',
     received_at: ev.received_at || new Date().toISOString(),
     amount: ev.amount || 0,
     method: ev.method || 'UNKNOWN',
