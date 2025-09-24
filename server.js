@@ -159,6 +159,9 @@ app.post('/qris/decode', async (req, res) => {
     }
 
     const html = await r.text();
+console.log("=== QRPLUS RAW RESPONSE START ===");
+console.log(html.substring(0, 1000)); // print 1000 karakter pertama
+console.log("=== QRPLUS RAW RESPONSE END ===");
     const m = html.match(/<textarea[^>]*id=["']?decodedText["']?[^>]*>([\s\S]*?)<\/textarea>/i)
              || html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i)
              || html.match(/<code[^>]*>([\s\S]*?)<\/code>/i);
