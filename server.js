@@ -356,34 +356,11 @@ app.get('/webhook/recent', async (req, res) => {
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
     const key = `ev:${token}`;
 
-    const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-    console.log('Raw data from Redis:', JSON.stringify(rowsRaw, null, 2));
-    
-    const rows = [];
-    for (let i = 0; i < rowsRaw.length; i++) {
-      const item = rowsRaw[i];
-      console.log('Item before parse:', typeof item, item);
-      
-      const parsed = safeParseMaybeString(item);
-      console.log('Item after parse:', typeof parsed, parsed);
-      
-      if (parsed && typeof parsed === 'object') {
-        rows.push(parsed);
-      }
-    }
-    
-    console.log('Valid rows count:', rows.length);
-    
-    const events = rows.map(ev => {
-      console.log('Event data for toCompact:', ev);
-      const compact = toCompact(ev, false);
-      console.log('Compact result:', compact);
-      return compact;
-    });
+    const rows = await redisLRangeJSON(key, 0, limit - 1);
 
+    const events = rows.map(ev => toCompact(ev, false));
     res.json({ ok: true, token, count: events.length, events });
   } catch (err) {
-    console.error('Recent events error:', err);
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
 });
@@ -396,15 +373,7 @@ app.get('/webhook/summary', async (req, res) => {
     const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
     const key = `ev:${token}`;
 
-    const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-
-    const rows = [];
-    for (let item of rowsRaw) {
-      const parsed = safeParseMaybeString(item);
-      if (parsed && parsed.token) {
-        rows.push(parsed);
-      }
-    }
+    const rows = await redisLRangeJSON(key, 0, limit - 1);
 
     const events = rows.map(e => ({
       id: e.event_id || 'unknown',
@@ -418,7 +387,6 @@ app.get('/webhook/summary', async (req, res) => {
 
     res.json({ ok: true, token, count: events.length, events });
   } catch (err) {
-    console.error('Summary error:', err);
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
 });
