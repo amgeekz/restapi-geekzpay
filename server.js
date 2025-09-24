@@ -236,66 +236,51 @@ function toCompact(ev, debug = false) {
   return base;
 }
 
-// server.js - Perbaiki safeParseMaybeString
 function safeParseMaybeString(v) {
   if (!v) return null;
   
-  console.log('safeParseMaybeString input type:', typeof v);
-  
-  if (typeof v === 'object' && !Array.isArray(v)) {
-    console.log('Already object, keys:', Object.keys(v));
-    // Check if it's actually a string masquerading as object
+  if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
+    if (v.token || v.event_id || v.received_at) {
+      return v;
+    }
+    
     if (v.raw && typeof v.raw === 'string') {
-      console.log('Found raw string, attempting parse');
       try {
         return JSON.parse(v.raw);
       } catch {
         return v;
       }
     }
+    
+    const keys = Object.keys(v);
+    const numericKeys = keys.filter(k => !isNaN(parseInt(k)));
+    if (numericKeys.length > 0) {
+      const firstKey = numericKeys.sort()[0];
+      const firstValue = v[firstKey];
+      
+      if (typeof firstValue === 'string') {
+        try {
+          return JSON.parse(firstValue);
+        } catch {
+          return { raw: firstValue };
+        }
+      }
+      return firstValue;
+    }
+    
     return v;
   }
   
   if (typeof v === 'string') {
-    console.log('Processing string:', v.substring(0, 200));
     try {
-      // Handle double-escaped JSON
-      let clean = v;
-      if (v.includes('\\"')) {
-        clean = v.replace(/\\"/g, '"');
-      }
-      // Remove surrounding quotes if present
-      if (clean.startsWith('"') && clean.endsWith('"')) {
-        clean = clean.slice(1, -1);
-      }
-      
-      const parsed = JSON.parse(clean);
-      console.log('Successfully parsed string to object');
+      const parsed = JSON.parse(v);
       return parsed;
     } catch (parseError) { 
-      console.log('Parse failed, trying alternative:', parseError.message);
-      try {
-        // Try parsing the original string directly
-        return JSON.parse(v);
-      } catch {
-        console.log('All parse attempts failed, using as text');
-        return { raw: v };
-      }
+      return { raw: v };
     }
   }
   
-  console.log('Unknown type:', typeof v);
   return null;
-}
-
-function debugObject(obj, prefix = '') {
-  console.log(`${prefix}Type:`, typeof obj);
-  if (obj && typeof obj === 'object') {
-    console.log(`${prefix}Keys:`, Object.keys(obj));
-    Object.keys(obj).forEach(key => {
-      console.log(`${prefix}${key}:`, typeof obj[key], Array.isArray(obj[key]) ? 'array' : obj[key]);
-    });
-  }
 }
 
 app.all('/webhook/payment', async (req, res) => {
@@ -362,36 +347,34 @@ app.get('/webhook/recent', async (req, res) => {
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
     const key = `ev:${token}`;
 
-    console.log('=== RECENT EVENTS DEBUG START ===');
-    console.log('Fetching recent events for token:', token.substring(0, 10) + '...');
-    
     const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-    console.log('Raw rows count:', rowsRaw.length);
     
     const rows = [];
     for (let i = 0; i < rowsRaw.length; i++) {
-      console.log(`\n--- Processing item ${i} ---`);
       const item = rowsRaw[i];
-      debugObject(item, 'Before parse: ');
-      
       const parsed = safeParseMaybeString(item);
-      debugObject(parsed, 'After parse: ');
-      
-      if (parsed) {
+      if (parsed && typeof parsed === 'object') {
         rows.push(parsed);
       }
     }
     
-    console.log('Final filtered rows:', rows.length);
-    
     const events = rows.map(ev => {
-      const compact = toCompact(ev, false);
-      console.log('Compact event keys:', Object.keys(compact));
-      return compact;
+      try {
+        const compact = toCompact(ev, false);
+        return compact;
+      } catch (error) {
+        return {
+          ok: true,
+          token: ev.token || token,
+          event_id: ev.event_id || 'unknown',
+          received_at: ev.received_at || new Date().toISOString(),
+          amount: ev.amount || 0,
+          method: ev.method || 'UNKNOWN',
+          ip: ev.ip || '0.0.0.0'
+        };
+      }
     });
 
-    console.log('=== RECENT EVENTS DEBUG END ===');
-    
     res.json({ ok: true, token, count: events.length, events });
   } catch (err) {
     console.error('Recent events error:', err);
@@ -407,17 +390,20 @@ app.get('/webhook/summary', async (req, res) => {
     const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
     const key = `ev:${token}`;
 
-    console.log('Fetching summary for token:', token.substring(0, 10) + '...');
     const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-    console.log('Summary raw rows:', rowsRaw.length);
 
-    const rows = (rowsRaw || []).map(safeParseMaybeString).filter(Boolean);
-    console.log('Summary filtered rows:', rows.length);
+    const rows = [];
+    for (let item of rowsRaw) {
+      const parsed = safeParseMaybeString(item);
+      if (parsed && parsed.token) {
+        rows.push(parsed);
+      }
+    }
 
     const events = rows.map(e => ({
       id: e.event_id || 'unknown',
       time: e.received_at || new Date().toISOString(),
-      amount: e.amount || 0,
+      amount: Number(e.amount) || 0,
       ip: e.ip || '0.0.0.0',
       method: e.method || 'UNKNOWN',
       order_id: e.body?.order_id,
