@@ -133,8 +133,6 @@ app.post('/qris/dynamic', async (req, res) => {
   }
 });
 
-const FormData = require('form-data');
-
 app.post('/qris/decode', async (req, res) => {
   try {
     console.log('QR decode endpoint called');
