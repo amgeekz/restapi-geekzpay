@@ -318,7 +318,7 @@ app.all('/webhook/payment', async (req, res) => {
   }
 });
 
-app.get('/webhook/summary', async (req, res) => {
+app.get('/webhook/recent', async (req, res) => {
   try {
     const token = String(extractToken(req));
     if (!token) return res.status(401).json({ error: 'Token required' });
@@ -339,7 +339,7 @@ app.get('/webhook/summary', async (req, res) => {
     
     const events = rows.map(ev => toCompact(ev, false));
 
-    res.json({ events });
+    res.json(events[0] || {});
   } catch (err) {
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
