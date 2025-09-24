@@ -30,8 +30,8 @@ function extractToken(req) {
 }
 
 app.use(fileUpload({
-  limits: { fileSize: 2 * 1024 * 1024 },
-  abortOnLimit: true
+  limits: { fileSize: 5 * 1024 * 1024 },
+  useTempFiles: false
 }));
 
 app.use((req, res, next) => {
@@ -136,50 +136,55 @@ app.post('/qris/dynamic', async (req, res) => {
 
 app.post('/qris/decode', async (req, res) => {
   try {
-    const f = req.files?.image;
-    if (!f) return res.status(400).json({ ok:false, error:'File gambar diperlukan (field: image)' });
-    if (!f.data?.length) return res.status(400).json({ ok:false, error:'File kosong' });
+    const f = req.files?.image || req.files?.file || req.files?.qr
+    if (!f || !f.data || !f.data.length) {
+      console.log('No file uploaded')
+      return res.status(400).json({ ok:false, error:'File gambar diperlukan (field: image)' })
+    }
 
-    const fd = new FormData();
-    fd.append(
-      'f',
-      Buffer.from(f.data),
-      { filename: path.basename(f.name || 'qr.jpg'), contentType: f.mimetype || 'image/jpeg' }
-    );
-    fd.append('submit', 'Upload');
+    console.log('File received:', f.name, f.mimetype, f.size)
 
-    const r = await fetch('https://zxing.org/w/decode', {
-      method: 'POST',
-      body: fd,
-      headers: fd.getHeaders()
-    });
+    const blob = new Blob([f.data], { type: f.mimetype || 'application/octet-stream' })
+    const fd = new FormData()
+    fd.append('f', blob, f.name || 'qr.jpg')
+
+    console.log('Sending to ZXing...')
+    const r = await fetch('https://zxing.org/w/decode', { method: 'POST', body: fd })
+    const html = await r.text()
+    console.log('ZXing response status:', r.status)
 
     if (!r.ok) {
-      const snippet = (await r.text().catch(()=>'')).slice(0, 300);
-      return res.status(r.status).json({ ok:false, error:`ZXing HTTP ${r.status}`, detail: snippet });
+      console.log('ZXing error body:', html.slice(0,200))
+      return res.status(r.status).json({ ok:false, error:`ZXing HTTP ${r.status}`, detail: html.slice(0,500) })
     }
 
-    const html = await r.text();
+    const pick = (re) => (html.match(re)?.[1] || '').trim()
+    const rawText =
+      pick(/<td>Raw text<\/td><td><pre>([\s\S]*?)<\/pre>/i) ||
+      pick(/<pre[^>]*id=["']?rawText["']?[^>]*>([\s\S]*?)<\/pre>/i) ||
+      pick(/<td>Parsed Result<\/td><td><pre>([\s\S]*?)<\/pre>/i) ||
+      pick(/<pre>([\s\S]*?)<\/pre>/i)
 
-    // ambil "Raw text" atau fallback ke "Parsed Result"
-    const mRaw = html.match(/<td>\s*Raw text\s*<\/td>\s*<td>\s*<pre>([\s\S]*?)<\/pre>/i);
-    const mParsed = html.match(/<td>\s*Parsed Result\s*<\/td>\s*<td>\s*<pre>([\s\S]*?)<\/pre>/i);
-    const payload = (mRaw?.[1] || mParsed?.[1] || '').trim();
+    const barcodeFormat = pick(/<td>Barcode format<\/td><td>([^<]+)<\/td>/i) || 'QR_CODE'
 
-    if (!payload) {
-      return res.status(422).json({ ok:false, error:'QR tidak berhasil di-decode dari response ZXing' });
+    if (!rawText) {
+      console.log('Failed to extract Raw text from ZXing HTML')
+      return res.status(422).json({ ok:false, error:'Gagal decode (Raw text kosong)', detail: html.slice(0,500) })
     }
 
-    res.json({
+    console.log('QR decoded successfully:', rawText.substring(0,100))
+    return res.json({
       ok: true,
-      payload,
+      payload: rawText,
+      barcode_format: barcodeFormat,
       file_info: { name: f.name, type: f.mimetype, size: f.size },
       decoded_at: new Date().toISOString()
-    });
+    })
   } catch (err) {
-    res.status(500).json({ ok:false, error: err.message || String(err) });
+    console.error('Decode error:', err)
+    return res.status(500).json({ ok:false, error: String(err.message || err) })
   }
-});
+})
 
 function toCompact(ev, debug = false) {
   const base = {
