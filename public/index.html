@@ -374,55 +374,16 @@
   window.onscroll = () => { toTop.classList.toggle('hidden', window.scrollY < 400); };
   toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  // Base URL management
   const baseInput = document.getElementById('baseUrl');
   const saveBase = document.getElementById('saveBase');
-  const useLocal = document.getElementById('useLocal');
-
-  function defaultBase(){ return window.location.origin; }
-  function normalizeBase(u){ return String(u || '').replace(/\/+$/,''); }
-  function getBase(){
-    const v = (localStorage.getItem('geekzpay_base') || '').trim();
-    return v || defaultBase();
-  }
-  function setBase(v){ localStorage.setItem('geekzpay_base', normalizeBase(v || defaultBase())); }
-
-  function rewriteExamplesWithBase() {
-    const base = normalizeBase(getBase());
-    document.querySelectorAll('code.language-bash').forEach(code => {
-      let txt = code.textContent;
-
-      txt = txt.replace(/https?:\/\/[^\s'"]+\/qris\/dynamic/g, `${base}/qris/dynamic`);
-      txt = txt.replace(/https?:\/\/[^\s'"]+\/webhook\/payment\?token=[^'"\s]+/g, `${base}/webhook/payment?token=USER123`);
-      txt = txt.replace(/https?:\/\/[^\s'"]+\/webhook\/summary\?token=[^'"\s]+(?:&limit=\d+)?/g, `${base}/webhook/summary?token=USER123&limit=3`);
-
-      code.textContent = txt;
-      if (window.hljs) hljs.highlightElement(code);
-    });
-  }
-
+  
+  function getBase(){ return localStorage.getItem('geekzpay_base') || baseInput.value; }
+  function setBase(v){ localStorage.setItem('geekzpay_base', v); }
   baseInput.value = getBase();
-  rewriteExamplesWithBase();
+  saveBase.onclick = () => { setBase(baseInput.value); alert('Base URL disimpan!'); };
 
-  saveBase.onclick = () => {
-    setBase(baseInput.value.trim() || defaultBase());
-    baseInput.value = getBase();
-    rewriteExamplesWithBase();
-    alert('Base URL disimpan!');
-  };
-
-  useLocal.onclick = () => {
-    const o = defaultBase();
-    baseInput.value = o;
-    setBase(o);
-    rewriteExamplesWithBase();
-  };
-
-  baseInput.addEventListener('change', () => {
-    setBase(baseInput.value.trim() || defaultBase());
-    baseInput.value = getBase();
-    rewriteExamplesWithBase();
-  });
-
+  // Utility functions
   function showJSON(el, text) {
     try { el.textContent = JSON.stringify(JSON.parse(text), null, 2); }
     catch { el.textContent = text; }
