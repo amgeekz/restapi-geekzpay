@@ -328,17 +328,10 @@ app.get('/webhook/recent', async (req, res) => {
 });
 
 app.get('/webhook/summary', async (req, res) => {
-  const token = String(
-    req.headers['x-webhook-token'] || req.query.token || (req.body && req.body.token) || ''
-  );
+  const token = String(req.headers['x-webhook-token'] || req.query.token || (req.body && req.body.token) || '');
   if (!token) return res.status(401).json({ error: 'Token required' });
-
   const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
-  const key = `ev:${token}`;
-
-  const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-  const rows = (rowsRaw || []).map(x => (typeof x === 'string' ? JSON.parse(x) : x));
-
+  const rows = await redisLRangeJSON(`ev:${token}`, 0, limit - 1);
   const events = rows.map(e => ({
     id: e.event_id,
     time: e.received_at,
@@ -348,7 +341,6 @@ app.get('/webhook/summary', async (req, res) => {
     order_id: e.body?.order_id,
     status: e.body?.status
   }));
-
   res.json({ ok: true, token, count: events.length, events });
 });
 
