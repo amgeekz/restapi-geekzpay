@@ -318,7 +318,7 @@ app.all('/webhook/payment', async (req, res) => {
   }
 });
 
-app.get('/webhook/recent', async (req, res) => {
+app.get('/webhook/status', async (req, res) => {
   try {
     const token = String(extractToken(req));
     if (!token) return res.status(401).json({ error: 'Token required' });
