@@ -141,7 +141,7 @@ app.post('/qris/decode', async (req, res) => {
 
     const f = req.files.image;
     const fd = new FormData();
-    fd.append('file', f.data, { filename: f.name || 'qr.png', contentType: f.mimetype });
+    fd.append('fileToUpload', f.data, { filename: f.name || 'qr.png', contentType: f.mimetype });
 
     const r = await fetch('https://www.qrplus.com.br/decode?culture=id', {
       method: 'POST',
