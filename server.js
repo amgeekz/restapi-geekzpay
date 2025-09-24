@@ -9,7 +9,6 @@ const crypto = require('crypto');
 const fs = require('fs');
 const QRCode = require('qrcode');
 const path = require('path');
-const FormData = require('form-data');
 const sharp = require('sharp');
 const { makeDynamic } = require('./src/qris');
 const { parseAmountFromAnything } = require('./src/utils');
@@ -40,8 +39,9 @@ function extractZXingText(html) {
 }
 
 async function postToZXing(buf, filename, mime) {
-  const fd = new FormData();                            // Web FormData bawaan Node 18
-  fd.append('f', new Blob([buf], { type: mime }), filename); // field *f* wajib
+  const fd = new FormData();
+  fd.append('f', new File([buf], filename, { type: mime }));
+
   const r = await fetch('https://zxing.org/w/decode', {
     method: 'POST',
     body: fd
