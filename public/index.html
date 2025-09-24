@@ -140,7 +140,7 @@
           <div class="card rounded-2xl p-6 mb-6">
             <h3 class="font-semibold mb-3">Base URL</h3>
             <div class="flex flex-col md:flex-row gap-4">
-              <input id="baseUrl" value="https://restapi-geekzpay.replit.app" 
+              <input id="baseUrl" placeholder="https://your-api.example.com"
                      class="flex-1 px-4 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" />
               <button id="saveBase" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Simpan</button>
             </div>
@@ -311,7 +311,7 @@
           <div class="space-y-6">
             <div class="card rounded-2xl p-6">
               <h3 class="font-semibold mb-2">Membuat QRIS Dinamis dengan Payload Custom</h3>
-              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST https://restapi-geekzpay.replit.app/qris/dynamic \
+              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST https://YOUR-BASE-URL/qris/dynamic \
   -d base_amount=20000 \
   -d unique_code=777 \
   -d payload_static='00020101021126...6304ABCD' \
@@ -327,14 +327,14 @@
             
             <div class="card rounded-2xl p-6">
               <h3 class="font-semibold mb-2">Mengirim Webhook</h3>
-              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST 'https://restapi-geekzpay.replit.app/webhook/payment?token=USER123' \
+              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST 'https://YOUR-BASE-URL/webhook/payment?token=USER123' \
   -H 'Content-Type: application/json' \
   -d '{ "message": "Pembayaran Rp 15.250 diterima" }'</code></pre>
             </div>
             
             <div class="card rounded-2xl p-6">
               <h3 class="font-semibold mb-2">Melihat Riwayat</h3>
-              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X GET 'https://restapi-geekzpay.replit.app/webhook/summary?token=USER123&limit=3'</code></pre>
+              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X GET 'https://YOUR-BASE-URL/webhook/summary?token=USER123&limit=3'</code></pre>
               <pre class="bg-slate-800 rounded-lg p-4 mt-2"><code class="language-json">{
   "ok": true,
   "token": "USER123",
@@ -359,7 +359,7 @@
 
   <button id="toTop" class="fixed bottom-5 right-5 md:hidden rounded-full bg-indigo-600 text-white px-4 py-2 shadow-lg hidden">↑</button>
 
-  <script>
+<script>
   hljs.highlightAll();
 
   // Navigation
@@ -374,14 +374,34 @@
   window.onscroll = () => { toTop.classList.toggle('hidden', window.scrollY < 400); };
   toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Base URL management
+  // Base URL management - DIUBAH untuk pakai window.location.origin
   const baseInput = document.getElementById('baseUrl');
   const saveBase = document.getElementById('saveBase');
+  const useLocal = document.getElementById('useLocal');
   
-  function getBase(){ return localStorage.getItem('geekzpay_base') || baseInput.value; }
+  function defaultBase() {
+    return window.location.origin;
+  }
+  
+  function getBase(){ 
+    const v = (localStorage.getItem('geekzpay_base') || '').trim();
+    return v || defaultBase();
+  }
+  
   function setBase(v){ localStorage.setItem('geekzpay_base', v); }
+  
   baseInput.value = getBase();
-  saveBase.onclick = () => { setBase(baseInput.value); alert('Base URL disimpan!'); };
+  
+  saveBase.onclick = () => { 
+    setBase(baseInput.value.trim() || defaultBase()); 
+    alert('Base URL disimpan!'); 
+  };
+  
+  useLocal.onclick = () => { 
+    const o = window.location.origin; 
+    baseInput.value = o; 
+    setBase(o); 
+  };
 
   // Utility functions
   function showJSON(el, text) {
@@ -525,7 +545,7 @@
     reader.readAsDataURL(file);
   }
 
-btnConvert.onclick = async () => {
+  btnConvert.onclick = async () => {
     if (!currentFile) {
         metaConverter.textContent = 'Error: Pilih file gambar terlebih dahulu';
         showJSON(jsonConverter, JSON.stringify({ 
@@ -552,8 +572,7 @@ btnConvert.onclick = async () => {
         const response = await fetch(url, {
             method: 'POST',
             body: formData,
-            // Tambahkan timeout dan error handling
-            signal: AbortSignal.timeout(30000) // 30 detik timeout
+            signal: AbortSignal.timeout(30000)
         });
         
         if (!response.ok) {
@@ -591,7 +610,6 @@ btnConvert.onclick = async () => {
                 note: result.note || ''
             }, null, 2));
             
-            // Auto-copy payload
             navigator.clipboard.writeText(result.payload).then(() => {
                 console.log('Payload copied to clipboard');
             }).catch(err => {
@@ -611,7 +629,6 @@ btnConvert.onclick = async () => {
         console.error('Fetch error:', err);
         metaConverter.textContent = `Network Error: ${err.message}`;
         
-        // Berikan solusi spesifik berdasarkan error
         let errorNote = '';
         if (err.name === 'TimeoutError') {
             errorNote = 'Request timeout. Server mungkin sedang sibuk.';
@@ -634,7 +651,7 @@ btnConvert.onclick = async () => {
         btnConvert.disabled = false;
         btnConvert.textContent = 'Convert ke Payload';
     }
-};
+  };
 
   btnCopyPayload.onclick = () => {
     const payloadText = jsonConverter.textContent;
@@ -651,7 +668,7 @@ btnConvert.onclick = async () => {
     currentFile = null;
   };
 
-  // Webhook Test (FIXED)
+  // Webhook Test
   const btnWh = document.getElementById('btnWebhook');
   const btnWhReset = document.getElementById('btnWebhookReset');
   const outWh = document.getElementById('outWebhook');
@@ -715,6 +732,6 @@ btnConvert.onclick = async () => {
     document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }';
     outWh.classList.add('hidden');
   };
-  </script>
+</script>
 </body>
 </html>
