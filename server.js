@@ -237,10 +237,25 @@ function toCompact(ev, debug = false) {
 }
 
 function safeParseMaybeString(v) {
-  if (v && typeof v === 'object') return v;
-  if (typeof v === 'string') {
-    try { return JSON.parse(v); } catch { return null; }
+  if (!v) return null;
+  
+  if (typeof v === 'object' && !Array.isArray(v)) {
+    console.log('Already object:', Object.keys(v));
+    return v;
   }
+  
+  if (typeof v === 'string') {
+    try { 
+      const parsed = JSON.parse(v);
+      console.log('Parsed string to object:', Object.keys(parsed));
+      return parsed;
+    } catch { 
+      console.log('Failed to parse string, using as text:', v.substring(0, 100));
+      return { raw: v };
+    }
+  }
+  
+  console.log('Unknown type:', typeof v, v);
   return null;
 }
 
@@ -308,12 +323,25 @@ app.get('/webhook/recent', async (req, res) => {
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '20', 10)));
     const key = `ev:${token}`;
 
+    console.log('Fetching recent events for token:', token.substring(0, 10) + '...');
     const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-    const rows = (rowsRaw || []).map(safeParseMaybeString).filter(Boolean);
-    const events = rows.map(ev => toCompact(ev, false));
+    console.log('Raw rows from Redis:', rowsRaw.length, 'items');
+    
+    const rows = (rowsRaw || []).map((item, index) => {
+      console.log(`Item ${index}:`, typeof item, Object.keys(item || {}));
+      return safeParseMaybeString(item);
+    }).filter(Boolean);
+    
+    console.log('Filtered rows:', rows.length);
+    const events = rows.map(ev => {
+      const compact = toCompact(ev, false);
+      console.log('Compact event:', Object.keys(compact));
+      return compact;
+    });
 
     res.json({ ok: true, token, count: events.length, events });
   } catch (err) {
+    console.error('Recent events error:', err);
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
 });
@@ -326,21 +354,26 @@ app.get('/webhook/summary', async (req, res) => {
     const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
     const key = `ev:${token}`;
 
+    console.log('Fetching summary for token:', token.substring(0, 10) + '...');
     const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
+    console.log('Summary raw rows:', rowsRaw.length);
+
     const rows = (rowsRaw || []).map(safeParseMaybeString).filter(Boolean);
+    console.log('Summary filtered rows:', rows.length);
 
     const events = rows.map(e => ({
-      id: e.event_id,
-      time: e.received_at,
-      amount: e.amount,
-      ip: e.ip,
-      method: e.method,
+      id: e.event_id || 'unknown',
+      time: e.received_at || new Date().toISOString(),
+      amount: e.amount || 0,
+      ip: e.ip || '0.0.0.0',
+      method: e.method || 'UNKNOWN',
       order_id: e.body?.order_id,
       status: e.body?.status
     }));
 
     res.json({ ok: true, token, count: events.length, events });
   } catch (err) {
+    console.error('Summary error:', err);
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
 });
