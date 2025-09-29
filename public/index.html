@@ -76,6 +76,55 @@
     max-width: 200px;
     margin: 0 auto;
   }
+  
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #6366f1;
+    color: white;
+    font-weight: bold;
+    margin-right: 12px;
+  }
+  
+  .download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    text-decoration: none;
+    color: #e2e8f0;
+    transition: all 0.3s;
+  }
+  
+  .download-link:hover {
+    background-color: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.5);
+  }
+  
+  /* Navigation untuk halaman terpisah */
+  .page-section {
+    display: none;
+  }
+  
+  .page-section.active {
+    display: block;
+  }
+  
+  .nav-link {
+    cursor: pointer;
+  }
+  
+  .nav-link.active {
+    color: #818cf8;
+    font-weight: 600;
+  }
   </style>
 </head>
 <body class="gradient-bg">
@@ -94,6 +143,10 @@
     <div class="flex w-full">
       <aside class="hidden md:block w-64 shrink-0 pr-6 py-8">
         <nav class="space-y-3 text-sm">
+          <div class="nav-link active" data-page="docs">🏠 Dokumentasi API</div>
+          <div class="nav-link" data-page="forwarder">📱 Termux Forwarder</div>
+          <hr class="border-slate-700 my-4">
+          <div class="text-xs text-slate-500 uppercase tracking-wider">API Sections</div>
           <a href="#hero" class="block font-medium hover:text-indigo-300">🏠 Overview</a>
           <a href="#quickstart" class="block font-medium hover:text-indigo-300">⚡ Quick Start</a>
           <a href="#qris" class="block font-medium hover:text-indigo-300">💳 QRIS Dinamis</a>
@@ -112,6 +165,10 @@
             <button id="closeMenu" class="p-2 rounded-lg border border-slate-700">✕</button>
           </div>
           <nav class="space-y-3">
+            <div class="nav-link active" data-page="docs" data-close>🏠 Dokumentasi API</div>
+            <div class="nav-link" data-page="forwarder" data-close>📱 Termux Forwarder</div>
+            <hr class="border-slate-700 my-4">
+            <div class="text-xs text-slate-500 uppercase tracking-wider">API Sections</div>
             <a href="#hero" class="block py-1" data-close>🏠 Overview</a>
             <a href="#quickstart" class="block py-1" data-close>⚡ Quick Start</a>
             <a href="#qris" class="block py-1" data-close>💳 QRIS Dinamis</a>
@@ -124,218 +181,232 @@
       </div>
 
       <main class="flex-1 py-8 md:py-10">
-        <section id="hero" class="mb-12 text-center">
-          <h1 class="text-3xl md:text-4xl font-bold mb-4">GeekzPay REST API</h1>
-          <p class="text-lg text-slate-300 mb-6">Integrasikan pembayaran QRIS dengan mudah dalam aplikasi Anda</p>
-          <div class="flex flex-wrap justify-center gap-4">
-            <div class="feature-icon bg-indigo-500/20 text-indigo-300">💳</div>
-            <div class="feature-icon bg-green-500/20 text-green-300">🔔</div>
-            <div class="feature-icon bg-blue-500/20 text-blue-300">📊</div>
-            <div class="feature-icon bg-purple-500/20 text-purple-300">🔄</div>
-          </div>
-        </section>
-
-        <section id="quickstart" class="mb-12">
-          <h2 class="text-2xl font-bold mb-4">⚡ Quick Start</h2>
-          <div class="card rounded-2xl p-6 mb-6">
-            <h3 class="font-semibold mb-3">Base URL</h3>
-            <div class="flex flex-col md:flex-row gap-4">
-              <input id="baseUrl" placeholder="https://your-api.example.com"
-                     class="flex-1 px-4 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" />
-              <button id="saveBase" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Simpan</button>
+        <!-- Halaman Dokumentasi API -->
+        <div id="docs-page" class="page-section active">
+          <section id="hero" class="mb-12 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">GeekzPay REST API</h1>
+            <p class="text-lg text-slate-300 mb-6">Integrasikan pembayaran QRIS dengan mudah dalam aplikasi Anda</p>
+            <div class="flex flex-wrap justify-center gap-4">
+              <div class="feature-icon bg-indigo-500/20 text-indigo-300">💳</div>
+              <div class="feature-icon bg-green-500/20 text-green-300">🔔</div>
+              <div class="feature-icon bg-blue-500/20 text-blue-300">📊</div>
+              <div class="feature-icon bg-purple-500/20 text-purple-300">🔄</div>
             </div>
-            <p class="text-sm text-slate-400 mt-2">Simpan Base URL untuk digunakan di Live Test</p>
-          </div>
-        </section>
+          </section>
 
-        <section id="qris" class="mb-12">
-          <h2 class="text-2xl font-bold mb-4">💳 QRIS Dinamis</h2>
-          <p class="mb-4">Buat kode QRIS dinamis dengan jumlah yang dapat disesuaikan</p>
-          
-          <div class="card rounded-2xl p-6 mb-6">
-            <h3 class="font-semibold mb-4">Parameter</h3>
-            <div class="overflow-x-auto">
-              <table class="min-w-full text-sm">
-                <thead class="text-slate-300">
-                  <tr><th class="py-2 px-3">Field</th><th class="py-2 px-3">Tipe</th><th class="py-2 px-3">Keterangan</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-800">
-                  <tr><td class="py-2 px-3"><code>base_amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Jumlah dasar (wajib dengan unique_code)</td></tr>
-                  <tr><td class="py-2 px-3"><code>unique_code</code></td><td class="py-2 px-3">int (1-999)</td><td class="py-2 px-3">Kode unik untuk total</td></tr>
-                  <tr><td class="py-2 px-3"><code>amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Jumlah langsung (alternatif)</td></tr>
-                  <tr><td class="py-2 px-3"><code>payload_static</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">Payload QRIS static custom (opsional)</td></tr>
-                  <tr><td class="py-2 px-3"><code>qr</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">"png" untuk mendapatkan gambar QR</td></tr>
-                </tbody>
-              </table>
+          <section id="quickstart" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">⚡ Quick Start</h2>
+            <div class="card rounded-2xl p-6 mb-6">
+              <h3 class="font-semibold mb-3">Base URL</h3>
+              <div class="flex flex-col md:flex-row gap-4">
+                <input id="baseUrl" placeholder="https://your-api.example.com"
+                       class="flex-1 px-4 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100" />
+                <button id="saveBase" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Simpan</button>
+              </div>
+              <p class="text-sm text-slate-400 mt-2">Simpan Base URL untuk digunakan di Live Test</p>
             </div>
-          </div>
+          </section>
 
-          <div class="card rounded-2xl p-6">
-            <h3 class="font-semibold mb-4">🧪 Live Test - QRIS Dinamis</h3>
-            <div class="grid gap-4 md:grid-cols-2">
-              <div>
-                <label class="block text-sm mb-1">Jumlah Dasar (Rp)</label>
-                <input id="tiBase" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="10000">
-              </div>
-              <div>
-                <label class="block text-sm mb-1">Kode Unik (1-999)</label>
-                <input id="tiUnique" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="338">
-              </div>
-              <div class="md:col-span-2 flex items-center gap-2">
-                <input id="tiAutoUnique" type="checkbox">
-                <label for="tiAutoUnique" class="text-sm">Acak kode unik otomatis</label>
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-sm mb-1">Atau Jumlah Langsung</label>
-                <input id="tiAmount" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="10338">
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-sm mb-1">Payload Static (Opsional)</label>
-                <textarea id="tiPayload" rows="3" class="textarea px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="00020101021126...6304XXXX"></textarea>
-                <p class="text-xs text-slate-400 mt-1">Gunakan payload QRIS static custom jika ingin override default</p>
-              </div>
-            </div>
-            <div class="flex gap-2 mt-4">
-              <button id="btnDynamic" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Buat QRIS</button>
-              <button id="btnDynamicReset" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
-            </div>
-
-            <div id="outDynamic" class="mt-4 hidden">
-              <h4 class="font-medium mb-2">Hasil</h4>
-              <div class="text-xs text-slate-400 mb-2" id="metaDynamic"></div>
-              <div class="grid gap-4 md:grid-cols-2">
-                <div class="rounded-xl bg-slate-800 p-4">
-                  <div class="text-sm font-medium mb-1">Response JSON</div>
-                  <pre class="overflow-x-auto"><code id="jsonDynamic" class="language-json"></code></pre>
-                </div>
-                <div class="rounded-xl bg-slate-800 p-4">
-                  <div class="text-sm font-medium mb-2">Kode QR</div>
-                  <img id="imgQR" class="w-full max-w-xs rounded-lg border border-slate-700 mx-auto">
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="qr-converter" class="mb-12">
-          <h2 class="text-2xl font-bold mb-4">🔄 QR Converter</h2>
-          <p class="mb-4">Konversi gambar QRIS static menjadi payload code</p>
-          
-          <div class="card rounded-2xl p-6">
-            <h3 class="font-semibold mb-4">📷 Upload Gambar QR</h3>
+          <section id="qris" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">💳 QRIS Dinamis</h2>
+            <p class="mb-4">Buat kode QRIS dinamis dengan jumlah yang dapat disesuaikan</p>
             
-            <div id="dropZone" class="drop-zone mb-4">
-              <div class="text-4xl mb-2">📁</div>
-              <p class="text-lg font-medium">Drop gambar QR di sini atau klik untuk upload</p>
-              <p class="text-sm text-slate-400 mt-1">Format: PNG, JPG, JPEG (max 2MB)</p>
-              <input type="file" id="fileInput" class="hidden" accept="image/png,image/jpeg,image/jpg">
-            </div>
-
-            <div id="previewSection" class="hidden mb-4">
-              <h4 class="font-medium mb-2">Preview Gambar</h4>
-              <div class="preview-container">
-                <img id="imagePreview" class="w-full rounded-lg border border-slate-700">
+            <div class="card rounded-2xl p-6 mb-6">
+              <h3 class="font-semibold mb-4">Parameter</h3>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead class="text-slate-300">
+                    <tr><th class="py-2 px-3">Field</th><th class="py-2 px-3">Tipe</th><th class="py-2 px-3">Keterangan</th></tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-800">
+                    <tr><td class="py-2 px-3"><code>base_amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Jumlah dasar (wajib dengan unique_code)</td></tr>
+                    <tr><td class="py-2 px-3"><code>unique_code</code></td><td class="py-2 px-3">int (1-999)</td><td class="py-2 px-3">Kode unik untuk total</td></tr>
+                    <tr><td class="py-2 px-3"><code>amount</code></td><td class="py-2 px-3">int</td><td class="py-2 px-3">Jumlah langsung (alternatif)</td></tr>
+                    <tr><td class="py-2 px-3"><code>payload_static</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">Payload QRIS static custom (opsional)</td></tr>
+                    <tr><td class="py-2 px-3"><code>qr</code></td><td class="py-2 px-3">string</td><td class="py-2 px-3">"png" untuk mendapatkan gambar QR</td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            <div class="flex gap-2">
-              <button id="btnConvert" class="px-4 py-2 rounded-lg bg-purple-600 text-white disabled:opacity-50" disabled>Convert ke Payload</button>
-              <button id="btnResetConverter" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
-            </div>
-
-            <div id="outConverter" class="mt-4 hidden">
-              <h4 class="font-medium mb-2">Hasil Konversi</h4>
-              <div class="text-xs text-slate-400 mb-2" id="metaConverter"></div>
-              <div class="rounded-xl bg-slate-800 p-4">
-                <div class="text-sm font-medium mb-1">Payload Code</div>
-                <pre class="overflow-x-auto"><code id="jsonConverter" class="language-json"></code></pre>
-              </div>
-              <button id="btnCopyPayload" class="mt-2 px-4 py-2 rounded-lg bg-green-600 text-white">Salin Payload</button>
-            </div>
-          </div>
-        </section>
-
-        <section id="webhook" class="mb-12">
-          <h2 class="text-2xl font-bold mb-4">🔔 Webhook Payment</h2>
-          <p class="mb-4">Terima notifikasi pembayaran dari berbagai dompet digital</p>
-          
-          <div class="card rounded-2xl p-6">
-            <h3 class="font-semibold mb-4">🧪 Live Test - Webhook</h3>
-            <div class="grid gap-4 md:grid-cols-2">
-              <div>
-                <label class="block text-sm mb-1">Token</label>
-                <input id="tiToken" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="USER123">
-              </div>
-              <div>
-                <label class="block text-sm mb-1">Format Data</label>
-                <select id="tiMode" class="select px-3 py-2 rounded-lg border border-slate-700 bg-slate-800">
-                  <option value="json">JSON</option>
-                  <option value="form">Form Data</option>
-                  <option value="text">Plain Text</option>
-                </select>
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-sm mb-1">Pesan Notifikasi</label>
-                <textarea id="tiBody" rows="3" class="textarea px-3 py-2 rounded-lg border border-slate-700 bg-slate-800">{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }</textarea>
-              </div>
-            </div>
-            <div class="flex gap-2 mt-4">
-              <button id="btnWebhook" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Test Webhook</button>
-              <button id="btnWebhookReset" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
-            </div>
-
-            <div id="outWebhook" class="mt-4 hidden">
-              <h4 class="font-medium mb-2">Hasil</h4>
-              <div class="text-xs text-slate-400 mb-2" id="metaWebhook"></div>
-              <div class="rounded-xl bg-slate-800 p-4">
-                <pre class="overflow-x-auto"><code id="jsonWebhook" class="language-json"></code></pre>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="history" class="mb-12">
-          <h2 class="text-2xl font-bold mb-4">📊 Riwayat Pembayaran</h2>
-          <div class="card rounded-2xl p-6">
-            <h3 class="font-semibold mb-4">Endpoint</h3>
-            <div class="bg-slate-800 rounded-lg p-4">
-              <code>GET /webhook/status?token=USER123&limit=5</code>
-            </div>
-            <p class="text-sm text-slate-400 mt-2">Mendapatkan ringkasan pembayaran terbaru</p>
-          </div>
-        </section>
-
-        <section id="examples" class="mb-16">
-          <h2 class="text-2xl font-bold mb-4">📚 Contoh Penggunaan</h2>
-          
-          <div class="space-y-6">
             <div class="card rounded-2xl p-6">
-              <h3 class="font-semibold mb-2">Membuat QRIS Dinamis dengan Payload Custom</h3>
-              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST https://restapi.amgeekz.my.id/qris/dynamic \
+              <h3 class="font-semibold mb-4">🧪 Live Test - QRIS Dinamis</h3>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label class="block text-sm mb-1">Jumlah Dasar (Rp)</label>
+                  <input id="tiBase" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="10000">
+                </div>
+                <div>
+                  <label class="block text-sm mb-1">Kode Unik (1-999)</label>
+                  <input id="tiUnique" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="338">
+                </div>
+                <div class="md:col-span-2 flex items-center gap-2">
+                  <input id="tiAutoUnique" type="checkbox">
+                  <label for="tiAutoUnique" class="text-sm">Acak kode unik otomatis</label>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm mb-1">Atau Jumlah Langsung</label>
+                  <input id="tiAmount" type="number" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="10338">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm mb-1">Payload Static (Opsional)</label>
+                  <textarea id="tiPayload" rows="3" class="textarea px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="00020101021126...6304XXXX"></textarea>
+                  <p class="text-xs text-slate-400 mt-1">Gunakan payload QRIS static custom jika ingin override default</p>
+                </div>
+              </div>
+              <div class="flex gap-2 mt-4">
+                <button id="btnDynamic" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Buat QRIS</button>
+                <button id="btnDynamicReset" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
+              </div>
+
+              <div id="outDynamic" class="mt-4 hidden">
+                <h4 class="font-medium mb-2">Hasil</h4>
+                <div class="text-xs text-slate-400 mb-2" id="metaDynamic"></div>
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div class="rounded-xl bg-slate-800 p-4">
+                    <div class="text-sm font-medium mb-1">Response JSON</div>
+                    <pre class="overflow-x-auto"><code id="jsonDynamic" class="language-json"></code></pre>
+                  </div>
+                  <div class="rounded-xl bg-slate-800 p-4">
+                    <div class="text-sm font-medium mb-2">Kode QR</div>
+                    <img id="imgQR" class="w-full max-w-xs rounded-lg border border-slate-700 mx-auto">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="qr-converter" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">🔄 QR Converter</h2>
+            <p class="mb-4">Konversi gambar QRIS static menjadi payload code</p>
+            
+            <div class="card rounded-2xl p-6">
+              <h3 class="font-semibold mb-4">📷 Upload Gambar QR</h3>
+              
+              <div id="dropZone" class="drop-zone mb-4">
+                <div class="text-4xl mb-2">📁</div>
+                <p class="text-lg font-medium">Drop gambar QR di sini atau klik untuk upload</p>
+                <p class="text-sm text-slate-400 mt-1">Format: PNG, JPG, JPEG (max 2MB)</p>
+                <input type="file" id="fileInput" class="hidden" accept="image/png,image/jpeg,image/jpg">
+              </div>
+
+              <div id="previewSection" class="hidden mb-4">
+                <h4 class="font-medium mb-2">Preview Gambar</h4>
+                <div class="preview-container">
+                  <img id="imagePreview" class="w-full rounded-lg border border-slate-700">
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button id="btnConvert" class="px-4 py-2 rounded-lg bg-purple-600 text-white disabled:opacity-50" disabled>Convert ke Payload</button>
+                <button id="btnResetConverter" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
+              </div>
+
+              <div id="outConverter" class="mt-4 hidden">
+                <h4 class="font-medium mb-2">Hasil Konversi</h4>
+                <div class="text-xs text-slate-400 mb-2" id="metaConverter"></div>
+                <div class="rounded-xl bg-slate-800 p-4">
+                  <div class="text-sm font-medium mb-1">Payload Code</div>
+                  <pre class="overflow-x-auto"><code id="jsonConverter" class="language-json"></code></pre>
+                </div>
+                <button id="btnCopyPayload" class="mt-2 px-4 py-2 rounded-lg bg-green-600 text-white">Salin Payload</button>
+              </div>
+            </div>
+          </section>
+
+          <section id="webhook" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">🔔 Webhook Payment</h2>
+            <p class="mb-4">Terima notifikasi pembayaran dari berbagai dompet digital</p>
+            
+            <div class="card rounded-2xl p-6">
+              <h3 class="font-semibold mb-4">🧪 Live Test - Webhook</h3>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label class="block text-sm mb-1">Token</label>
+                  <input id="tiToken" class="input px-3 py-2 rounded-lg border border-slate-700 bg-slate-800" placeholder="USER123">
+                </div>
+                <div>
+                  <label class="block text-sm mb-1">Format Data</label>
+                  <select id="tiMode" class="select px-3 py-2 rounded-lg border border-slate-700 bg-slate-800">
+                    <option value="json">JSON</option>
+                    <option value="form">Form Data</option>
+                    <option value="text">Plain Text</option>
+                  </select>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm mb-1">Pesan Notifikasi</label>
+                  <textarea id="tiBody" rows="3" class="textarea px-3 py-2 rounded-lg border border-slate-700 bg-slate-800">{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }</textarea>
+                </div>
+              </div>
+              <div class="flex gap-2 mt-4">
+                <button id="btnWebhook" class="btn px-4 py-2 rounded-lg bg-indigo-600 text-white">Test Webhook</button>
+                <button id="btnWebhookReset" class="btn px-4 py-2 rounded-lg bg-slate-800 border border-slate-700">Reset</button>
+              </div>
+
+              <div id="outWebhook" class="mt-4 hidden">
+                <h4 class="font-medium mb-2">Hasil</h4>
+                <div class="text-xs text-slate-400 mb-2" id="metaWebhook"></div>
+                <div class="rounded-xl bg-slate-800 p-4">
+                  <pre class="overflow-x-auto"><code id="jsonWebhook" class="language-json"></code></pre>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="history" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">📊 Riwayat Pembayaran</h2>
+            <div class="card rounded-2xl p-6">
+              <h3 class="font-semibold mb-4">Endpoint</h3>
+              <div class="bg-slate-800 rounded-lg p-4">
+                <code>GET /webhook/status?token=USER123&limit=5</code>
+              </div>
+              <p class="text-sm text-slate-400 mt-2">Mendapatkan ringkasan pembayaran terbaru</p>
+            </div>
+          </section>
+
+          <section id="examples" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">📚 Contoh Penggunaan</h2>
+            
+            <div class="space-y-6">
+              <div class="card rounded-2xl p-6">
+                <h3 class="font-semibold mb-2">Membuat QRIS Dinamis dengan Payload Custom</h3>
+                <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST https://restapi.amgeekz.my.id/qris/dynamic \
   -d base_amount=20000 \
   -d unique_code=777 \
   -d payload_static='00020101021126...6304ABCD' \
   -d qr=png</code></pre>
-              <pre class="bg-slate-800 rounded-lg p-4 mt-2"><code class="language-json">{
+                <pre class="bg-slate-800 rounded-lg p-4 mt-2"><code class="language-json">{
   "base_amount": 20000,
   "unique_code": 777,
   "total": 20777,
   "payload": "00020101021126...",
   "qr_png_data_url": "data:image/png;base64,..."
 }</code></pre>
-            </div>
-            
-            <div class="card rounded-2xl p-6">
-              <h3 class="font-semibold mb-2">Mengirim Webhook</h3>
-              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST 'https://restapi.amgeekz.my.id/webhook/payment?token=USER123' \
+              </div>
+              
+              <div class="card rounded-2xl p-6">
+                <h3 class="font-semibold mb-2">Mengirim Webhook</h3>
+                <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X POST 'https://restapi.amgeekz.my.id/webhook/payment?token=USER123' \
   -H 'Content-Type: application/json' \
   -d '{ "message": "Pembayaran Rp 15.250 diterima" }'</code></pre>
-            </div>
-            
-            <div class="card rounded-2xl p-6">
-              <h3 class="font-semibold mb-2">Melihat Riwayat</h3>
-              <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X GET 'https://restapi.amgeekz.my.id/webhook/summary?token=USER123&limit=3'</code></pre>
-              <pre class="bg-slate-800 rounded-lg p-4 mt-2"><code class="language-json">{
+               <div class="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+    <div class="flex items-start gap-3">
+      <div class="text-blue-400 text-lg">📱</div>
+      <div class="flex-1">
+        <h4 class="font-medium text-blue-300 mb-1">Baca Notifikasi QRIS Otomatis</h4>
+        <p class="text-sm text-blue-200 mb-2">Termux Forwarder membaca notifikasi dari aplikasi QRIS (ShopeePay, Gopay, dll) dan meneruskan ke webhook secara otomatis</p>
+        <button onclick="showPage('forwarder')" class="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+          📥 Buka Panduan Instalasi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+              
+              <div class="card rounded-2xl p-6">
+                <h3 class="font-semibold mb-2">Melihat Riwayat</h3>
+                <pre class="bg-slate-800 rounded-lg p-4"><code class="language-bash">curl -X GET 'https://restapi.amgeekz.my.id/webhook/summary?token=USER123&limit=3'</code></pre>
+                <pre class="bg-slate-800 rounded-lg p-4 mt-2"><code class="language-json">{
   "ok": true,
   "token": "USER123",
   "event_id": "a6ac10590d18d2190e7082552c03a0395bc9142c",
@@ -347,9 +418,172 @@
     "message": "Pembayaran masuk Rp 10.338 dari ShopeePay"
   }
 }</code></pre>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
+
+        <!-- Halaman Termux Forwarder -->
+        <div id="forwarder-page" class="page-section">
+          <section class="mb-12 text-center">
+  <h1 class="text-3xl md:text-4xl font-bold mb-4">📱 Termux Forwarder</h1>
+  <p class="text-lg text-slate-300 mb-6">Membaca notifikasi dari aplikasi QRIS dan meneruskannya ke webhook secara otomatis</p>
+  <div class="flex flex-wrap justify-center gap-4">
+    <div class="feature-icon bg-green-500/20 text-green-300">📱</div>
+    <div class="feature-icon bg-blue-500/20 text-blue-300">🔔</div>
+    <div class="feature-icon bg-purple-500/20 text-purple-300">📨</div>
+    <div class="feature-icon bg-yellow-500/20 text-yellow-300">⚡</div>
+  </div>
+</section>
+
+          <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">📥 Instalasi Termux & Dependencies</h2>
+            
+            <div class="card rounded-2xl p-6 mb-6">
+              <div class="space-y-6">
+                <div class="flex items-start">
+                  <span class="step-number">1</span>
+                  <div class="flex-1">
+                    <h4 class="font-medium text-lg mb-2">Unduh dan Instal Termux</h4>
+                    <p class="text-slate-400 mb-3">Download aplikasi Termux dari F-Droid untuk environment Linux di Android</p>
+                    <a href="https://f-droid.org/repo/com.termux_1022.apk" class="download-link" target="_blank">
+                      <span>📥</span>
+                      <span>Download Termux APK</span>
+                    </a>
+                  </div>
+                </div>
+                
+                <div class="flex items-start">
+                  <span class="step-number">2</span>
+                  <div class="flex-1">
+                    <h4 class="font-medium text-lg mb-2">Unduh dan Instal Termux:API</h4>
+                    <p class="text-slate-400 mb-3">Untuk akses fitur sistem Android seperti notifikasi</p>
+                    <a href="https://f-droid.org/repo/com.termux.api_1002.apk" class="download-link" target="_blank">
+                      <span>📥</span>
+                      <span>Download Termux:API APK</span>
+                    </a>
+                  </div>
+                </div>
+                
+                <div class="flex items-start">
+                  <span class="step-number">3</span>
+                  <div class="flex-1">
+                    <h4 class="font-medium text-lg mb-2">Unduh dan Instal Termux:Boot</h4>
+                    <p class="text-slate-400 mb-3">Untuk menjalankan script forwarder secara otomatis saat boot</p>
+                    <a href="https://f-droid.org/repo/com.termux.boot_1000.apk" class="download-link" target="_blank">
+                      <span>📥</span>
+                      <span>Download Termux:Boot APK</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card rounded-2xl p-6 mb-6">
+              <h3 class="font-semibold text-xl mb-4">🚀 Instalasi Forwarder</h3>
+              <p class="mb-4">Setelah menginstal semua aplikasi di atas, buka Termux dan jalankan perintah berikut:</p>
+              
+              <div class="bg-slate-800 rounded-lg p-4 mb-4">
+                <pre class="overflow-x-auto"><code class="language-bash">pkg update && pkg upgrade -y && pkg install -y curl && \
+bash <(curl -sSL https://raw.githubusercontent.com/amgeekz/restapi-geekzpay/refs/heads/main/installer.sh)</code></pre>
+              </div>
+              
+              <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <h4 class="font-medium text-yellow-300 mb-2">⚠️ Catatan Penting</h4>
+                <ul class="text-sm text-yellow-200 space-y-2">
+                  <li class="flex items-start">
+                    <span class="mr-2">•</span>
+                    <span>Pastikan koneksi internet stabil selama proses instalasi</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="mr-2">•</span>
+                    <span>Berikan semua izin yang diminta oleh aplikasi Termux</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="mr-2">•</span>
+                    <span>Simpan token yang dihasilkan selama instalasi untuk konfigurasi webhook</span>
+                  </li>
+                  <li class="flex items-start">
+                    <span class="mr-2">•</span>
+                    <span>Forwarder akan berjalan otomatis di latar belakang setelah instalasi selesai</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div class="card rounded-2xl p-6">
+              <div class="grid gap-6 md:grid-cols-2">
+                <div class="card rounded-xl p-4">
+                  <h4 class="font-medium text-lg mb-3">✅ Keuntungan</h4>
+                  <ul class="text-slate-300 space-y-2">
+                    <li class="flex items-start">
+                      <span class="mr-2">•</span>
+                      <span>Notifikasi real-time langsung di perangkat Android</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-2">•</span>
+                      <span>Tidak memerlukan server eksternal yang mahal</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-2">•</span>
+                      <span>Berjalan otomatis di latar belakang</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-2">•</span>
+                      <span>Mudah dikonfigurasi dan dikustomisasi</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div class="card rounded-xl p-4">
+  <h4 class="font-medium text-lg mb-3">🔄 Cara Kerja</h4>
+  <ul class="text-slate-300 space-y-2">
+    <li class="flex items-start">
+      <span class="mr-2">1.</span>
+      <span>Termux membaca notifikasi dari aplikasi QRIS (ShopeePay, Gopay, dll)</span>
+    </li>
+    <li class="flex items-start">
+      <span class="mr-2">2.</span>
+      <span>Data pembayaran diproses dan dikonversi ke format webhook</span>
+    </li>
+    <li class="flex items-start">
+      <span class="mr-2">3.</span>
+      <span>Webhook dikirim ke API GeekzPay</span>
+    </li>
+    <li class="flex items-start">
+      <span class="mr-2">4.</span>
+      <span>Sistem menerima konfirmasi pembayaran secara real-time</span>
+    </li>
+  </ul>
+</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">❓ Troubleshooting</h2>
+            <div class="card rounded-2xl p-6">
+              <div class="space-y-4">
+                <div>
+                  <h4 class="font-medium mb-2">Instalasi gagal</h4>
+                  <p class="text-slate-400">Pastikan storage permission sudah diberikan ke Termux dan koneksi internet stabil.</p>
+                </div>
+                <div>
+                  <h4 class="font-medium mb-2">Forwarder tidak berjalan</h4>
+                  <p class="text-slate-400">Coba jalankan ulang script installer atau restart aplikasi Termux.</p>
+                </div>
+                <div>
+                  <h4 class="font-medium mb-2">Notifikasi tidak muncul</h4>
+                  <p class="text-slate-400">Pastikan Termux:API sudah terinstal dan izin notifikasi sudah diberikan.</p>
+                </div>
+                <div>
+                  <h4 class="font-medium mb-2">Webhook tidak terkirim</h4>
+                  <p class="text-slate-400">Periksa token dan pastikan perangkat terkoneksi internet.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </main>
     </div>
   </div>
@@ -359,7 +593,40 @@
 <script>
   hljs.highlightAll();
 
-  // Navigation
+  // Navigation untuk halaman terpisah
+  function showPage(pageId) {
+    // Sembunyikan semua halaman
+    document.querySelectorAll('.page-section').forEach(page => {
+      page.classList.remove('active');
+    });
+    
+    // Tampilkan halaman yang dipilih
+    document.getElementById(pageId + '-page').classList.add('active');
+    
+    // Update navigasi aktif
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+    document.querySelector(`.nav-link[data-page="${pageId}"]`).classList.add('active');
+    
+    // Scroll ke atas
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Event listeners untuk navigasi
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function() {
+      const page = this.getAttribute('data-page');
+      showPage(page);
+      
+      // Tutup drawer mobile jika terbuka
+      if (window.innerWidth < 768) {
+        drawer.classList.add('hidden');
+      }
+    });
+  });
+
+  // Navigation drawer
   const drawer = document.getElementById('drawer');
   document.getElementById('openMenu').onclick = () => drawer.classList.remove('hidden');
   document.getElementById('closeMenu').onclick = () => drawer.classList.add('hidden');
@@ -388,7 +655,7 @@
     if (baseInput) baseInput.value = val;
   }
 
-  // Utility functions - TAMBAHKAN INI
+  // Utility functions
   function showJSON(el, text) {
     try { 
       el.textContent = JSON.stringify(JSON.parse(text), null, 2); 
@@ -669,7 +936,7 @@
     }
   }
 
-  // Webhook Test - PERBAIKAN BESAR DI SINI
+  // Webhook Test
   const btnWh = document.getElementById('btnWebhook');
   const btnWhReset = document.getElementById('btnWebhookReset');
   const outWh = document.getElementById('outWebhook');
