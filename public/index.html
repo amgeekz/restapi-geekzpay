@@ -142,11 +142,12 @@
   <div class="max-w-6xl mx-auto px-4 w-full max-w-full">
     <div class="flex w-full">
       <aside class="hidden md:block w-64 shrink-0 pr-6 py-8">
-        <nav class="space-y-3 text-sm">
-          <div class="nav-link active" data-page="docs">🏠 Dokumentasi API</div>
-          <div class="nav-link" data-page="forwarder">📱 Termux Forwarder</div>
-          <hr class="border-slate-700 my-4">
-          <div class="text-xs text-slate-500 uppercase tracking-wider">API Sections</div>
+  <nav class="space-y-3 text-sm">
+    <div class="nav-link active" data-page="docs">🏠 Dokumentasi API</div>
+    <div class="nav-link" data-page="forwarder">📱 Termux Forwarder</div>
+    <div class="nav-link" data-page="donate">❤️ Donasi</div>
+    <hr class="border-slate-700 my-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wider">API Sections</div>
           <a href="#hero" class="block font-medium hover:text-indigo-300">🏠 Overview</a>
           <a href="#quickstart" class="block font-medium hover:text-indigo-300">⚡ Quick Start</a>
           <a href="#qris" class="block font-medium hover:text-indigo-300">💳 QRIS Dinamis</a>
@@ -158,17 +159,18 @@
       </aside>
 
       <div id="drawer" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/50"></div>
-        <div class="absolute left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-800 shadow-xl p-6">
-          <div class="flex items-center justify-between mb-6">
-            <div class="text-base font-semibold">Menu</div>
-            <button id="closeMenu" class="p-2 rounded-lg border border-slate-700">✕</button>
-          </div>
-          <nav class="space-y-3">
-            <div class="nav-link active" data-page="docs" data-close>🏠 Dokumentasi API</div>
-            <div class="nav-link" data-page="forwarder" data-close>📱 Termux Forwarder</div>
-            <hr class="border-slate-700 my-4">
-            <div class="text-xs text-slate-500 uppercase tracking-wider">API Sections</div>
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="absolute left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-800 shadow-xl p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div class="text-base font-semibold">Menu</div>
+      <button id="closeMenu" class="p-2 rounded-lg border border-slate-700">✕</button>
+    </div>
+    <nav class="space-y-3">
+      <div class="nav-link active" data-page="docs" data-close>🏠 Dokumentasi API</div>
+      <div class="nav-link" data-page="forwarder" data-close>📱 Termux Forwarder</div>
+      <div class="nav-link" data-page="donate" data-close>❤️ Donasi</div>
+      <hr class="border-slate-700 my-4">
+      <div class="text-xs text-slate-500 uppercase tracking-wider">API Sections</div>
             <a href="#hero" class="block py-1" data-close>🏠 Overview</a>
             <a href="#quickstart" class="block py-1" data-close>⚡ Quick Start</a>
             <a href="#qris" class="block py-1" data-close>💳 QRIS Dinamis</a>
@@ -587,6 +589,36 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
       </main>
     </div>
   </div>
+  
+  <!-- Halaman donasi simple -->
+<div id="donate-page" class="page-section">
+  <section class="mb-12 text-center">
+    <h1 class="text-3xl md:text-4xl font-bold mb-4">❤️ Donasi</h1>
+    <p class="text-lg text-slate-300 mb-6">Support pengembangan GeekzPay</p>
+  </section>
+
+  <section class="mb-12">
+    <div class="max-w-md mx-auto">
+      <div class="card rounded-2xl p-8 text-center">
+        <h2 class="text-xl font-bold mb-4">Scan QRIS</h2>
+        
+        <div class="mb-6">
+          <img 
+            src="https://restapi.amgeekz.my.id/qris.jpg" 
+            alt="QRIS Donasi"
+            class="w-64 h-64 mx-auto rounded-xl border-2 border-green-500/30"
+            onerror="this.src='https://via.placeholder.com/256x256/1e293b/64748b?text=QRIS+Donasi'"
+          >
+        </div>
+        
+        <div class="text-sm text-slate-400 space-y-1">
+          <p>Support semua e-wallet & bank</p>
+          <p>Terima kasih! 🚀</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 
   <button id="toTop" class="fixed bottom-5 right-5 md:hidden rounded-full bg-indigo-600 text-white px-4 py-2 shadow-lg hidden">↑</button>
 
