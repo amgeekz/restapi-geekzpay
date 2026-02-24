@@ -327,7 +327,7 @@ app.get('/webhook/status', async (req, res) => {
     const key = `ev:${token}`;
 
     const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
-    
+
     const rows = [];
     for (let i = 0; i < rowsRaw.length; i++) {
       const item = rowsRaw[i];
@@ -336,10 +336,16 @@ app.get('/webhook/status', async (req, res) => {
         rows.push(parsed);
       }
     }
-    
-    const events = rows.map(ev => toCompact(ev, false));  
 
-    res.json(events[0] || {});
+    const events = rows.map(ev => toCompact(ev, false));
+
+    res.json({
+      ok: true,
+      total: events.length,
+      limit,
+      data: events
+    });
+
   } catch (err) {
     res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
   }
