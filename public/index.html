@@ -144,7 +144,7 @@
       <aside class="hidden md:block w-64 shrink-0 pr-6 py-8">
   <nav class="space-y-3 text-sm">
     <div class="nav-link active" data-page="docs">🏠 Dokumentasi API</div>
-    <div class="nav-link" data-page="forwarder">📱 Termux Forwarder</div>
+    <div class="nav-link" data-page="forwarder">📱 Geekz Forwarder</div>
     <div class="nav-link" data-page="donate">❤️ Donasi</div>
     <hr class="border-slate-700 my-4">
     <div class="text-xs text-slate-500 uppercase tracking-wider">API Sections</div>
@@ -167,7 +167,7 @@
     </div>
     <nav class="space-y-3">
       <div class="nav-link active" data-page="docs" data-close>🏠 Dokumentasi API</div>
-      <div class="nav-link" data-page="forwarder" data-close>📱 Termux Forwarder</div>
+      <div class="nav-link" data-page="forwarder" data-close>📱 Geekz Forwarder</div>
       <div class="nav-link" data-page="donate" data-close>❤️ Donasi</div>
       <hr class="border-slate-700 my-4">
       <div class="text-xs text-slate-500 uppercase tracking-wider">API Sections</div>
@@ -396,7 +396,7 @@
       <div class="text-blue-400 text-lg">📱</div>
       <div class="flex-1">
         <h4 class="font-medium text-blue-300 mb-1">Baca Notifikasi QRIS Otomatis</h4>
-        <p class="text-sm text-blue-200 mb-2">Termux Forwarder membaca notifikasi dari aplikasi QRIS (ShopeePay, Gopay, dll) dan meneruskan ke webhook secara otomatis</p>
+        <p class="text-sm text-blue-200 mb-2">Geekz Forwarder membaca notifikasi dari aplikasi QRIS (ShopeePay, Gopay, dll) dan meneruskan ke webhook secara otomatis</p>
         <button onclick="showPage('forwarder')" class="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
           📥 Buka Panduan Instalasi
         </button>
@@ -425,170 +425,337 @@
           </section>
         </div>
 
-        <!-- Halaman Termux Forwarder -->
-        <div id="forwarder-page" class="page-section">
-          <section class="mb-12 text-center">
-  <h1 class="text-3xl md:text-4xl font-bold mb-4">📱 Termux Forwarder</h1>
-  <p class="text-lg text-slate-300 mb-6">Membaca notifikasi dari aplikasi QRIS dan meneruskannya ke webhook secara otomatis</p>
-  <div class="flex flex-wrap justify-center gap-4">
-    <div class="feature-icon bg-green-500/20 text-green-300">📱</div>
-    <div class="feature-icon bg-blue-500/20 text-blue-300">🔔</div>
-    <div class="feature-icon bg-purple-500/20 text-purple-300">📨</div>
-    <div class="feature-icon bg-yellow-500/20 text-yellow-300">⚡</div>
-  </div>
-</section>
-
-          <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-4">📥 Instalasi Termux & Dependencies</h2>
-            
-            <div class="card rounded-2xl p-6 mb-6">
-              <div class="space-y-6">
-                <div class="flex items-start">
-                  <span class="step-number">1</span>
-                  <div class="flex-1">
-                    <h4 class="font-medium text-lg mb-2">Unduh dan Instal Termux</h4>
-                    <p class="text-slate-400 mb-3">Download aplikasi Termux dari F-Droid untuk environment Linux di Android</p>
-                    <a href="https://f-droid.org/repo/com.termux_1022.apk" class="download-link" target="_blank">
-                      <span>📥</span>
-                      <span>Download Termux APK</span>
-                    </a>
-                  </div>
-                </div>
-                
-                <div class="flex items-start">
-                  <span class="step-number">2</span>
-                  <div class="flex-1">
-                    <h4 class="font-medium text-lg mb-2">Unduh dan Instal Termux:API</h4>
-                    <p class="text-slate-400 mb-3">Untuk akses fitur sistem Android seperti notifikasi</p>
-                    <a href="https://f-droid.org/repo/com.termux.api_1002.apk" class="download-link" target="_blank">
-                      <span>📥</span>
-                      <span>Download Termux:API APK</span>
-                    </a>
-                  </div>
-                </div>
-                
-                <div class="flex items-start">
-                  <span class="step-number">3</span>
-                  <div class="flex-1">
-                    <h4 class="font-medium text-lg mb-2">Unduh dan Instal Termux:Boot</h4>
-                    <p class="text-slate-400 mb-3">Untuk menjalankan script forwarder secara otomatis saat boot</p>
-                    <a href="https://f-droid.org/repo/com.termux.boot_1000.apk" class="download-link" target="_blank">
-                      <span>📥</span>
-                      <span>Download Termux:Boot APK</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="card rounded-2xl p-6 mb-6">
-              <h3 class="font-semibold text-xl mb-4">🚀 Instalasi Forwarder</h3>
-              <p class="mb-4">Setelah menginstal semua aplikasi di atas, buka Termux dan jalankan perintah berikut:</p>
-              
-              <div class="bg-slate-800 rounded-lg p-4 mb-4">
-                <pre class="overflow-x-auto"><code class="language-bash">pkg update && pkg upgrade -y && pkg install -y curl && \
-bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
-              </div>
-              
-              <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                <h4 class="font-medium text-yellow-300 mb-2">⚠️ Catatan Penting</h4>
-                <ul class="text-sm text-yellow-200 space-y-2">
-                  <li class="flex items-start">
-                    <span class="mr-2">•</span>
-                    <span>Pastikan koneksi internet stabil selama proses instalasi</span>
-                  </li>
-                  <li class="flex items-start">
-                    <span class="mr-2">•</span>
-                    <span>Berikan semua izin yang diminta oleh aplikasi Termux</span>
-                  </li>
-                  <li class="flex items-start">
-                    <span class="mr-2">•</span>
-                    <span>Simpan token yang dihasilkan selama instalasi untuk konfigurasi webhook</span>
-                  </li>
-                  <li class="flex items-start">
-                    <span class="mr-2">•</span>
-                    <span>Forwarder akan berjalan otomatis di latar belakang setelah instalasi selesai</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            
-            <div class="card rounded-2xl p-6">
-              <div class="grid gap-6 md:grid-cols-2">
-                <div class="card rounded-xl p-4">
-                  <h4 class="font-medium text-lg mb-3">✅ Keuntungan</h4>
-                  <ul class="text-slate-300 space-y-2">
-                    <li class="flex items-start">
-                      <span class="mr-2">•</span>
-                      <span>Notifikasi real-time langsung di perangkat Android</span>
-                    </li>
-                    <li class="flex items-start">
-                      <span class="mr-2">•</span>
-                      <span>Tidak memerlukan server eksternal yang mahal</span>
-                    </li>
-                    <li class="flex items-start">
-                      <span class="mr-2">•</span>
-                      <span>Berjalan otomatis di latar belakang</span>
-                    </li>
-                    <li class="flex items-start">
-                      <span class="mr-2">•</span>
-                      <span>Mudah dikonfigurasi dan dikustomisasi</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div class="card rounded-xl p-4">
-  <h4 class="font-medium text-lg mb-3">🔄 Cara Kerja</h4>
-  <ul class="text-slate-300 space-y-2">
-    <li class="flex items-start">
-      <span class="mr-2">1.</span>
-      <span>Termux membaca notifikasi dari aplikasi QRIS (ShopeePay, Gopay, dll)</span>
-    </li>
-    <li class="flex items-start">
-      <span class="mr-2">2.</span>
-      <span>Data pembayaran diproses dan dikonversi ke format webhook</span>
-    </li>
-    <li class="flex items-start">
-      <span class="mr-2">3.</span>
-      <span>Webhook dikirim ke API GeekzPay</span>
-    </li>
-    <li class="flex items-start">
-      <span class="mr-2">4.</span>
-      <span>Sistem menerima konfirmasi pembayaran secara real-time</span>
-    </li>
-  </ul>
-</div>
-              </div>
-            </div>
-          </section>
-
-          <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">❓ Troubleshooting</h2>
-            <div class="card rounded-2xl p-6">
-              <div class="space-y-4">
-                <div>
-                  <h4 class="font-medium mb-2">Instalasi gagal</h4>
-                  <p class="text-slate-400">Pastikan storage permission sudah diberikan ke Termux dan koneksi internet stabil.</p>
-                </div>
-                <div>
-                  <h4 class="font-medium mb-2">Forwarder tidak berjalan</h4>
-                  <p class="text-slate-400">Coba jalankan ulang script installer atau restart aplikasi Termux.</p>
-                </div>
-                <div>
-                  <h4 class="font-medium mb-2">Notifikasi tidak muncul</h4>
-                  <p class="text-slate-400">Pastikan Termux:API sudah terinstal dan izin notifikasi sudah diberikan.</p>
-                </div>
-                <div>
-                  <h4 class="font-medium mb-2">Webhook tidak terkirim</h4>
-                  <p class="text-slate-400">Periksa token dan pastikan perangkat terkoneksi internet.</p>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
+        <!-- Halaman Geekz Forwarder -->
+<div id="forwarder-page" class="page-section">
+  <section class="mb-8">
+    <div class="flex items-center gap-3 mb-6">
+      <h1 class="text-3xl font-bold">📱 Geekz Forwarder</h1>
+      <span class="px-3 py-1 text-xs bg-green-500/20 text-green-300 border border-green-500/30 rounded-full">v2.0</span>
     </div>
+    
+    <p class="text-lg text-slate-300 mb-8">Aplikasi Android untuk membaca notifikasi pembayaran dan meneruskannya ke webhook secara otomatis</p>
+
+    <!-- Download Card -->
+<div class="card rounded-2xl p-8 mb-10 text-center">
+  <div class="text-7xl mb-4">📲</div>
+  <h2 class="text-2xl font-bold mb-2">Geekz Forwarder App</h2>
+  <p class="text-slate-400 mb-6">Versi terbaru 2.0.1 • Ukuran 4.2 MB</p>
+  
+  <div class="flex justify-center">
+    <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="download-link px-8 py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-lg font-semibold">
+      <span class="text-2xl mr-2">⬇️</span>
+      Download Geekz Forwarder.apk
+    </a>
   </div>
+</div>
+
+    <!-- Fitur-Fitur -->
+    <h2 class="text-2xl font-bold mb-6">✨ Fitur Unggulan</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      <div class="card rounded-xl p-6">
+        <div class="feature-icon bg-blue-500/20 text-blue-300">🔔</div>
+        <h3 class="text-lg font-semibold mb-2">Baca Notifikasi</h3>
+        <p class="text-slate-400 text-sm">Membaca notifikasi dari berbagai aplikasi pembayaran seperti ShopeePay, GoPay, DANA, OVO, dan lainnya</p>
+      </div>
+
+      <div class="card rounded-xl p-6">
+        <div class="feature-icon bg-green-500/20 text-green-300">🔄</div>
+        <h3 class="text-lg font-semibold mb-2">Forward ke Webhook</h3>
+        <p class="text-slate-400 text-sm">Meneruskan data pembayaran ke endpoint webhook yang sudah ditentukan</p>
+      </div>
+
+      <div class="card rounded-xl p-6">
+        <div class="feature-icon bg-purple-500/20 text-purple-300">📊</div>
+        <h3 class="text-lg font-semibold mb-2">Riwayat Notifikasi</h3>
+        <p class="text-slate-400 text-sm">Menyimpan riwayat notifikasi yang sudah diterima dan diforward</p>
+      </div>
+
+      <div class="card rounded-xl p-6">
+        <div class="feature-icon bg-yellow-500/20 text-yellow-300">⚡</div>
+        <h3 class="text-lg font-semibold mb-2">Multi Format</h3>
+        <p class="text-slate-400 text-sm">Support JSON, Form Data, dan Plain Text untuk webhook</p>
+      </div>
+    </div>
+
+    <!-- PANDUAN SETTING LENGKAP -->
+    <h2 class="text-2xl font-bold mb-6">⚙️ PANDUAN SETTING LENGKAP</h2>
+    
+    <div class="card rounded-2xl p-6 mb-8">
+      <h3 class="text-xl font-semibold mb-4 text-indigo-300">📋 LANGKAH-LANGKAH SETTING:</h3>
+      
+      <!-- Step 1: Notification Access -->
+      <div class="mb-8 p-4 bg-blue-500/10 rounded-xl border border-blue-500/30">
+        <div class="flex items-start gap-4">
+          <div class="step-number bg-blue-600">1</div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-lg mb-2">🔔 IZINKAN NOTIFICATION ACCESS</h4>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-start gap-2">
+                <span class="text-blue-400">➡️</span>
+                <span>Tap <span class="font-mono bg-slate-800 px-2 py-1 rounded">"Open Notification Access"</span> di aplikasi</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-blue-400">➡️</span>
+                <span>Akan terbuka pengaturan sistem Android</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-blue-400">➡️</span>
+                <span>Cari dan tap <span class="font-mono bg-slate-800 px-2 py-1 rounded">"Geekz Forwarder"</span> dalam daftar aplikasi</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-blue-400">➡️</span>
+                <span><span class="font-bold text-green-400">AKTIFKAN</span> toggle izin notifikasinya</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-blue-400">➡️</span>
+                <span>Kembali ke aplikasi Geekz Forwarder</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Setting Dasar -->
+      <div class="mb-8 p-4 bg-green-500/10 rounded-xl border border-green-500/30">
+        <div class="flex items-start gap-4">
+          <div class="step-number bg-green-600">2</div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-lg mb-2">⚙️ SETTING DASAR</h4>
+            <div class="grid gap-3">
+              <div class="flex items-center gap-3 p-3 bg-slate-800 rounded-lg">
+                <span class="text-xl">✅</span>
+                <div>
+                  <span class="font-semibold">Enabled</span>
+                  <span class="text-xs text-slate-400 ml-2">(WAJIB DICENTANG)</span>
+                  <p class="text-xs text-slate-400">Aktifkan forward notifikasi</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-slate-800 rounded-lg">
+                <span class="text-xl">⬜</span>
+                <div>
+                  <span class="font-semibold">Wi-Fi Only</span>
+                  <span class="text-xs text-slate-400 ml-2">(KOSONGKAN)</span>
+                  <p class="text-xs text-slate-400">Biarkan tidak dicentang agar tetap forward walau pakai data seluler</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: App Filtering -->
+      <div class="mb-8 p-4 bg-purple-500/10 rounded-xl border border-purple-500/30">
+        <div class="flex items-start gap-4">
+          <div class="step-number bg-purple-600">3</div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-lg mb-2">🔍 APP FILTERING</h4>
+            <div class="space-y-4">
+              <div class="flex items-center gap-3 p-3 bg-slate-800 rounded-lg">
+                <span class="text-xl">✅</span>
+                <div>
+                  <span class="font-semibold">Enable App Filter</span>
+                  <span class="text-xs text-slate-400 ml-2">(WAJIB DICENTANG)</span>
+                  <p class="text-xs text-slate-400">Aktifkan filter aplikasi</p>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="font-semibold">Select Apps:</span>
+                  <span class="text-xs bg-yellow-600/30 text-yellow-300 px-2 py-1 rounded">Tap untuk memilih aplikasi</span>
+                </div>
+                <div class="p-5 bg-slate-800/50 rounded-lg text-center border border-dashed border-slate-600">
+                  <span class="text-4xl block mb-3">📱</span>
+                  <p class="text-sm text-slate-300 font-medium">Silakan pilih aplikasi yang diinginkan</p>
+                  <p class="text-xs text-slate-400 mt-2">User bebas memilih aplikasi yang notifikasinya ingin diforward</p>
+                  <p class="text-xs text-indigo-300 mt-3">Contoh: ShopeePay, GoPay, DANA, OVO, Mobile Banking, dll</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: ENDPOINT -->
+      <div class="mb-4 p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/30">
+        <div class="flex items-start gap-4">
+          <div class="step-number bg-yellow-600">4</div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-lg mb-2">🌐 ENDPOINT</h4>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">URL:</label>
+                <div class="flex gap-2">
+                  <input type="text" id="webhookUrlInput" value="https://restapi.amgeekz.my.id/webhook/payment?token=USER123" 
+                         class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-mono"
+                         readonly>
+                  <button onclick="copyWebhookUrl()" class="px-3 py-2 bg-indigo-600 rounded-lg text-sm whitespace-nowrap">📋 Salin</button>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Ganti USER123 dengan token Anda</p>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-1">Protocol:</label>
+                <div class="flex gap-3">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="protocol" checked class="accent-indigo-500">
+                    <span class="text-sm">JSON</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="protocol" class="accent-indigo-500">
+                    <span class="text-sm">Form Data</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="protocol" class="accent-indigo-500">
+                    <span class="text-sm">Plain Text</span>
+                  </label>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Pilih JSON (paling umum digunakan)</p>
+              </div>
+              
+              <div class="flex items-center gap-3 p-3 bg-slate-800 rounded-lg">
+                <span class="text-xl">⬜</span>
+                <div>
+                  <span class="font-semibold">Enable Authentication</span>
+                  <span class="text-xs text-slate-400 ml-2">(KOSONGKAN)</span>
+                  <p class="text-xs text-slate-400">Biarkan tidak dicentang jika tidak pakai authentication</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABEL RINGKASAN SETTING -->
+    <div class="card rounded-2xl p-6 mb-10">
+      <h3 class="text-lg font-semibold mb-4">📊 RINGKASAN SETTING</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-800">
+            <tr>
+              <th class="p-3 text-left">Menu</th>
+              <th class="p-3 text-left">Setting</th>
+              <th class="p-3 text-left">Keterangan</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800">
+            <tr>
+              <td class="p-3">Enabled</td>
+              <td class="p-3"><span class="px-2 py-1 bg-green-600/30 text-green-300 rounded">✅ CENTANG</span></td>
+              <td class="p-3 text-slate-400">Forward notifikasi aktif</td>
+            </tr>
+            <tr>
+              <td class="p-3">Wi-Fi Only</td>
+              <td class="p-3"><span class="px-2 py-1 bg-slate-700 text-slate-300 rounded">⬜ KOSONG</span></td>
+              <td class="p-3 text-slate-400">Bisa pakai WiFi/Data</td>
+            </tr>
+            <tr>
+              <td class="p-3">Open Notification Access</td>
+              <td class="p-3"><span class="px-2 py-1 bg-green-600/30 text-green-300 rounded">✅ SUDAH</span></td>
+              <td class="p-3 text-slate-400">Izin notifikasi diberikan</td>
+            </tr>
+            <tr>
+              <td class="p-3">Enable App Filter</td>
+              <td class="p-3"><span class="px-2 py-1 bg-green-600/30 text-green-300 rounded">✅ CENTANG</span></td>
+              <td class="p-3 text-slate-400">Filter aplikasi aktif</td>
+            </tr>
+            <tr>
+              <td class="p-3">Select Apps</td>
+              <td class="p-3"><span class="px-2 py-1 bg-blue-600/30 text-blue-300 rounded">📱 BEBAS</span></td>
+              <td class="p-3 text-slate-400">User pilih sendiri aplikasinya</td>
+            </tr>
+            <tr>
+              <td class="p-3">URL</td>
+              <td class="p-3"><span class="px-2 py-1 bg-blue-600/30 text-blue-300 rounded">Isi endpoint</span></td>
+              <td class="p-3 text-slate-400">URL webhook Anda</td>
+            </tr>
+            <tr>
+              <td class="p-3">Protocol</td>
+              <td class="p-3"><span class="px-2 py-1 bg-blue-600/30 text-blue-300 rounded">JSON</span></td>
+              <td class="p-3 text-slate-400">Format data</td>
+            </tr>
+            <tr>
+              <td class="p-3">Enable Authentication</td>
+              <td class="p-3"><span class="px-2 py-1 bg-slate-700 text-slate-300 rounded">⬜ KOSONG</span></td>
+              <td class="p-3 text-slate-400">Tidak pakai auth</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Cara Install -->
+    <h2 class="text-2xl font-bold mb-6">📦 Cara Install</h2>
+    <div class="space-y-4 mb-10">
+      <div class="flex items-start gap-4 card rounded-xl p-4">
+        <div class="step-number">1</div>
+        <div>
+          <h3 class="font-semibold">Download APK</h3>
+          <p class="text-sm text-slate-400">Klik tombol Download di atas</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 card rounded-xl p-4">
+        <div class="step-number">2</div>
+        <div>
+          <h3 class="font-semibold">Izinkan Install dari Sumber Tidak Dikenal</h3>
+          <p class="text-sm text-slate-400">Buka Settings → Security → Aktifkan "Install from Unknown Sources"</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 card rounded-xl p-4">
+        <div class="step-number">3</div>
+        <div>
+          <h3 class="font-semibold">Install APK</h3>
+          <p class="text-sm text-slate-400">Buka file APK yang sudah di download dan install</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 card rounded-xl p-4">
+        <div class="step-number">4</div>
+        <div>
+          <h3 class="font-semibold">Konfigurasi Aplikasi</h3>
+          <p class="text-sm text-slate-400">Ikuti panduan setting lengkap di atas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Format Notifikasi -->
+    <h2 class="text-2xl font-bold mb-6">📝 Format Notifikasi</h2>
+    <div class="space-y-4">
+      <div class="card rounded-xl p-6">
+        <h3 class="font-semibold mb-2">Contoh Notifikasi dari ShopeePay</h3>
+        <pre class="bg-slate-800 rounded-lg p-3 text-xs overflow-x-auto"><code>Pembayaran diterima
+Rp 10.338
+dari ShopeePay
+17 Nov 2024 14:23</code></pre>
+      </div>
+
+      <div class="card rounded-xl p-6">
+        <h3 class="font-semibold mb-2">Data yang Dikirim ke Webhook</h3>
+        <pre class="bg-slate-800 rounded-lg p-3 text-xs overflow-x-auto"><code class="language-json">{
+  "app": "ShopeePay",
+  "amount": 10338,
+  "message": "Pembayaran diterima Rp 10.338 dari ShopeePay",
+  "timestamp": "2024-11-17T14:23:00+07:00",
+  "token": "USER123"
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="mt-10 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl">
+      <h3 class="text-lg font-semibold text-yellow-300 mb-3">⚠️ Troubleshooting</h3>
+      <ul class="list-disc list-inside text-sm text-slate-300 space-y-2">
+        <li>Pastikan notifikasi aplikasi pembayaran aktif di settings HP</li>
+        <li>Berikan akses notifikasi ke Geekz Forwarder</li>
+        <li>Pastikan koneksi internet aktif</li>
+        <li>Webhook URL harus bisa diakses dari publik</li>
+        <li>Jika tidak masuk webhook, cek kembali izin notifikasi di settings</li>
+      </ul>
+    </div>
+  </section>
+</div>
   
   <!-- Halaman donasi simple -->
 <div id="donate-page" class="page-section">
@@ -627,45 +794,37 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
 
   // Navigation untuk halaman terpisah
   function showPage(pageId) {
-    // Sembunyikan semua halaman
     document.querySelectorAll('.page-section').forEach(page => {
       page.classList.remove('active');
     });
     
-    // Tampilkan halaman yang dipilih
     document.getElementById(pageId + '-page').classList.add('active');
     
-    // Update navigasi aktif
     document.querySelectorAll('.nav-link').forEach(link => {
       link.classList.remove('active');
     });
     document.querySelector(`.nav-link[data-page="${pageId}"]`).classList.add('active');
     
-    // Scroll ke atas
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Event listeners untuk navigasi
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function() {
       const page = this.getAttribute('data-page');
       showPage(page);
       
-      // Tutup drawer mobile jika terbuka
       if (window.innerWidth < 768) {
         drawer.classList.add('hidden');
       }
     });
   });
 
-  // Navigation drawer
   const drawer = document.getElementById('drawer');
   document.getElementById('openMenu').onclick = () => drawer.classList.remove('hidden');
   document.getElementById('closeMenu').onclick = () => drawer.classList.add('hidden');
   drawer.onclick = (e) => { if (e.target === drawer.firstElementChild) drawer.classList.add('hidden'); };
   drawer.querySelectorAll('[data-close]').forEach(a => a.onclick = () => drawer.classList.add('hidden'));
 
-  // Back to top
   const toTop = document.getElementById('toTop');
   window.onscroll = () => { toTop.classList.toggle('hidden', window.scrollY < 400); };
   toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -687,7 +846,6 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
     if (baseInput) baseInput.value = val;
   }
 
-  // Utility functions
   function showJSON(el, text) {
     try { 
       el.textContent = JSON.stringify(JSON.parse(text), null, 2); 
@@ -709,6 +867,16 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
       setBase(baseInput.value);
       alert('Base URL disimpan!');
     };
+  }
+
+  // Fungsi untuk Geekz Forwarder
+  function copyWebhookUrl() {
+    const urlInput = document.getElementById('webhookUrlInput');
+    if (urlInput) {
+      navigator.clipboard.writeText(urlInput.value).then(() => {
+        alert('URL webhook berhasil disalin!');
+      });
+    }
   }
 
   // QRIS Dynamic Test
@@ -801,7 +969,6 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
   let currentFile = null;
 
   if (dropZone) {
-    // Drag and drop functionality
     dropZone.addEventListener('click', () => fileInput.click());
     
     dropZone.addEventListener('dragover', (e) => {
@@ -990,7 +1157,6 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
       let headers = {};
       let payload;
 
-      // Persiapan payload berdasarkan mode
       if (mode === 'json') {
         headers['Content-Type'] = 'application/json';
         try { 
@@ -1002,7 +1168,6 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
         payload = body;
       } else if (mode === 'form') {
         headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        // Untuk form data, kita perlu membuat URLSearchParams yang benar
         try {
           const bodyObj = JSON.parse(body);
           const params = new URLSearchParams();
@@ -1011,7 +1176,6 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
           }
           payload = params;
         } catch {
-          // Jika bukan JSON, gunakan sebagai plain text
           payload = new URLSearchParams();
           payload.append('message', body);
         }
@@ -1034,7 +1198,6 @@ bash <(curl -sSL https://restapi.amgeekz.my.id/installer.sh)</code></pre>
         const responseText = await response.text();
         const dur = Math.round(performance.now() - start);
         
-        // Tampilkan hasil
         metaWh.textContent = `Status: ${response.status} • ${dur} ms`;
         showJSON(jsonWh, responseText);
         outWh.classList.remove('hidden');
