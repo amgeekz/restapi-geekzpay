@@ -287,8 +287,8 @@ app.all('/webhook/payment', async (req, res) => {
     const amount = parseAmountFromAnything(body, raw);
 
     const bucket = Math.floor(Date.now() / 10000);
-    const eventId = crypto.createHash('sha1').update((raw || JSON.stringify(body)) + '|' + bucket).digest('hex');
-
+    const eventId = crypto.createHash('sha1').update((raw || JSON.stringify(body)) + '|' + bucket).digest('hex').slice(0, 12);
+    
     const eventPayload = {
       ok: true,
       token: tokenForBucket,
