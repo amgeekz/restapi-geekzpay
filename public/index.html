@@ -464,47 +464,65 @@
     </div>
 
     <!-- Cara Setting -->
-    <div class="bg-slate-800/50 rounded-xl p-6 mb-8">
-      <h2 class="text-xl font-bold mb-4">⚙️ Cara Setting</h2>
-      
-      <div class="space-y-4">
-        <div class="flex gap-3">
-          <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-sm shrink-0">1</div>
+<div class="bg-slate-800/50 rounded-xl p-6 mb-8">
+  <h2 class="text-xl font-bold mb-4">⚙️ Cara Setting</h2>
+  
+  <div class="space-y-4">
+    <div class="flex gap-3">
+      <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-sm shrink-0">1</div>
+      <div>
+        <p class="font-medium">Open Notification Access</p>
+        <p class="text-sm text-slate-400">Tap, cari Geekz Forwarder, aktifkan izin notifikasi</p>
+      </div>
+    </div>
+    
+    <div class="flex gap-3">
+      <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-sm shrink-0">2</div>
+      <div>
+        <p class="font-medium">Enabled & Wi-Fi Only</p>
+        <p class="text-sm text-slate-400">Centang Enabled, kosongkan Wi-Fi Only</p>
+      </div>
+    </div>
+    
+    <div class="flex gap-3">
+      <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-sm shrink-0">3</div>
+      <div>
+        <p class="font-medium">App Filtering</p>
+        <p class="text-sm text-slate-400">Centang Enable App Filter, tap Select Apps pilih aplikasi yang mau diforward (ShopeePay, GoPay, DANA, dll)</p>
+      </div>
+    </div>
+    
+    <div class="flex gap-3">
+      <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-sm shrink-0">4</div>
+      <div class="flex-1">
+        <p class="font-medium mb-2">Endpoint</p>
+        <div class="space-y-3">
+          <!-- URL -->
           <div>
-            <p class="font-medium">Open Notification Access</p>
-            <p class="text-sm text-slate-400">Tap, cari Geekz Forwarder, aktifkan izin notifikasi</p>
-          </div>
-        </div>
-        
-        <div class="flex gap-3">
-          <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-sm shrink-0">2</div>
-          <div>
-            <p class="font-medium">Enabled & Wi-Fi Only</p>
-            <p class="text-sm text-slate-400">Centang Enabled, kosongkan Wi-Fi Only</p>
-          </div>
-        </div>
-        
-        <div class="flex gap-3">
-          <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-sm shrink-0">3</div>
-          <div>
-            <p class="font-medium">App Filtering</p>
-            <p class="text-sm text-slate-400">Centang Enable App Filter, tap Select Apps pilih aplikasi yang mau diforward (ShopeePay, GoPay, DANA, dll)</p>
-          </div>
-        </div>
-        
-        <div class="flex gap-3">
-          <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-sm shrink-0">4</div>
-          <div>
-            <p class="font-medium">Endpoint</p>
-            <div class="text-sm text-slate-400 space-y-2 mt-1">
-              <div><span class="text-slate-300">URL:</span> <code class="bg-slate-900 px-2 py-1 rounded text-xs">https://restapi.amgeekz.my.id/webhook/payment?token=USER123</code> <button onclick="copyWebhookUrl()" class="text-indigo-400 hover:text-indigo-300 ml-1 text-xs">📋</button></div>
-              <div><span class="text-slate-300">Protocol:</span> Pilih JSON</div>
-              <div><span class="text-slate-300">Enable Authentication:</span> Kosongkan</div>
+            <p class="text-sm text-slate-400 mb-1">URL:</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <code class="bg-slate-900 px-3 py-2 rounded-lg text-xs text-slate-300 break-all flex-1">https://restapi.amgeekz.my.id/webhook/payment?token=USER123</code>
+              <button onclick="copyWebhookUrl()" class="text-indigo-400 hover:text-indigo-300 text-sm border border-indigo-800 px-3 py-2 rounded-lg whitespace-nowrap">📋 Salin</button>
             </div>
+            <p class="text-xs text-yellow-400 mt-1">⚠️ Ganti USER123 dengan token Anda sendiri</p>
+          </div>
+          
+          <!-- Protocol -->
+          <div>
+            <p class="text-sm text-slate-400 mb-1">Protocol:</p>
+            <p class="text-sm text-slate-300">Pilih <span class="bg-slate-900 px-2 py-1 rounded text-indigo-400">JSON</span></p>
+          </div>
+          
+          <!-- Authentication -->
+          <div>
+            <p class="text-sm text-slate-400 mb-1">Enable Authentication:</p>
+            <p class="text-sm text-slate-300">Kosongkan (jangan dicentang)</p>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
     <!-- Ringkasan Setting -->
     <div class="bg-slate-800/30 rounded-xl p-6 mb-8 border border-slate-700">
