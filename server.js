@@ -359,16 +359,16 @@ app.get('/webhook/status', async (req, res) => {
           const rupiah = Number(ev.amount).toLocaleString('id-ID');
 
           tableRowsHtml += `
-            <tr class="bg-white border-b-2 border-black hover:bg-[#fbf8ee] font-bold">
-              <td class="p-4 border-r-2 border-black font-mono text-xs text-neutral-600 break-all">${ev.event_id}</td>
-              <td class="p-4 border-r-2 border-black text-xs text-neutral-800">${tanggal}</td>
-              <td class="p-4 border-r-2 border-black font-mono text-sm text-emerald-600 font-black">Rp ${rupiah}</td>
-              <td class="p-4 border-r-2 border-black text-xs font-bold text-neutral-700">${isiPesan}</td>
-              <td class="p-4 font-mono text-xs text-neutral-400">${ev.ip}</td>
+            <tr class="bg-white border-b-2 border-black hover:bg-[#fbf8ee] font-bold text-xs">
+              <td class="p-4 border-r-2 border-black font-mono text-neutral-600 break-all">${ev.event_id}</td>
+              <td class="p-4 border-r-2 border-black text-neutral-800 whitespace-nowrap">${tanggal}</td>
+              <td class="p-4 border-r-2 border-black font-mono text-sm text-emerald-600 font-black whitespace-nowrap">Rp ${rupiah}</td>
+              <td class="p-4 border-r-2 border-black font-bold text-neutral-700 break-words">${isiPesan}</td>
+              <td class="p-4 font-mono text-neutral-400 whitespace-nowrap">${ev.ip}</td>
             </tr>`;
 
           mobileCardsHtml += `
-            <div class="bg-white border-2 border-black rounded-xl p-4 shadow-[3px_3px_0px_#000000] flex flex-col gap-2 font-bold">
+            <div class="bg-white border-2 border-black rounded-xl p-4 shadow-[4px_4px_0px_#000000] flex flex-col gap-2 font-bold">
               <div class="flex items-center justify-between border-b-2 border-dashed border-black/20 pb-2">
                 <span class="font-mono text-[10px] text-neutral-500">${ev.event_id}</span>
                 <span class="text-[10px] text-neutral-600">${tanggal}</span>
@@ -398,13 +398,13 @@ app.get('/webhook/status', async (req, res) => {
     body { font-family: system-ui, -apple-system, sans-serif; color: #000000; background: #fbf8ee; }
     .neo-box {
       background: #ffffff;
-      border: 3px solid #000000;
+      border: 2.5px solid #000000;
       border-radius: 16px;
-      box-shadow: 6px 6px 0px #000000;
+      box-shadow: 4px 4px 0px #000000;
     }
     .neo-btn {
-      border: 3px solid #000000;
-      border-radius: 12px;
+      border: 2.5px solid #000000;
+      border-radius: 14px;
       font-weight: 800;
       box-shadow: 4px 4px 0px #000000;
       transition: transform 0.1s, box-shadow 0.1s;
@@ -419,7 +419,7 @@ app.get('/webhook/status', async (req, res) => {
   <header class="sticky top-0 z-40 border-b-4 border-black bg-white py-4 mb-6 md:mb-10">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between gap-4">
       <span class="text-lg md:text-xl font-black tracking-tight uppercase">GEEKZPAY MUTASI</span>
-      <span class="text-[10px] md:text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-[#f472b6] border-2 border-black shadow-[2px_2px_0px_#000000]">
+      <span class="text-[10px] md:text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-[#f472b6] text-white border-2 border-black shadow-[2px_2px_0px_#000000]">
         TOKEN: ${token}
       </span>
     </div>
@@ -437,23 +437,21 @@ app.get('/webhook/status', async (req, res) => {
     </div>
 
     <div class="hidden md:block neo-box overflow-hidden">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-[#f1ebd9] border-b-4 border-black text-xs font-black uppercase tracking-wider">
-          <tr>
-            <th class="p-4 border-r-2 border-black w-32">ID Transaksi</th>
-            <th class="p-4 border-r-2 border-black w-48">Waktu Masuk</th>
-            <th class="p-4 border-r-2 border-black w-44">Jumlah Dana</th>
-            <th class="p-4 border-r-2 border-black">Isi Notifikasi</th>
-            <th class="p-4 w-36">IP Forwarder</th>
-          </tr>
+      <div class="max-h-[600px] overflow-y-auto">
+        <table class="w-full text-left border-collapse table-fixed">
+          <thead class="bg-[#f1ebd9] border-b-4 border-black text-xs font-black uppercase tracking-wider sticky top-0 z-10">
+            <tr>
+              <th class="p-4 border-r-2 border-black w-32">ID Transaksi</th>
+              <th class="p-4 border-r-2 border-black w-44">Waktu Masuk</th>
+              <th class="p-4 border-r-2 border-black w-40">Jumlah Dana</th>
+              <th class="p-4 border-r-2 border-black">Isi Notifikasi</th>
+              <th class="p-4 w-32">IP Forwarder</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white">
+            ${tableRowsHtml}
+          </tbody>
         </table>
-        <div class="max-h-[600px] overflow-y-auto">
-          <table class="w-full text-left border-collapse">
-            <tbody class="bg-white">
-              ${tableRowsHtml}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
 
@@ -462,7 +460,7 @@ app.get('/webhook/status', async (req, res) => {
     </div>
     
     <div class="mt-8 text-center">
-      <a href="/docs" class="neo-btn inline-block bg-white text-black hover:bg-neutral-50 px-6 py-3 text-xs uppercase tracking-wider">
+      <a href="/" class="neo-btn inline-block bg-white text-black hover:bg-neutral-50 px-6 py-3 text-xs uppercase tracking-wider">
         &larr; Kembali ke Dokumentasi
       </a>
     </div>
