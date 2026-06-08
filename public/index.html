@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
   <style>
   :root { color-scheme: light; }
   html, body { max-width:100%; overflow-x:hidden; background:#fbf8ee; }
@@ -188,8 +188,9 @@
       
       <nav class="flex flex-wrap gap-3 w-full border-b-2 border-black/10 pb-4">
         <div class="nav-link active" data-page="docs">&#9632; Dokumentasi API</div>
+        <div class="nav-link" data-page="history">&#9632; Cek Status</div>
         <div class="nav-link" data-page="forwarder">&#9632; Aplikasi Forwarder (v2.0)</div>
-        <div class="nav-link" data-page="donate">&#9632; Kirim Donasi</div>
+        <div class="nav-link" data-page="donate">&#9632; Donasi</div>
       </nav>
 
       <div class="flex flex-col md:flex-row gap-6 items-start">
@@ -200,7 +201,7 @@
           <a href="#qris" class="nav-section-link block text-black">&#9654; Buat QRIS Dinamis</a>
           <a href="#qr-converter" class="nav-section-link block text-black">&#9654; Scan Gambar QR</a>
           <a href="#webhook" class="nav-section-link block text-black">&#9654; Tes Kirim Webhook</a>
-          <a href="#history" class="nav-section-link block text-black">&#9654; Cek Riwayat Masuk</a>
+          <a href="#history-doc" class="nav-section-link block text-black">&#9654; Alamat URL Riwayat</a>
           <a href="#examples" class="nav-section-link block text-black">&#9654; Contoh Perintah cURL</a>
           <a href="#status-code" class="nav-section-link block text-black">&#9654; Arti Kode Error HTTP</a>
         </aside>
@@ -213,16 +214,17 @@
               <button id="closeMenu" class="px-2.5 py-1 border-2 border-black bg-white text-xs rounded-lg shadow-[1.5px_1.5px_0px_#000000]">&#10005;</button>
             </div>
             <nav class="space-y-3 text-sm">
-              <div class="nav-link active" data-page="docs" data-close>Buku Panduan API</div>
-              <div class="nav-link" data-page="forwarder" data-close>Aplikasi HP Forwarder</div>
-              <div class="nav-link" data-page="donate" data-close>Kirim Donasi</div>
+              <div class="nav-link active" data-page="docs" data-close>Dokumentasi API</div>
+              <div class="nav-link" data-page="history" data-close>Cek Status</div>
+              <div class="nav-link" data-page="forwarder" data-close>Aplikasi Forwarder</div>
+              <div class="nav-link" data-page="donate" data-close>Donasi</div>
               <hr class="border-black my-4 border-t-2">
               <a href="#hero" class="block py-1 text-black" data-close>&#9654; Cara Kerja Sistem</a>
               <a href="#quickstart" class="block py-1 text-black" data-close>&#9654; Setting Alamat API</a>
               <a href="#qris" class="block py-1 text-black" data-close>&#9654; Buat QRIS Dinamis</a>
               <a href="#qr-converter" class="block py-1 text-black" data-close>&#9654; Scan Gambar QR</a>
               <a href="#webhook" class="block py-1 text-black" data-close>&#9654; Tes Kirim Webhook</a>
-              <a href="#history" class="block py-1 text-black" data-close>&#9654; Cek Riwayat Masuk</a>
+              <a href="#history-doc" class="block py-1 text-black" data-close>&#9654; Alamat URL Riwayat</a>
               <a href="#examples" class="block py-1 text-black" data-close>&#9654; Contoh Perintah cURL</a>
               <a href="#status-code" class="block py-1 text-black" data-close>&#9654; Arti Kode Error HTTP</a>
             </nav>
@@ -333,7 +335,7 @@
                 
                 <div id="dropZone" class="drop-zone mb-4 font-bold text-xs">
                   <div class="text-3xl mb-2 text-black">&#9634;</div>
-                  <p class="text-black text-sm">Tarik dan jatuhkan file gambar ke sini, atau klik untuk mencari berkas</p>
+                  <p class="text-black text-sm">Tarik and jatuhkan file gambar ke sini, atau klik untuk mencari berkas</p>
                   <p class="text-[11px] text-neutral-400 mt-1">Ekstensi File: PNG, JPG, JPEG (Ukuran Maksimal: 2MB)</p>
                   <input type="file" id="fileInput" class="hidden" accept="image/png,image/jpeg,image/jpg">
                 </div>
@@ -402,7 +404,7 @@
               </div>
             </section>
 
-            <section id="history">
+            <section id="history-doc">
               <div class="neo-card p-5">
                 <div class="border-b-2 border-black pb-2 mb-3">
                   <h2 class="text-lg font-black uppercase tracking-tight">4. ALAMAT URL CEK RIWAYAT PEMBAYARAN</h2>
@@ -512,13 +514,61 @@
             </section>
           </div>
 
+          <div id="history-page" class="page-section space-y-6">
+            <section class="neo-card p-5">
+              <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight">Daftar Mutasi Masuk Terbaru</h1>
+              <p class="text-xs text-neutral-500 font-bold mt-0.5">// Masukkan token dan batas limit untuk mengecek antrean log dana masuk secara realtime</p>
+              
+              <div class="grid gap-4 sm:grid-cols-3 text-xs mt-4 pt-4 border-t-2 border-black/10">
+                <div class="sm:col-span-2">
+                  <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Masukkan Token Rahasia Akun</label>
+                  <input id="historyToken" type="text" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black font-bold" placeholder="USER123">
+                </div>
+                <div>
+                  <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Batas Limit Log</label>
+                  <input id="historyLimit" type="number" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black font-bold" value="10" placeholder="10">
+                </div>
+                <div class="sm:col-span-3">
+                  <button id="btnFetchHistory" class="neo-btn neo-btn-danger w-full sm:w-auto px-6 py-2.5 text-xs uppercase tracking-wider">Cari & Refresh Data ↻</button>
+                </div>
+              </div>
+            </section>
+
+            <div id="desktopHistoryContainer" class="hidden md:block neo-card overflow-hidden opacity-40">
+              <div class="max-h-[500px] overflow-y-auto">
+                <table class="w-full text-left border-collapse table-fixed">
+                  <thead class="bg-[#f1ebd9] border-b-4 border-black text-xs font-black uppercase tracking-wider sticky top-0 z-10">
+                    <tr>
+                      <th class="p-4 border-r-2 border-black w-32">ID Transaksi</th>
+                      <th class="p-4 border-r-2 border-black w-44">Waktu Masuk</th>
+                      <th class="p-4 border-r-2 border-black w-40">Jumlah Dana</th>
+                      <th class="p-4 border-r-2 border-black">Isi Notifikasi</th>
+                      <th class="p-4 w-32">IP Forwarder</th>
+                    </tr>
+                  </thead>
+                  <tbody id="desktopHistoryBody" class="bg-white font-bold text-xs">
+                    <tr>
+                      <td colspan="5" class="p-8 text-center text-neutral-400 uppercase tracking-wider">Silakan masukkan token dan klik tombol cari di atas.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="mobileHistoryContainer" class="md:hidden flex flex-col gap-4">
+              <div class="bg-white border-2 border-black rounded-xl p-6 text-center text-neutral-400 font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#000000]">
+                Silakan masukkan token dan klik tombol cari di atas.
+              </div>
+            </div>
+          </div>
+
           <div id="forwarder-page" class="page-section space-y-6">
             <section class="neo-card p-5">
               <h1 class="text-2xl font-black tracking-tight uppercase mb-2">PANDUAN SETTING APLIKASI GEEKZ FORWARDER v2.0</h1>
               <p class="text-xs md:text-sm font-semibold text-neutral-700 leading-relaxed mb-4">
                 Silakan ikuti 3 tahapan setting sederhana di bawah ini di dalam aplikasi HP Anda agar data dana masuk terkirim dengan lancar dan aman.
               </p>
-              <a href="https://sfile.co/wJY1XdTEXjo" target="_blank" class="neo-btn neo-btn-danger inline-block px-4 py-2 text-xs tracking-wider shadow-[2px_2px_0px_#000000]">
+              <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="neo-btn neo-btn-danger inline-block px-4 py-2 text-xs tracking-wider shadow-[2px_2px_0px_#000000]">
                 UNDUH FILE APLIKASI (.APK) SEKARANG
               </a>
             </section>
@@ -701,16 +751,99 @@
     };
   }
 
+  // JAVASCRIPT ENGINE BARU: MENGAMBIL DATA DARI ENDPOINT DAN MERENDER TABEL / KARTU RESPONSIF
+  const btnFetchHistory = document.getElementById('btnFetchHistory');
+  if (btnFetchHistory) {
+    btnFetchHistory.onclick = async () => {
+      const token = document.getElementById('historyToken').value.trim();
+      const limit = document.getElementById('historyLimit').value.trim() || '10';
+      const desktopContainer = document.getElementById('desktopHistoryContainer');
+      const desktopBody = document.getElementById('desktopHistoryBody');
+      const mobileContainer = document.getElementById('mobileHistoryContainer');
+
+      if (!token) {
+        alert('Masukkan token terlebih dahulu!');
+        return;
+      }
+
+      btnFetchHistory.disabled = true;
+      btnFetchHistory.textContent = 'Mencari Data...';
+
+      const url = `${getBase().replace(/\/$/, '')}/webhook/status?token=${encodeURIComponent(token)}&limit=${limit}`;
+
+      try {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
+        const resData = await r.json();
+
+        desktopContainer.classList.remove('opacity-40');
+        
+        let tRows = '';
+        let mCards = '';
+
+        if (!resData.data || resData.data.length === 0) {
+          const empty = `
+            <div class="bg-white border-2 border-black rounded-xl p-6 text-center text-neutral-500 font-bold text-xs uppercase tracking-wider">
+              Belum ada data pembayaran masuk untuk token ini.
+            </div>`;
+          tRows = `<tr><td colspan="5" class="p-8 text-center text-neutral-500 uppercase tracking-wider font-bold text-xs">Belum ada data pembayaran masuk untuk token ini.</td></tr>`;
+          mCards = empty;
+        } else {
+          resData.data.forEach(ev => {
+            const dateStr = new Date(ev.received_at).toLocaleString('id-ID');
+            const msgStr = ev.body && ev.body.message ? ev.body.message : (ev.body && ev.body.text ? ev.body.text : JSON.stringify(ev.body || {}));
+            const rupiahStr = Number(ev.amount).toLocaleString('id-ID');
+
+            tRows += `
+              <tr class="bg-white border-b-2 border-black hover:bg-[#fbf8ee]">
+                <td class="p-4 border-r-2 border-black font-mono text-neutral-600 break-all">${ev.event_id || 'unknown'}</td>
+                <td class="p-4 border-r-2 border-black text-neutral-800 whitespace-nowrap">${dateStr}</td>
+                <td class="p-4 border-r-2 border-black font-mono text-sm text-emerald-600 font-black whitespace-nowrap">Rp ${rupiahStr}</td>
+                <td class="p-4 border-r-2 border-black text-neutral-700 break-words font-medium">${msgStr}</td>
+                <td class="p-4 font-mono text-neutral-400 whitespace-nowrap">${ev.ip || '0.0.0.0'}</td>
+              </tr>`;
+
+            mCards += `
+              <div class="bg-white border-2 border-black rounded-xl p-4 shadow-[4px_4px_0px_#000000] flex flex-col gap-2 font-bold">
+                <div class="flex items-center justify-between border-b-2 border-dashed border-black/20 pb-2">
+                  <span class="font-mono text-[10px] text-neutral-500">${ev.event_id || 'unknown'}</span>
+                  <span class="text-[10px] text-neutral-600">${dateStr}</span>
+                </div>
+                <div class="text-base font-mono font-black text-emerald-600">Rp ${rupiahStr}</div>
+                <div class="text-xs text-neutral-700 bg-[#fbf8ee] p-2.5 border border-black rounded-lg font-medium break-words">${msgStr}</div>
+                <div class="text-[10px] text-neutral-400 font-mono text-right">IP: ${ev.ip || '0.0.0.0'}</div>
+              </div>`;
+          });
+        }
+
+        desktopBody.innerHTML = tRows;
+        mobileContainer.innerHTML = mCards;
+
+      } catch (err) {
+        alert(`Gagal mengambil data: ${err.message}`);
+        const errBlock = `
+          <div class="bg-red-50 text-red-600 border-2 border-black rounded-xl p-4 font-bold text-xs uppercase tracking-wider">
+            Gagal tersambung ke server. Periksa koneksi internet Anda atau pastikan Base URL sudah benar.
+          </div>`;
+        desktopBody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-600 font-bold">${errBlock}</td></tr>`;
+        mobileContainer.innerHTML = errBlock;
+      } finally {
+        btnFetchHistory.disabled = false;
+        btnFetchHistory.textContent = 'Cari & Refresh Data ↻';
+      }
+    };
+  }
+
   // QRIS Dynamic Test
-  const btnDyn = document.getElementById('btnDynamic');
-  const btnDynReset = document.getElementById('btnDynamicReset');
-  const outDyn = document.getElementById('outDynamic');
-  const jsonDyn = document.getElementById('jsonDynamic');
-  const metaDyn = document.getElementById('metaDynamic');
+  const btnDynamic = document.getElementById('btnDynamic');
+  const btnDynamicReset = document.getElementById('btnDynamicReset');
+  const outDynamic = document.getElementById('outDynamic');
+  const jsonDynamic = document.getElementById('jsonDynamic');
+  const metaDynamic = document.getElementById('metaDynamic');
   const imgQR = document.getElementById('imgQR');
 
-  if (btnDyn) {
-    btnDyn.onclick = async () => {
+  if (btnDynamic) {
+    btnDynamic.onclick = async () => {
       const base = document.getElementById('tiBase').value;
       const uniqIn = document.getElementById('tiUnique').value;
       const auto = document.getElementById('tiAutoUnique').checked;
@@ -733,8 +866,8 @@
       if (payloadStatic) form.append('payload_static', payloadStatic);
       form.append('qr', 'png');
 
-      btnDyn.disabled = true;
-      btnDyn.textContent = 'Menghubungi Server...';
+      btnDynamic.disabled = true;
+      btnDynamic.textContent = 'Menghubungi Server...';
       
       try {
         const start = performance.now();
@@ -746,33 +879,33 @@
         const text = await r.text();
         const dur = Math.round(performance.now() - start);
         
-        metaDyn.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
-        showJSON(jsonDyn, text);
+        metaDynamic.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
+        showJSON(jsonDynamic, text);
 
         try {
           const obj = JSON.parse(text);
           imgQR.src = obj.qr_png_data_url || '';
         } catch { imgQR.src = ''; }
 
-        outDyn.classList.remove('hidden');
-        outDyn.scrollIntoView({ behavior: 'smooth' });
+        outDynamic.classList.remove('hidden');
+        outDynamic.scrollIntoView({ behavior: 'smooth' });
       } catch (err) {
-        metaDyn.textContent = `Error: ${err.message}`;
-        showJSON(jsonDyn, String(err));
-        outDyn.classList.remove('hidden');
+        metaDynamic.textContent = `Error: ${err.message}`;
+        showJSON(jsonDynamic, String(err));
+        outDynamic.classList.remove('hidden');
       } finally {
-        btnDyn.disabled = false;
-        btnDyn.textContent = 'PROSES & BUAT GAMBAR QRIS';
+        btnDynamic.disabled = false;
+        btnDynamic.textContent = 'PROSES & BUAT GAMBAR QRIS';
       }
     };
 
-    btnDynReset.onclick = () => {
+    btnDynamicReset.onclick = () => {
       document.getElementById('tiBase').value = '';
       document.getElementById('tiUnique').value = '';
       document.getElementById('tiAutoUnique').checked = false;
       document.getElementById('tiAmount').value = '';
       document.getElementById('tiPayload').value = '';
-      outDyn.classList.add('hidden');
+      outDynamic.classList.add('hidden');
     };
   }
 
@@ -898,14 +1031,14 @@
   }
 
   // Webhook Test
-  const btnWh = document.getElementById('btnWebhook');
-  const btnWhReset = document.getElementById('btnWebhookReset');
-  const outWh = document.getElementById('outWebhook');
-  const jsonWh = document.getElementById('jsonWebhook');
-  const metaWh = document.getElementById('metaWebhook');
+  const btnWebhook = document.getElementById('btnWebhook');
+  const btnWebhookReset = document.getElementById('btnWebhookReset');
+  const outWebhook = document.getElementById('outWebhook');
+  const jsonWebhook = document.getElementById('jsonWebhook');
+  const metaWebhook = document.getElementById('metaWebhook');
 
-  if (btnWh) {
-    btnWh.onclick = async () => {
+  if (btnWebhook) {
+    btnWebhook.onclick = async () => {
       const token = document.getElementById('tiToken').value;
       const mode = document.getElementById('tiMode').value;
       const body = document.getElementById('tiBody').value;
@@ -935,8 +1068,8 @@
         payload = body;
       }
 
-      btnWh.disabled = true;
-      btnWh.textContent = 'Mengirimkan...';
+      btnWebhook.disabled = true;
+      btnWebhook.textContent = 'Mengirimkan...';
       
       try {
         const start = performance.now();
@@ -944,26 +1077,26 @@
         const responseText = await response.text();
         const dur = Math.round(performance.now() - start);
         
-        metaWh.textContent = `Status: ${response.status} • ${dur} ms`;
-        showJSON(jsonWh, responseText);
-        outWh.classList.remove('hidden');
-        outWh.scrollIntoView({ behavior: 'smooth' });
+        metaWebhook.textContent = `Status: ${response.status} • ${dur} ms`;
+        showJSON(jsonWebhook, responseText);
+        outWebhook.classList.remove('hidden');
+        outWebhook.scrollIntoView({ behavior: 'smooth' });
       } catch (err) {
-        metaWh.textContent = `Error: ${err.message}`;
-        showJSON(jsonWh, JSON.stringify({ error: err.message }));
-        outWh.classList.remove('hidden');
+        metaWebhook.textContent = `Error: ${err.message}`;
+        showJSON(jsonWebhook, JSON.stringify({ error: err.message }));
+        outWebhook.classList.remove('hidden');
       } finally {
-        btnWh.disabled = false;
-        btnWh.textContent = 'KIRIM SIMULASI SEKARANG';
+        btnWebhook.disabled = false;
+        btnWebhook.textContent = 'KIRIM SIMULASI SEKARANG';
       }
     };
 
-    if (btnWhReset) {
-      btnWhReset.onclick = () => {
+    if (btnWebhookReset) {
+      btnWebhookReset.onclick = () => {
         document.getElementById('tiToken').value = '';
         document.getElementById('tiMode').value = 'json';
         document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }';
-        outWh.classList.add('hidden');
+        outWebhook.classList.add('hidden');
       };
     }
   }
