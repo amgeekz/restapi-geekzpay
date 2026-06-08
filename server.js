@@ -339,7 +339,114 @@ app.get('/webhook/status', async (req, res) => {
 
     const events = rows.map(ev => toCompact(ev, false));
 
-    res.json({
+    const acceptHeader = req.headers['accept'] || '';
+    if (acceptHeader.includes('text/html')) {      
+      let tableRowsHtml = '';
+      if (events.length === 0) {
+        tableRowsHtml = `
+          <tr>
+            <td colspan="5" class="p-8 text-center text-neutral-500 font-medium">
+              Belum ada riwayat pembayaran masuk untuk token ini.
+            </td>
+          </tr>`;
+      } else {
+        events.forEach(ev => {
+          const tanggal = new Date(ev.received_at).toLocaleString('id-ID');
+          const isiPesan = ev.body && ev.body.message ? ev.body.message : (ev.body && ev.body.text ? ev.body.text : JSON.stringify(ev.body || {}));
+          tableRowsHtml += `
+            <tr class="bg-white">
+              <td class="p-3 border-r-2 border-black font-mono text-xs break-all text-neutral-600">${ev.event_id}</td>
+              <td class="p-3 border-r-2 border-black font-semibold">${tanggal}</td>
+              <td class="p-3 border-r-2 border-black font-mono font-bold text-rose-600">Rp ${Number(ev.amount).toLocaleString('id-ID')}</td>
+              <td class="p-3 border-r-2 border-black font-medium text-neutral-700">${isiPesan}</td>
+              <td class="p-3 font-mono text-xs text-neutral-400">${ev.ip}</td>
+            </tr>`;
+        });
+      }
+
+      const htmlPage = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Riwayat Pembayaran Masuk</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; color: #000000; background: #fbf8ee; }
+    .neo-card {
+      background: #ffffff;
+      border: 2.5px solid #000000;
+      border-radius: 16px;
+      box-shadow: 4px 4px 0px #000000;
+    }
+    .neo-btn {
+      border: 2.5px solid #000000;
+      border-radius: 14px;
+      font-weight: 700;
+      box-shadow: 3px 3px 0px #000000;
+      transition: all 0.1s ease;
+    }
+    .neo-btn:active {
+      transform: translate(1px, 1px);
+      box-shadow: 1.5px 1.5px 0px #000000;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+  <header class="sticky top-0 z-40 border-b-4 border-black bg-white/95 backdrop-blur py-4 mb-6">
+    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between">
+      <span class="text-xl font-black tracking-tight text-black">GEEKZPAY RIWAYAT</span>
+      <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_#000000]">
+        TOKEN: ${token}
+      </span>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4">
+    <div class="mb-4 flex items-center justify-between gap-2">
+      <div>
+        <h1 class="text-xl font-black uppercase tracking-tight">Daftar Mutasi Masuk Terbaru</h1>
+        <p class="text-xs text-neutral-500 font-bold mt-0.5">// Menampilkan ${events.length} antrean data terakhir (Batas Limit: ${limit})</p>
+      </div>
+      <button onclick="window.location.reload()" class="neo-btn bg-white hover:bg-neutral-50 px-4 py-2 text-xs uppercase tracking-wider">
+        Refresh Data ↻
+      </button>
+    </div>
+
+    <div class="neo-card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs font-bold text-left border-collapse">
+          <thead class="bg-[#f1ebd9] border-b-2 border-black">
+            <tr>
+              <th class="p-3 border-r-2 border-black w-32">ID Transaksi</th>
+              <th class="p-3 border-r-2 border-black w-44">Waktu Masuk</th>
+              <th class="p-3 border-r-2 border-black w-36">Jumlah Dana</th>
+              <th class="p-3 border-r-2 border-black">Isi Pesan Notifikasi</th>
+              <th class="p-3 w-28">IP Forwarder</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-black/30 bg-white">
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="mt-6 text-center">
+      <a href="/docs" class="neo-btn inline-block bg-[#f472b6] text-white px-5 py-2.5 text-xs uppercase tracking-wide">
+        &larr; Kembali ke Buku Panduan API
+      </a>
+    </div>
+  </main>
+</body>
+</html>`;
+      
+      res.setHeader('Content-Type', 'text/html');
+      return res.send(htmlPage);
+    }
+
+    return res.json({
       ok: true,
       total: events.length,
       limit,
