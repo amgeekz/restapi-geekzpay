@@ -343,25 +343,46 @@ app.get('/webhook/status', async (req, res) => {
     if (acceptHeader.includes('text/html')) {
       
       let tableRowsHtml = '';
+      let mobileCardsHtml = '';
+
       if (events.length === 0) {
-        tableRowsHtml = `
-          <tr>
-            <td colspan="5" class="p-8 text-center text-neutral-500 font-bold text-xs uppercase tracking-wider">
-              Belum ada data pembayaran masuk untuk token ini.
-            </td>
-          </tr>`;
+        const emptyState = `
+          <div class="p-8 text-center text-neutral-500 font-bold text-xs uppercase tracking-wider">
+            Belum ada data pembayaran masuk untuk token ini.
+          </div>`;
+        tableRowsHtml = `<tr><td colspan="5">${emptyState}</td></tr>`;
+        mobileCardsHtml = emptyState;
       } else {
         events.forEach(ev => {
           const tanggal = new Date(ev.received_at).toLocaleString('id-ID');
           const isiPesan = ev.body && ev.body.message ? ev.body.message : (ev.body && ev.body.text ? ev.body.text : JSON.stringify(ev.body || {}));
+          const rupiah = Number(ev.amount).toLocaleString('id-ID');
+
           tableRowsHtml += `
-            <tr class="bg-white border-b-2 border-black/20 hover:bg-neutral-50 font-bold">
-              <td class="p-3 border-r-2 border-black font-mono text-xs text-neutral-600 break-all">${ev.event_id}</td>
-              <td class="p-3 border-r-2 border-black text-xs text-neutral-800">${tanggal}</td>
-              <td class="p-3 border-r-2 border-black font-mono text-sm text-rose-600 font-black">Rp ${Number(ev.amount).toLocaleString('id-ID')}</td>
-              <td class="p-3 border-r-2 border-black text-xs font-medium text-neutral-700">${isiPesan}</td>
-              <td class="p-3 font-mono text-xs text-neutral-400">${ev.ip}</td>
+            <tr class="bg-white border-b-2 border-black hover:bg-[#fbf8ee] font-bold">
+              <td class="p-4 border-r-2 border-black font-mono text-xs text-neutral-600 break-all">${ev.event_id}</td>
+              <td class="p-4 border-r-2 border-black text-xs text-neutral-800">${tanggal}</td>
+              <td class="p-4 border-r-2 border-black font-mono text-sm text-emerald-600 font-black">Rp ${rupiah}</td>
+              <td class="p-4 border-r-2 border-black text-xs font-bold text-neutral-700">${isiPesan}</td>
+              <td class="p-4 font-mono text-xs text-neutral-400">${ev.ip}</td>
             </tr>`;
+
+          mobileCardsHtml += `
+            <div class="bg-white border-2 border-black rounded-xl p-4 shadow-[3px_3px_0px_#000000] flex flex-col gap-2 font-bold">
+              <div class="flex items-center justify-between border-b-2 border-dashed border-black/20 pb-2">
+                <span class="font-mono text-[10px] text-neutral-500">${ev.event_id}</span>
+                <span class="text-[10px] text-neutral-600">${tanggal}</span>
+              </div>
+              <div class="text-base font-mono font-black text-emerald-600">
+                Rp ${rupiah}
+              </div>
+              <div class="text-xs text-neutral-700 bg-[#fbf8ee] p-2.5 border border-black rounded-lg font-medium break-words">
+                ${isiPesan}
+              </div>
+              <div class="text-[10px] text-neutral-400 font-mono text-right">
+                IP: ${ev.ip}
+              </div>
+            </div>`;
         });
       }
 
@@ -370,23 +391,23 @@ app.get('/webhook/status', async (req, res) => {
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Riwayat Pembayaran Masuk</title>
+  <title>GeekzPay - Riwayat Mutasi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; color: #000000; background: #fbf8ee; }
-    .neo-card {
+    .neo-box {
       background: #ffffff;
-      border: 2.5px solid #000000;
+      border: 3px solid #000000;
       border-radius: 16px;
-      box-shadow: 4px 4px 0px #000000;
+      box-shadow: 6px 6px 0px #000000;
     }
     .neo-btn {
-      border: 2.5px solid #000000;
-      border-radius: 14px;
-      font-weight: 700;
+      border: 3px solid #000000;
+      border-radius: 12px;
+      font-weight: 800;
       box-shadow: 4px 4px 0px #000000;
-      transition: all 0.1s ease;
+      transition: transform 0.1s, box-shadow 0.1s;
     }
     .neo-btn:active {
       transform: translate(2px, 2px);
@@ -395,48 +416,54 @@ app.get('/webhook/status', async (req, res) => {
   </style>
 </head>
 <body class="min-h-screen pb-12">
-  <header class="sticky top-0 z-40 border-b-4 border-black bg-white/95 backdrop-blur py-4 mb-8">
+  <header class="sticky top-0 z-40 border-b-4 border-black bg-white py-4 mb-6 md:mb-10">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between gap-4">
-      <span class="text-xl font-black tracking-tight text-black uppercase">GEEKZPAY RIWAYAT</span>
-      <span class="text-[11px] font-bold px-3 py-1 rounded-full bg-white border-2 border-black shadow-[2px_2px_0px_#000000] font-mono">
+      <span class="text-lg md:text-xl font-black tracking-tight uppercase">GEEKZPAY MUTASI</span>
+      <span class="text-[10px] md:text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-[#f472b6] border-2 border-black shadow-[2px_2px_0px_#000000]">
         TOKEN: ${token}
       </span>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-4">
-    <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight">Daftar Mutasi Masuk Terbaru</h1>
-        <p class="text-xs text-neutral-500 font-bold mt-0.5">// Menampilkan ${events.length} data terakhir (Batas Limit: ${limit})</p>
+        <p class="text-xs text-neutral-500 font-bold mt-0.5">// Log data antrean (Limit: ${limit})</p>
       </div>
-      <button onclick="window.location.reload()" class="neo-btn bg-white hover:bg-neutral-50 px-4 py-2.5 text-xs uppercase tracking-wider shrink-0 self-start sm:self-auto">
+      <button onclick="window.location.reload()" class="neo-btn bg-[#f472b6] text-white hover:bg-[#ec4899] px-5 py-2.5 text-xs uppercase tracking-wider self-start sm:self-auto">
         Refresh Data ↻
       </button>
     </div>
 
-    <div class="neo-card overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead class="bg-[#f1ebd9] border-b-4 border-black text-xs font-black uppercase tracking-wider">
-            <tr>
-              <th class="p-3 border-r-2 border-black w-32">ID Transaksi</th>
-              <th class="p-3 border-r-2 border-black w-48">Waktu Masuk</th>
-              <th class="p-3 border-r-2 border-black w-40">Jumlah Dana</th>
-              <th class="p-3 border-r-2 border-black">Isi Pesan Notifikasi</th>
-              <th class="p-3 w-32">IP Forwarder</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y-2 divide-black/10 bg-white">
-            ${tableRowsHtml}
-          </tbody>
+    <div class="hidden md:block neo-box overflow-hidden">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-[#f1ebd9] border-b-4 border-black text-xs font-black uppercase tracking-wider">
+          <tr>
+            <th class="p-4 border-r-2 border-black w-32">ID Transaksi</th>
+            <th class="p-4 border-r-2 border-black w-48">Waktu Masuk</th>
+            <th class="p-4 border-r-2 border-black w-44">Jumlah Dana</th>
+            <th class="p-4 border-r-2 border-black">Isi Notifikasi</th>
+            <th class="p-4 w-36">IP Forwarder</th>
+          </tr>
         </table>
+        <div class="max-h-[600px] overflow-y-auto">
+          <table class="w-full text-left border-collapse">
+            <tbody class="bg-white">
+              ${tableRowsHtml}
+            </tbody>
+          </table>
+        </div>
       </div>
+    </div>
+
+    <div class="md:hidden flex flex-col gap-4">
+      ${mobileCardsHtml}
     </div>
     
     <div class="mt-8 text-center">
-      <a href="/docs" class="neo-btn inline-block bg-[#f472b6] text-white px-6 py-3 text-xs uppercase tracking-wider">
-        &larr; Kembali ke Buku Panduan API
+      <a href="/docs" class="neo-btn inline-block bg-white text-black hover:bg-neutral-50 px-6 py-3 text-xs uppercase tracking-wider">
+        &larr; Kembali ke Dokumentasi
       </a>
     </div>
   </main>
