@@ -1,1086 +1,1330 @@
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <title>GeekzPay API Docs</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-  <style>
-  :root { color-scheme: light; }
-  html, body { max-width:100%; overflow-x:hidden; background:#fbf8ee; }
-  body { font-family: system-ui, -apple-system, sans-serif; color:#000000; }
-  
-  .flex > * { min-width: 0; }
-  .grid > * { min-width: 0; }
-  
-  p code, li code, td code, th code, h1 code, h2 code, h3 code, a code {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-  
-  pre { margin:0; }
-  pre code {
-    font-size:.92rem;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  
-  img { max-width:100%; height:auto; }
-  table { width:100%; border-collapse:separate; border-spacing:0; table-layout: fixed; }
-  .input, .select, .textarea { font-size:16px; min-width:0; width:100%; }
-  
-  @media (max-width:480px){
-    pre code { font-size:.86rem; }
-    .btn { padding:.75rem 1rem; font-size:.95rem; }
-  }
-  
-  /* Neo-Brutalism Theme Styles */
-  .neo-card {
-    background: #ffffff;
-    border: 2.5px solid #000000;
-    border-radius: 16px;
-    box-shadow: 4px 4px 0px #000000;
-    position: relative;
-  }
+    <meta charset="UTF-8" />
+    <title>GeekzPay API Docs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #fcf7e8;
+            --card: #ffffff;
+            --black: #111111;
+            --pink: #ff4088;
+            --yellow: #ffe600;
+            --lime: #b4ff00;
+            --cyan: #00e5ff;
+            --orange: #ff6d00;
+            --purple: #7c3aed;
+            --green: #00c853;
+            --red: #ff1744;
+            --shadow-sm: 3px 3px 0px #111111;
+            --shadow-md: 5px 5px 0px #111111;
+            --shadow-lg: 8px 8px 0px #111111;
+            --border: 3px solid #111111;
+        }
 
-  .neo-card-terminal {
-    background: #f1ebd9;
-    border: 2.5px solid #000000;
-    border-radius: 16px;
-    box-shadow: 4px 4px 0px #000000;
-  }
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle, #11111111 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', 'Arial Black', sans-serif;
+            color: var(--black);
+            -webkit-font-smoothing: antialiased;
+        }
 
-  .neo-card-warning {
-    background: #fffbeb;
-    border: 2.5px solid #000000;
-    border-radius: 16px;
-    box-shadow: 4px 4px 0px #000000;
-  }
+        .flex>* {
+            min-width: 0;
+        }
+        .grid>* {
+            min-width: 0;
+        }
 
-  .neo-card-info {
-    background: #f0fdf4;
-    border: 2.5px solid #000000;
-    border-radius: 16px;
-    box-shadow: 4px 4px 0px #000000;
-  }
+        p code,
+        li code,
+        td code,
+        th code,
+        h1 code,
+        h2 code,
+        h3 code,
+        a code {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
 
-  .neo-code-block {
-    background: #ffffff;
-    border: 2px solid #000000;
-    border-radius: 14px;
-    box-shadow: 3px 3px 0px #000000;
-  }
-  
-  .neo-btn {
-    border: 2.5px solid #000000;
-    border-radius: 14px;
-    font-weight: 700;
-    box-shadow: 4px 4px 0px #000000;
-    transition: all 0.1s ease;
-  }
+        pre {
+            margin: 0;
+        }
+        pre code {
+            font-size: .92rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
 
-  .neo-btn:active:not(:disabled) {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px #000000;
-  }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
+        }
+        .input,
+        .select,
+        .textarea {
+            font-size: 16px;
+            min-width: 0;
+            width: 100%;
+        }
 
-  .neo-btn-primary {
-    background-color: #ffffff;
-    color: #000000;
-  }
+        @media (max-width:480px) {
+            pre code {
+                font-size: .86rem;
+            }
+            .btn {
+                padding: .75rem 1rem;
+                font-size: .95rem;
+            }
+        }
 
-  .neo-btn-danger {
-    background-color: #f43f5e;
-    color: #ffffff;
-  }
+        /* ========== NEO-BRUTALISM ENHANCED STYLES ========== */
 
-  .neo-btn-secondary {
-    background-color: #ffffff;
-    color: #000000;
-  }
-  
-  .drop-zone {
-    border: 2.5px dashed #000000;
-    border-radius: 14px;
-    background: #ffffff;
-    padding: 32px 20px;
-    text-align: center;
-    cursor: pointer;
-  }
-  
-  .step-box {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: 2px solid #000000;
-    border-radius: 9999px;
-    background-color: #ffffff;
-    color: #000000;
-    font-weight: 800;
-    margin-right: 10px;
-    box-shadow: 1.5px 1.5px 0px #000000;
-  }
-  
-  .page-section {
-    display: none;
-  }
-  
-  .page-section.active {
-    display: block;
-  }
-  
-  .nav-link {
-    cursor: pointer;
-    border: 2.5px solid #000000;
-    border-radius: 14px;
-    padding: 10px 16px;
-    background: #ffffff;
-    box-shadow: 4px 4px 0px #000000;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: all 0.1s ease;
-    white-space: nowrap;
-  }
-  
-  .nav-link.active {
-    background: #f472b6;
-    color: #ffffff;
-  }
+        .neo-card {
+            background: #ffffff;
+            border: 3px solid #111111;
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px #111111;
+            position: relative;
+            transition: box-shadow 0.15s ease, transform 0.15s ease;
+        }
+        .neo-card:hover {
+            box-shadow: 9px 9px 0px #111111;
+            transform: translate(-2px, -2px);
+        }
 
-  .nav-section-link:hover {
-    color: #f43f5e;
-    text-decoration: underline;
-  }
+        .neo-card-terminal {
+            background: #fffef5;
+            border: 3px solid #111111;
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px #111111;
+            position: relative;
+        }
+        .neo-card-terminal::before {
+            content: '';
+            position: absolute;
+            top: -14px;
+            left: 20px;
+            width: 50px;
+            height: 14px;
+            background: #ffe600;
+            border: 3px solid #111111;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            z-index: 2;
+        }
 
-  .hljs { background: transparent !important; color: #000000 !important; }
-  .hljs-string { color: #0d9488 !important; }
-  .hljs-number { color: #db2777 !important; }
-  .hljs-attr { color: #2563eb !important; }
-  .hljs-keyword { color: #d97706 !important; }
-  </style>
+        .neo-card-warning {
+            background: #fffdf0;
+            border: 3px solid #111111;
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px #111111;
+            position: relative;
+        }
+
+        .neo-card-info {
+            background: #f0fff7;
+            border: 3px solid #111111;
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px #111111;
+        }
+
+        .neo-card-accent-pink {
+            background: #ffffff;
+            border: 3px solid #111111;
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px #ff4088;
+            position: relative;
+        }
+
+        .neo-card-accent-yellow {
+            background: #ffffff;
+            border: 3px solid #111111;
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px #ffe600;
+        }
+
+        .neo-code-block {
+            background: #fafafa;
+            border: 3px solid #111111;
+            border-radius: 16px;
+            box-shadow: 4px 4px 0px #111111;
+            overflow: hidden;
+        }
+
+        .neo-btn {
+            border: 3px solid #111111;
+            border-radius: 16px;
+            font-weight: 800;
+            box-shadow: 5px 5px 0px #111111;
+            transition: all 0.12s ease;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .neo-btn:active:not(:disabled) {
+            transform: translate(3px, 3px);
+            box-shadow: 2px 2px 0px #111111;
+        }
+        .neo-btn:hover:not(:disabled) {
+            transform: translate(-1px, -1px);
+            box-shadow: 7px 7px 0px #111111;
+        }
+
+        .neo-btn-primary {
+            background-color: #ffffff;
+            color: #111111;
+        }
+        .neo-btn-primary:hover:not(:disabled) {
+            background-color: #ffe600;
+        }
+
+        .neo-btn-danger {
+            background-color: #ff4088;
+            color: #ffffff;
+            border-color: #111111;
+        }
+        .neo-btn-danger:hover:not(:disabled) {
+            background-color: #ff1a6e;
+            box-shadow: 7px 7px 0px #111111;
+        }
+
+        .neo-btn-secondary {
+            background-color: #ffffff;
+            color: #111111;
+        }
+        .neo-btn-secondary:hover:not(:disabled) {
+            background-color: #e8e8e8;
+        }
+
+        .neo-btn-go {
+            background-color: #00c853;
+            color: #111111;
+            border-color: #111111;
+        }
+        .neo-btn-go:hover:not(:disabled) {
+            background-color: #00e676;
+            box-shadow: 7px 7px 0px #111111;
+        }
+
+        .drop-zone {
+            border: 3px dashed #111111;
+            border-radius: 16px;
+            background: #ffffff;
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 4px 4px 0px #111111;
+        }
+        .drop-zone:hover {
+            background: #fffef5;
+            border-style: solid;
+            box-shadow: 6px 6px 0px #111111;
+            transform: translate(-1px, -1px);
+        }
+
+        .step-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border: 3px solid #111111;
+            border-radius: 9999px;
+            background-color: #ffe600;
+            color: #111111;
+            font-weight: 900;
+            margin-right: 10px;
+            box-shadow: 2.5px 2.5px 0px #111111;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .page-section {
+            display: none;
+        }
+        .page-section.active {
+            display: block;
+        }
+
+        .nav-link {
+            cursor: pointer;
+            border: 3px solid #111111;
+            border-radius: 14px;
+            padding: 10px 18px;
+            background: #ffffff;
+            box-shadow: 4px 4px 0px #111111;
+            font-weight: 800;
+            font-size: 0.88rem;
+            transition: all 0.12s ease;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            position: relative;
+        }
+        .nav-link:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 6px 6px 0px #111111;
+        }
+        .nav-link.active {
+            background: #ff4088;
+            color: #ffffff;
+            box-shadow: 4px 4px 0px #111111;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #ff4088;
+        }
+
+        .nav-section-link {
+            color: #111111;
+            transition: all 0.12s ease;
+        }
+        .nav-section-link:hover {
+            color: #ff4088;
+            text-decoration: underline;
+            text-decoration-thickness: 3px;
+            text-underline-offset: 4px;
+            text-decoration-color: #ffe600;
+        }
+
+        /* Sticker badge */
+        .sticker-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border: 3px solid #111111;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+            box-shadow: 3px 3px 0px #111111;
+            transform: rotate(-1.5deg);
+            background: #ffe600;
+            color: #111111;
+        }
+        .sticker-badge-pink {
+            background: #ff4088;
+            color: #fff;
+            transform: rotate(1deg);
+        }
+        .sticker-badge-lime {
+            background: #b4ff00;
+            color: #111111;
+            transform: rotate(-2deg);
+        }
+
+        /* Highlighted inline code */
+        .inline-tag {
+            display: inline-block;
+            background: #ffe600;
+            color: #111111;
+            padding: 2px 8px;
+            border: 2px solid #111111;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8em;
+            box-shadow: 2px 2px 0px #111111;
+        }
+
+        /* Decorative stripe */
+        .stripe-accent {
+            background: repeating-linear-gradient(-35deg,
+                    #ffe600 0px,
+                    #ffe600 8px,
+                    #111111 8px,
+                    #111111 10px);
+            height: 6px;
+            border-radius: 3px;
+            margin: 8px 0;
+            border: 2px solid #111111;
+        }
+
+        /* Rotated accent wrapper */
+        .rotated-wrapper {
+            transform: rotate(-0.8deg);
+            display: inline-block;
+        }
+
+        /* HLJS override */
+        .hljs {
+            background: transparent !important;
+            color: #111111 !important;
+        }
+        .hljs-string {
+            color: #00875a !important;
+        }
+        .hljs-number {
+            color: #c62828 !important;
+        }
+        .hljs-attr {
+            color: #1565c0 !important;
+        }
+        .hljs-keyword {
+            color: #e65100 !important;
+        }
+
+        /* Drawer overlay */
+        #drawer .nav-link {
+            display: block;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        #drawer .nav-link.active::after {
+            display: none;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fcf7e8;
+            border-left: 2px solid #111111;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #111111;
+            border-radius: 6px;
+            border: 2px solid #fcf7e8;
+        }
+
+        /* Table enhancement */
+        table thead th {
+            background: #ffe600;
+            color: #111111;
+            border-bottom: 3px solid #111111;
+        }
+        table tbody tr:hover td {
+            background: #fffef5;
+        }
+    </style>
 </head>
 <body class="min-h-screen pb-12">
-  <header class="sticky top-0 z-40 border-b-4 border-black bg-white/95 backdrop-blur py-4">
-    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between gap-4">
-      <button id="openMenu" class="md:hidden px-3 py-1.5 border-2 border-black bg-white font-bold text-xs rounded-xl shadow-[2px_2px_0px_#000000]">MENU &#9776;</button>
-      
-      <div class="flex items-center flex-wrap gap-2 min-w-0">
-        <span class="text-xl md:text-2xl font-black tracking-tight text-black whitespace-nowrap">
-          GEEKZPAY API
-        </span>
-        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#dcfce7] text-[#15803d] border-2 border-black whitespace-nowrap">v2.0</span>
-      </div>
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 border-b-4 border-black bg-white/95 backdrop-blur py-4">
+        <div class="max-w-6xl mx-auto px-4 flex items-center justify-between gap-4">
+            <button id="openMenu" class="md:hidden px-3 py-1.5 border-3 border-black bg-white font-extrabold text-xs rounded-xl shadow-[3px_3px_0px_#111111] hover:bg-yellow-200 transition-colors">MENU &#9776;</button>
 
-      <div class="flex items-center shrink-0">
-        <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-white border-2 border-black flex items-center gap-1.5 shadow-[2px_2px_0px_#000000]">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block border border-black"></span> SISTEM AMAN
-        </span>
-      </div>
-    </div>
-  </header>
-
-  <div class="max-w-6xl mx-auto px-4 w-full mt-6">
-    <div class="flex flex-col gap-6">
-      
-      <nav class="flex flex-wrap gap-3 w-full border-b-2 border-black/10 pb-4">
-        <div class="nav-link active" data-page="docs">&#9632; Dokumentasi API</div>
-        <div class="nav-link" data-page="history">&#9632; Cek Riwayat</div>
-        <div class="nav-link" data-page="forwarder">&#9632; Aplikasi Forwarder (v2.0)</div>
-        <div class="nav-link" data-page="donate">&#9632; Donasi</div>
-      </nav>
-
-      <div class="flex flex-col md:flex-row gap-6 items-start">
-        <aside class="hidden md:block w-52 shrink-0 p-4 border-2 border-black bg-white rounded-2xl shadow-[3px_3px_0px_#000000] text-xs font-bold space-y-3">
-          <div class="text-neutral-400 uppercase tracking-wider font-black text-[10px] mb-1">Menu Navigasi</div>
-          <a href="#hero" class="nav-section-link block text-black">&#9654; Cara Kerja Sistem</a>
-          <a href="#quickstart" class="nav-section-link block text-black">&#9654; Alamat Server Aktif</a>
-          <a href="#qris" class="nav-section-link block text-black">&#9654; Buat QRIS Dinamis</a>
-          <a href="#qr-converter" class="nav-section-link block text-black">&#9654; Scan Gambar QR</a>
-          <a href="#webhook" class="nav-section-link block text-black">&#9654; Tes Kirim Webhook</a>
-          <a href="#history-doc" class="nav-section-link block text-black">&#9654; Alamat URL Riwayat</a>
-          <a href="#examples" class="nav-section-link block text-black">&#9654; Contoh Perintah cURL</a>
-          <a href="#status-code" class="nav-section-link block text-black">&#9654; Arti Kode Error HTTP</a>
-        </aside>
-
-        <div id="drawer" class="fixed inset-0 z-50 hidden">
-          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-          <div class="absolute left-0 top-0 h-full w-72 bg-[#fbf8ee] border-r-4 border-black p-6 font-bold">
-            <div class="flex items-center justify-between mb-6 border-b-2 border-black pb-3">
-              <div class="text-sm uppercase font-black tracking-wider">Navigasi Menu</div>
-              <button id="closeMenu" class="px-2.5 py-1 border-2 border-black bg-white text-xs rounded-lg shadow-[1.5px_1.5px_0px_#000000]">&#10005;</button>
+            <div class="flex items-center flex-wrap gap-2 min-w-0">
+                <span class="text-xl md:text-2xl font-black tracking-tight text-black whitespace-nowrap">
+                    &#x26A1; GEEKZPAY API
+                </span>
+                <span class="sticker-badge sticker-badge-pink">v2.0</span>
             </div>
-            <nav class="space-y-3 text-sm">
-              <div class="nav-link active" data-page="docs" data-close>Dokumentasi API</div>
-              <div class="nav-link" data-page="history" data-close>Cek Riwayat</div>
-              <div class="nav-link" data-page="forwarder" data-close>Aplikasi Forwarder</div>
-              <div class="nav-link" data-page="donate" data-close>Donasi</div>
-              <hr class="border-black my-4 border-t-2">
-              <a href="#hero" class="block py-1 text-black" data-close>&#9654; Cara Kerja Sistem</a>
-              <a href="#quickstart" class="block py-1 text-black" data-close>&#9654; Alamat Server Aktif</a>
-              <a href="#qris" class="block py-1 text-black" data-close>&#9654; Buat QRIS Dinamis</a>
-              <a href="#qr-converter" class="block py-1 text-black" data-close>&#9654; Scan Gambar QR</a>
-              <a href="#webhook" class="block py-1 text-black" data-close>&#9654; Tes Kirim Webhook</a>
-              <a href="#history-doc" class="block py-1 text-black" data-close>&#9654; Alamat URL Riwayat</a>
-              <a href="#examples" class="block py-1 text-black" data-close>&#9654; Contoh Perintah cURL</a>
-              <a href="#status-code" class="block py-1 text-black" data-close>&#9654; Arti Kode Error HTTP</a>
-            </nav>
-          </div>
+
+            <div class="flex items-center shrink-0 gap-2">
+                <span class="sticker-badge sticker-badge-lime flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block border-2 border-black animate-pulse"></span> SISTEM AMAN
+                </span>
+            </div>
         </div>
+    </header>
 
-        <main class="flex-1 w-full space-y-8">
-          <div id="docs-page" class="page-section active space-y-8">
-            
-            <section id="hero" class="neo-card p-6">
-              <h1 class="text-2xl md:text-3xl font-black tracking-tight text-black mb-2">PANDUAN SISTEM GEEKZPAY REST API</h1>
-              <p class="text-sm text-neutral-700 font-medium leading-relaxed mb-4">
-                Sistem ini berfungsi untuk mengecek dan mencatat pembayaran QRIS secara otomatis hanya dengan membaca notifikasi handphone Anda sendiri secara langsung.
-              </p>
-              <div class="bg-amber-50 border-2 border-black p-4 rounded-xl text-xs font-bold space-y-2">
-                <div class="text-black uppercase tracking-wide">// LALU BAGAIMANA ALUR KERJA OTOMATISNYA?</div>
-                <ol class="list-decimal list-inside space-y-1.5 text-neutral-800 font-medium text-[13px]">
-                  <li>Website atau aplikasi Anda membuat kode QRIS Dinamis lengkap dengan **Kode Unik** di belakangnya (contoh: Rp 10.338).</li>
-                  <li>Pembeli melakukan scan kode QRIS dan membayar pas sesuai angka tersebut.</li>
-                  <li>HP Anda menerima notifikasi SMS atau pop-up dana masuk dari aplikasi bank/e-wallet Anda (seperti DANA, ShopeePay, OVO, dll).</li>
-                  <li>Aplikasi <span class="text-pink-600">Geekz Forwarder</span> di HP otomatis membaca isi notifikasi teks tersebut, lalu mengirimkannya ke server Anda dalam hitungan detik.</li>
-                  <li>Server website Anda menerima data itu, mencocokkan nominalnya, dan langsung merubah status pembelian menjadi **LUNAS**.</li>
-                </ol>
-              </div>
-            </section>
+    <div class="max-w-6xl mx-auto px-4 w-full mt-6">
+        <div class="flex flex-col gap-6">
 
-            <section id="quickstart">
-              <div class="neo-card-warning p-5">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="text-base">⚠</span>
-                  <h3 class="font-black text-xs uppercase tracking-wide">Konfigurasi Alamat API Utama</h3>
-                </div>
-                <p class="text-xs font-semibold text-amber-950 leading-relaxed">Alamat URL server di bawah ini terdeteksi otomatis sesuai lokasi berjalannya aplikasi. Anda tidak perlu merubah bagian ini untuk menjalankan simulasi pengujian tombol di halaman dokumen.</p>
-                
-                <div class="mt-4 pt-4 border-t-2 border-black/10">
-                  <label class="block text-[11px] uppercase font-black text-neutral-400 tracking-wider mb-1.5">// Alamat Base URL Server Anda (Terdeteksi Otomatis)</label>
-                  <div class="flex flex-col sm:flex-row gap-2">
-                    <input id="baseUrl" type="text" disabled
-                           class="flex-1 px-3 py-2 border-2 border-black bg-neutral-100 font-mono text-xs text-neutral-500 focus:outline-none rounded-xl font-bold cursor-not-allowed" />
-                  </div>
-                </div>
-              </div>
-            </section>
+            <!-- NAVIGATION TABS -->
+            <nav class="flex flex-wrap gap-3 w-full border-b-3 border-black/15 pb-4">
+                <div class="nav-link active" data-page="docs">&#9632; Dokumentasi API</div>
+                <div class="nav-link" data-page="history">&#9632; Cek Riwayat</div>
+                <div class="nav-link" data-page="forwarder">&#9632; Aplikasi Forwarder (v2.0)</div>
+                <div class="nav-link" data-page="donate">&#9632; Donasi</div>
+            </nav>
 
-            <section id="qris">
-              <div class="neo-card-terminal p-5">
-                <div class="border-b-2 border-black pb-3 mb-4">
-                  <h2 class="text-lg font-black uppercase tracking-tight">1. MENU BUAT QRIS DINAMIS</h2>
-                  <p class="text-[11px] text-neutral-600 font-bold mt-0.5">Membuat kode bayar yang memiliki nominal acak di belakangnya agar sistem tahu siapa pembelinya.</p>
-                </div>
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <!-- SIDEBAR DESKTOP -->
+                <aside class="hidden md:block w-52 shrink-0 p-5 border-3 border-black bg-white rounded-2xl shadow-[5px_5px_0px_#111111] text-xs font-bold space-y-3 sticky top-28">
+                    <div class="sticker-badge mb-2">Menu Navigasi</div>
+                    <a href="#hero" class="nav-section-link block text-black text-[11px]">&#9654; Cara Kerja Sistem</a>
+                    <a href="#quickstart" class="nav-section-link block text-black text-[11px]">&#9654; Alamat Server Aktif</a>
+                    <a href="#qris" class="nav-section-link block text-black text-[11px]">&#9654; Buat QRIS Dinamis</a>
+                    <a href="#qr-converter" class="nav-section-link block text-black text-[11px]">&#9654; Scan Gambar QR</a>
+                    <a href="#webhook" class="nav-section-link block text-black text-[11px]">&#9654; Tes Kirim Webhook</a>
+                    <a href="#history-doc" class="nav-section-link block text-black text-[11px]">&#9654; Alamat URL Riwayat</a>
+                    <a href="#examples" class="nav-section-link block text-black text-[11px]">&#9654; Contoh Perintah cURL</a>
+                    <a href="#status-code" class="nav-section-link block text-black text-[11px]">&#9654; Arti Kode Error HTTP</a>
+                    <div class="stripe-accent mt-3"></div>
+                    <div class="text-[9px] text-neutral-400 font-semibold uppercase tracking-wider leading-relaxed">Dibangun dengan semangat Neobrutalism &#x2764;&#xFE0F;</div>
+                </aside>
 
-                <div class="grid gap-4 md:grid-cols-2 text-xs">
-                  <div>
-                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Harga Dasar Barang (IDR) <span class="text-rose-600">*</span></label>
-                    <input id="tiBase" type="number" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black" placeholder="10000">
-                  </div>
-                  <div>
-                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Kode Unik Tambahan (Angka 1-999)</label>
-                    <input id="tiUnique" type="number" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black" placeholder="338">
-                  </div>
-                  <div class="md:col-span-2 flex items-center gap-2 py-0.5">
-                    <input id="tiAutoUnique" type="checkbox" class="w-4 h-4 accent-black border-2 border-black rounded">
-                    <label for="tiAutoUnique" class="font-bold uppercase text-black tracking-wide cursor-pointer text-[11px]">Biar Sistem Acak Kode Unik Otomatis</label>
-                  </div>
-                  <div class="md:col-span-2 border-t-2 border-dashed border-black/20 pt-3">
-                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Atau Masukkan Total Nominal Mutlak (Tanpa Kode Unik Tambahan)</label>
-                    <input id="tiAmount" type="number" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black" placeholder="10338">
-                  </div>
-                  <div class="md:col-span-2">
-                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Isi Payload QRIS Statis Anda</label>
-                    <textarea id="tiPayload" rows="2" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black" placeholder="00020101021126...6304XXXX"></textarea>
-                  </div>
-                </div>
-                
-                <div class="flex flex-wrap gap-2.5 mt-5 pt-4 border-t-2 border-black">
-                  <button id="btnDynamic" class="neo-btn neo-btn-primary px-5 py-2.5 text-xs uppercase tracking-wider">PROSES & BUAT GAMBAR QRIS</button>
-                  <button id="btnDynamicReset" class="neo-btn neo-btn-secondary px-5 py-2.5 text-xs uppercase tracking-wider">BERSIHKAN INPUT</button>
-                </div>
-
-                <div id="outDynamic" class="mt-6 pt-4 border-t-2 border-dashed border-black/30 hidden">
-                  <h4 class="text-xs uppercase font-black tracking-wider text-black mb-2">// Hasil Data dari Server Utama</h4>
-                  <div class="text-[10px] font-mono text-neutral-600 mb-3 bg-white/60 p-2 border border-black rounded-lg" id="metaDynamic"></div>
-                  
-                  <div class="grid gap-4 md:grid-cols-2">
-                    <div class="neo-card p-3">
-                      <div class="text-[10px] font-mono text-neutral-400 mb-1.5 uppercase tracking-wider">// Output Data Format JSON</div>
-                      <pre class="overflow-x-auto text-xs"><code id="jsonDynamic" class="language-json"></code></pre>
+                <!-- MOBILE DRAWER -->
+                <div id="drawer" class="fixed inset-0 z-50 hidden">
+                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+                    <div class="absolute left-0 top-0 h-full w-72 bg-[#fcf7e8] border-r-4 border-black p-6 font-bold shadow-[8px_0px_0px_#111111]">
+                        <div class="flex items-center justify-between mb-6 border-b-3 border-black pb-3">
+                            <div class="sticker-badge">Navigasi Menu</div>
+                            <button id="closeMenu" class="px-3 py-1 border-3 border-black bg-white text-xs rounded-xl shadow-[2px_2px_0px_#111111] font-extrabold hover:bg-red-100 transition-colors">&#10005;</button>
+                        </div>
+                        <nav class="space-y-3 text-sm">
+                            <div class="nav-link active" data-page="docs" data-close>Dokumentasi API</div>
+                            <div class="nav-link" data-page="history" data-close>Cek Riwayat</div>
+                            <div class="nav-link" data-page="forwarder" data-close>Aplikasi Forwarder</div>
+                            <div class="nav-link" data-page="donate" data-close>Donasi</div>
+                            <hr class="border-black my-4 border-t-2">
+                            <a href="#hero" class="block py-1.5 text-black text-[11px] font-bold" data-close>&#9654; Cara Kerja Sistem</a>
+                            <a href="#quickstart" class="block py-1.5 text-black text-[11px] font-bold" data-close>&#9654; Alamat Server Aktif</a>
+                            <a href="#qris" class="block py-1.5 text-black text-[11px] font-bold" data-close>&#9654; Buat QRIS Dinamis</a>
+                            <a href="#qr-converter" class="block py-1.5 text-black text-[11px] font-bold" data-close>&#9654; Scan Gambar QR</a>
+                            <a href="#webhook" class="block py-1.5 text-black text-[11px] font-bold" data-close>&#9654; Tes Kirim Webhook</a>
+                            <a href="#history-doc" class="block py-1.5 text-black text-[11px] font-bold" data-close>&#9654; Alamat URL Riwayat</a>
+                            <a href="#examples" class="block py-1.5 text-black text-[11px] font-bold" data-close>&#9654; Contoh Perintah cURL</a>
+                            <a href="#status-code" class="block py-1.5 text-black text-[11px] font-bold" data-close>&#9654; Arti Kode Error HTTP</a>
+                        </nav>
                     </div>
-                    <div class="border-2 border-black bg-white rounded-xl p-3 flex flex-col justify-between items-center shadow-[2px_2px_0px_#000000]">
-                      <div class="text-xs font-bold text-black mb-3 uppercase tracking-wider self-start">// Tampilan Gambar QRIS Hasil Generate</div>
-                      <div class="p-2 bg-white border-2 border-black inline-block">
-                        <img id="imgQR" class="w-full max-w-[140px] block mx-auto">
-                      </div>
-                      <div class="w-full text-center text-[10px] text-neutral-500 font-mono mt-3">Pembeli harus men-scan dan membayar tepat sesuai angka di atas.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section id="qr-converter">
-              <div class="neo-card p-5">
-                <div class="border-b-2 border-black pb-3 mb-4">
-                  <h2 class="text-lg font-black uppercase tracking-tight">2. SCAN ATAU BACA GAMBAR QRIS (QR CONVERTER)</h2>
-                  <p class="text-[11px] text-neutral-500 font-semibold mt-0.5">Masukkan file gambar QRIS Anda di sini untuk diubah menjadi barisan teks kode mentah (*payload string*).</p>
-                </div>
-                
-                <div id="dropZone" class="drop-zone mb-4 font-bold text-xs">
-                  <div class="text-3xl mb-2 text-black">&#9634;</div>
-                  <p class="text-black text-sm">Tarik dan jatuhkan file gambar ke sini, atau klik untuk mencari berkas</p>
-                  <p class="text-[11px] text-neutral-400 mt-1">Ekstensi File: PNG, JPG, JPEG (Ukuran Maksimal: 2MB)</p>
-                  <input type="file" id="fileInput" class="hidden" accept="image/png,image/jpeg,image/jpg">
                 </div>
 
-                <div id="previewSection" class="hidden mb-4 border-2 border-black bg-white rounded-xl p-3">
-                  <h4 class="text-xs uppercase font-black text-black mb-2">// Pratinjau Gambar Anda</h4>
-                  <div class="preview-container p-1 bg-neutral-50 border border-neutral-300">
-                    <img id="imagePreview" class="w-full border border-neutral-400">
-                  </div>
-                </div>
+                <!-- MAIN CONTENT -->
+                <main class="flex-1 w-full space-y-8">
+                    <!-- DOKUMENTASI API PAGE -->
+                    <div id="docs-page" class="page-section active space-y-8">
 
-                <div class="flex gap-2.5">
-                  <button id="btnConvert" class="neo-btn neo-btn-primary px-5 py-2 text-xs disabled:opacity-40 disabled:pointer-events-none" disabled>Mulai Baca Gambar</button>
-                  <button id="btnResetConverter" class="neo-btn neo-btn-secondary px-5 py-2 text-xs">Hapus File</button>
-                </div>
+                        <!-- HERO -->
+                        <section id="hero" class="neo-card p-6">
+                            <div class="flex items-center gap-3 mb-3 flex-wrap">
+                                <span class="sticker-badge sticker-badge-pink text-sm">PENTING</span>
+                                <h1 class="text-2xl md:text-3xl font-black tracking-tight text-black">PANDUAN SISTEM GEEKZPAY REST API</h1>
+                            </div>
+                            <p class="text-sm text-neutral-700 font-semibold leading-relaxed mb-4">
+                                Sistem ini berfungsi untuk mengecek dan mencatat pembayaran QRIS secara otomatis hanya dengan membaca notifikasi handphone Anda sendiri secara langsung.
+                            </p>
+                            <div class="bg-amber-50 border-3 border-black p-5 rounded-xl text-xs font-bold space-y-2 shadow-[4px_4px_0px_#111111]">
+                                <div class="text-black uppercase tracking-wide text-sm font-black">// LALU BAGAIMANA ALUR KERJA OTOMATISNYA?</div>
+                                <ol class="list-decimal list-inside space-y-2 text-neutral-800 font-semibold text-[13px]">
+                                    <li>Website atau aplikasi Anda membuat kode QRIS Dinamis lengkap dengan <span class="inline-tag">Kode Unik</span> di belakangnya (contoh: Rp 10.338).</li>
+                                    <li>Pembeli melakukan scan kode QRIS dan membayar pas sesuai angka tersebut.</li>
+                                    <li>HP Anda menerima notifikasi SMS atau pop-up dana masuk dari aplikasi bank/e-wallet Anda (seperti DANA, ShopeePay, OVO, dll).</li>
+                                    <li>Aplikasi <span class="inline-tag">Geekz Forwarder</span> di HP otomatis membaca isi notifikasi teks tersebut, lalu mengirimkannya ke server Anda dalam hitungan detik.</li>
+                                    <li>Server website Anda menerima data itu, mencocokkan nominalnya, dan langsung merubah status pembelian menjadi <span class="inline-tag">LUNAS</span>.</li>
+                                </ol>
+                            </div>
+                        </section>
 
-                <div id="outConverter" class="mt-6 pt-4 border-t-2 border-dashed border-black hidden">
-                  <h4 class="text-xs uppercase font-black text-black mb-2">// Teks Kode Hasil Pembacaan</h4>
-                  <div class="text-[10px] font-mono text-neutral-500 mb-2 bg-neutral-100 p-2 border border-black rounded-lg" id="metaConverter"></div>
-                  <div class="neo-card p-3">
-                    <pre class="overflow-x-auto text-xs"><code id="jsonConverter" class="language-json"></code></pre>
-                  </div>
-                  <button id="btnCopyPayload" class="neo-btn neo-btn-primary bg-zinc-800 text-white hover:bg-zinc-700 text-xs px-4 py-2 mt-3.5">Salin Teks Kode</button>
-                </div>
-              </div>
-            </section>
+                        <!-- QUICKSTART -->
+                        <section id="quickstart">
+                            <div class="neo-card-warning p-5">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xl">&#9888;&#65039;</span>
+                                    <h3 class="font-black text-xs uppercase tracking-wide">Konfigurasi Alamat API Utama</h3>
+                                </div>
+                                <p class="text-xs font-semibold text-amber-950 leading-relaxed">Alamat URL server di bawah ini terdeteksi otomatis sesuai lokasi berjalannya aplikasi. Anda tidak perlu merubah bagian ini untuk menjalankan simulasi pengujian tombol di halaman dokumen.</p>
+                                <div class="stripe-accent my-3"></div>
+                                <div>
+                                    <label class="block text-[11px] uppercase font-black text-neutral-500 tracking-wider mb-1.5">// Alamat Base URL Server Anda (Terdeteksi Otomatis)</label>
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        <input id="baseUrl" type="text" disabled class="flex-1 px-3 py-2.5 border-3 border-black bg-neutral-100 font-mono text-xs text-neutral-600 focus:outline-none rounded-xl font-bold cursor-not-allowed shadow-[2px_2px_0px_#111111]" />
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
 
-            <section id="webhook">
-              <div class="neo-card-terminal p-5">
-                <div class="border-b-2 border-black pb-3 mb-4">
-                  <h2 class="text-lg font-black uppercase tracking-tight">3. SIMULATOR TES KIRIM NOTIFIKASI (WEBHOOK)</h2>
-                  <p class="text-[11px] text-neutral-600 font-bold mt-0.5">Uji coba untuk meniru cara kerja HP Forwarder saat mengirimkan teks mutasi dana masuk menuju ke server website Anda.</p>
-                </div>
+                        <!-- QRIS DYNAMIC -->
+                        <section id="qris">
+                            <div class="neo-card-terminal p-5">
+                                <div class="border-b-3 border-black pb-3 mb-4">
+                                    <h2 class="text-lg font-black uppercase tracking-tight">1. MENU BUAT QRIS DINAMIS</h2>
+                                    <p class="text-[11px] text-neutral-600 font-bold mt-0.5">Membuat kode bayar yang memiliki nominal acak di belakangnya agar sistem tahu siapa pembelinya.</p>
+                                </div>
 
-                <div class="grid gap-4 md:grid-cols-2 text-xs">
-                  <div>
-                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Kode Token Keamanan Akun Anda</label>
-                    <input id="tiToken" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black" placeholder="USER123">
-                  </div>
-                  <div>
-                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Format Pengiriman Data</label>
-                    <select id="tiMode" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black">
-                      <option value="json">application/json</option>
-                      <option value="form">application/x-www-form-urlencoded</option>
-                      <option value="text">text/plain</option>
-                    </select>
-                  </div>
-                  <div class="md:col-span-2">
-                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Isi Contoh Pesan Notifikasi Tiruan</label>
-                    <textarea id="tiBody" rows="2" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black" placeholder='{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }'>{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }</textarea>
-                  </div>
-                </div>
-                
-                <div class="flex gap-2.5 mt-5 pt-4 border-t-2 border-black">
-                  <button id="btnWebhook" class="neo-btn neo-btn-primary px-5 py-2 text-xs">KIRIM SIMULASI SEKARANG</button>
-                  <button id="btnWebhookReset" class="neo-btn neo-btn-secondary px-5 py-2 text-xs">RESET FORM SIMULATOR</button>
-                </div>
+                                <div class="grid gap-4 md:grid-cols-2 text-xs">
+                                    <div>
+                                        <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Harga Dasar Barang (IDR) <span class="text-rose-600">*</span></label>
+                                        <input id="tiBase" type="number" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black shadow-[2px_2px_0px_#111111]" placeholder="10000">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Kode Unik Tambahan (Angka 1-999)</label>
+                                        <input id="tiUnique" type="number" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black shadow-[2px_2px_0px_#111111]" placeholder="338">
+                                    </div>
+                                    <div class="md:col-span-2 flex items-center gap-2 py-1">
+                                        <input id="tiAutoUnique" type="checkbox" class="w-5 h-5 accent-black border-3 border-black rounded">
+                                        <label for="tiAutoUnique" class="font-bold uppercase text-black tracking-wide cursor-pointer text-[11px]">Biar Sistem Acak Kode Unik Otomatis</label>
+                                    </div>
+                                    <div class="md:col-span-2 border-t-3 border-dashed border-black/20 pt-3">
+                                        <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Atau Masukkan Total Nominal Mutlak (Tanpa Kode Unik Tambahan)</label>
+                                        <input id="tiAmount" type="number" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black shadow-[2px_2px_0px_#111111]" placeholder="10338">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Isi Payload QRIS Statis Anda</label>
+                                        <textarea id="tiPayload" rows="2" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black shadow-[2px_2px_0px_#111111]" placeholder="00020101021126...6304XXXX"></textarea>
+                                    </div>
+                                </div>
 
-                <div id="outWebhook" class="mt-6 pt-4 border-t-2 border-dashed border-black/30 hidden">
-                  <h4 class="text-xs uppercase font-black text-black mb-2">// Balasan dari Server Anda (Response)</h4>
-                  <div class="text-[10px] font-mono text-neutral-600 mb-2 bg-white/60 p-2 border border-black rounded-lg" id="metaWebhook"></div>
-                  <div class="neo-card p-3">
-                    <pre class="overflow-x-auto text-xs"><code id="jsonWebhook" class="language-json"></code></pre>
-                  </div>
-                </div>
-              </div>
-            </section>
+                                <div class="flex flex-wrap gap-3 mt-5 pt-4 border-t-3 border-black">
+                                    <button id="btnDynamic" class="neo-btn neo-btn-go px-5 py-3 text-xs tracking-wider font-black">&#9889; PROSES & BUAT GAMBAR QRIS</button>
+                                    <button id="btnDynamicReset" class="neo-btn neo-btn-secondary px-5 py-3 text-xs tracking-wider">BERSIHKAN INPUT</button>
+                                </div>
 
-            <section id="history-doc">
-              <div class="neo-card p-5">
-                <div class="border-b-2 border-black pb-2 mb-3">
-                  <h2 class="text-lg font-black uppercase tracking-tight">4. ALAMAT URL CEK RIWAYAT PEMBAYARAN</h2>
-                  <p class="text-[11px] text-neutral-500 font-bold">// Jalur Akses: GET /webhook/status?token=USER123&limit=5</p>
-                </div>
-                <p class="text-xs text-neutral-700 font-semibold mb-3">Gunakan alamat URL di bawah ini pada website Anda jika ingin mengambil data daftar pembayaran terakhir yang sukses masuk ke database.</p>
-                <div class="neo-card p-3 font-mono text-xs font-bold bg-[#fcfcfc]">
-                  <span class="text-rose-600 font-black">GET</span> /webhook/status?token=USER123&limit=5
-                </div>
-              </div>
-            </section>
+                                <div id="outDynamic" class="mt-6 pt-4 border-t-3 border-dashed border-black/30 hidden">
+                                    <h4 class="text-xs uppercase font-black tracking-wider text-black mb-2 flex items-center gap-2"><span class="sticker-badge">HASIL</span> // Hasil Data dari Server Utama</h4>
+                                    <div class="text-[10px] font-mono text-neutral-600 mb-3 bg-white/60 p-2 border-3 border-black rounded-lg font-semibold" id="metaDynamic"></div>
+                                    <div class="grid gap-4 md:grid-cols-2">
+                                        <div class="neo-card p-3">
+                                            <div class="text-[10px] font-mono text-neutral-400 mb-1.5 uppercase tracking-wider font-black">// Output Data Format JSON</div>
+                                            <pre class="overflow-x-auto text-xs"><code id="jsonDynamic" class="language-json"></code></pre>
+                                        </div>
+                                        <div class="border-3 border-black bg-white rounded-xl p-3 flex flex-col justify-between items-center shadow-[4px_4px_0px_#111111]">
+                                            <div class="text-xs font-bold text-black mb-3 uppercase tracking-wider self-start font-black">// Tampilan Gambar QRIS Hasil Generate</div>
+                                            <div class="p-3 bg-white border-3 border-black inline-block shadow-[3px_3px_0px_#111111]">
+                                                <img id="imgQR" class="w-full max-w-[140px] block mx-auto">
+                                            </div>
+                                            <div class="w-full text-center text-[10px] text-neutral-500 font-mono mt-3 font-semibold">Pembeli harus men-scan dan membayar tepat sesuai angka di atas.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
 
-            <section id="examples" class="space-y-4">
-              <h2 class="text-xl font-black uppercase tracking-tight">📚 Contoh Perintah cURL (Bagi Developer Backend)</h2>
-              
-              <div class="neo-card p-5">
-                <div class="text-xs uppercase font-black text-rose-600 mb-1">// A. Membuat Perintah QRIS Dinamis</div>
-                <p class="text-xs text-neutral-600 font-semibold mb-3">Salin perintah di bawah ini untuk disuntikkan ke dalam sistem script website backend Anda.</p>
-                <div class="neo-card p-3 mb-2 bg-[#fcfcfc]">
-                  <pre class="overflow-x-auto text-xs"><code class="language-bash">curl -X POST https://restapi.amgeekz.my.id/qris/dynamic \
+                        <!-- QR CONVERTER -->
+                        <section id="qr-converter">
+                            <div class="neo-card p-5">
+                                <div class="border-b-3 border-black pb-3 mb-4">
+                                    <h2 class="text-lg font-black uppercase tracking-tight">2. SCAN ATAU BACA GAMBAR QRIS (QR CONVERTER)</h2>
+                                    <p class="text-[11px] text-neutral-500 font-semibold mt-0.5">Masukkan file gambar QRIS Anda di sini untuk diubah menjadi barisan teks kode mentah (<em>payload string</em>).</p>
+                                </div>
+                                <div id="dropZone" class="drop-zone mb-4 font-bold text-xs">
+                                    <div class="text-4xl mb-2 text-black">&#9634;</div>
+                                    <p class="text-black text-sm font-extrabold">Tarik dan jatuhkan file gambar ke sini, atau klik untuk mencari berkas</p>
+                                    <p class="text-[11px] text-neutral-400 mt-1 font-semibold">Ekstensi File: PNG, JPG, JPEG (Ukuran Maksimal: 2MB)</p>
+                                    <input type="file" id="fileInput" class="hidden" accept="image/png,image/jpeg,image/jpg">
+                                </div>
+                                <div id="previewSection" class="hidden mb-4 border-3 border-black bg-white rounded-xl p-3 shadow-[3px_3px_0px_#111111]">
+                                    <h4 class="text-xs uppercase font-black text-black mb-2">// Pratinjau Gambar Anda</h4>
+                                    <div class="preview-container p-2 bg-neutral-50 border-2 border-neutral-400 rounded-lg">
+                                        <img id="imagePreview" class="w-full border-2 border-neutral-400 rounded">
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button id="btnConvert" class="neo-btn neo-btn-primary px-5 py-2.5 text-xs disabled:opacity-40 disabled:pointer-events-none font-black" disabled>Mulai Baca Gambar</button>
+                                    <button id="btnResetConverter" class="neo-btn neo-btn-secondary px-5 py-2.5 text-xs">Hapus File</button>
+                                </div>
+                                <div id="outConverter" class="mt-6 pt-4 border-t-3 border-dashed border-black hidden">
+                                    <h4 class="text-xs uppercase font-black text-black mb-2 flex items-center gap-2"><span class="sticker-badge">OUTPUT</span> // Teks Kode Hasil Pembacaan</h4>
+                                    <div class="text-[10px] font-mono text-neutral-500 mb-2 bg-neutral-100 p-2 border-3 border-black rounded-lg font-semibold" id="metaConverter"></div>
+                                    <div class="neo-card p-3">
+                                        <pre class="overflow-x-auto text-xs"><code id="jsonConverter" class="language-json"></code></pre>
+                                    </div>
+                                    <button id="btnCopyPayload" class="neo-btn neo-btn-danger bg-zinc-900 text-white hover:bg-zinc-700 text-xs px-4 py-2.5 mt-3.5 font-black">&#128203; Salin Teks Kode</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- WEBHOOK SIMULATOR -->
+                        <section id="webhook">
+                            <div class="neo-card-terminal p-5">
+                                <div class="border-b-3 border-black pb-3 mb-4">
+                                    <h2 class="text-lg font-black uppercase tracking-tight">3. SIMULATOR TES KIRIM NOTIFIKASI (WEBHOOK)</h2>
+                                    <p class="text-[11px] text-neutral-600 font-bold mt-0.5">Uji coba untuk meniru cara kerja HP Forwarder saat mengirimkan teks mutasi dana masuk menuju ke server website Anda.</p>
+                                </div>
+                                <div class="grid gap-4 md:grid-cols-2 text-xs">
+                                    <div>
+                                        <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Kode Token Keamanan Akun Anda</label>
+                                        <input id="tiToken" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black shadow-[2px_2px_0px_#111111]" placeholder="USER123">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Format Pengiriman Data</label>
+                                        <select id="tiMode" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black shadow-[2px_2px_0px_#111111]">
+                                            <option value="json">application/json</option>
+                                            <option value="form">application/x-www-form-urlencoded</option>
+                                            <option value="text">text/plain</option>
+                                        </select>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Isi Contoh Pesan Notifikasi Tiruan</label>
+                                        <textarea id="tiBody" rows="2" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black shadow-[2px_2px_0px_#111111]" placeholder='{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }'>{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }</textarea>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 mt-5 pt-4 border-t-3 border-black">
+                                    <button id="btnWebhook" class="neo-btn neo-btn-danger px-5 py-3 text-xs font-black">&#128640; KIRIM SIMULASI SEKARANG</button>
+                                    <button id="btnWebhookReset" class="neo-btn neo-btn-secondary px-5 py-3 text-xs">RESET FORM SIMULATOR</button>
+                                </div>
+                                <div id="outWebhook" class="mt-6 pt-4 border-t-3 border-dashed border-black/30 hidden">
+                                    <h4 class="text-xs uppercase font-black text-black mb-2 flex items-center gap-2"><span class="sticker-badge sticker-badge-pink">RESPON</span> // Balasan dari Server Anda</h4>
+                                    <div class="text-[10px] font-mono text-neutral-600 mb-2 bg-white/60 p-2 border-3 border-black rounded-lg font-semibold" id="metaWebhook"></div>
+                                    <div class="neo-card p-3">
+                                        <pre class="overflow-x-auto text-xs"><code id="jsonWebhook" class="language-json"></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- HISTORY DOC -->
+                        <section id="history-doc">
+                            <div class="neo-card p-5">
+                                <div class="border-b-3 border-black pb-2 mb-3">
+                                    <h2 class="text-lg font-black uppercase tracking-tight">4. ALAMAT URL CEK RIWAYAT PEMBAYARAN</h2>
+                                    <p class="text-[11px] text-neutral-500 font-bold">// Jalur Akses: GET /webhook/status?token=USER123&limit=5</p>
+                                </div>
+                                <p class="text-xs text-neutral-700 font-semibold mb-3">Gunakan alamat URL di bawah ini pada website Anda jika ingin mengambil data daftar pembayaran terakhir yang sukses masuk ke database.</p>
+                                <div class="neo-card p-4 font-mono text-xs font-bold bg-[#fcfcfc] shadow-[3px_3px_0px_#111111]">
+                                    <span class="text-rose-600 font-black text-sm">GET</span> /webhook/status?token=USER123&limit=5
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- EXAMPLES -->
+                        <section id="examples" class="space-y-4">
+                            <h2 class="text-xl font-black uppercase tracking-tight flex items-center gap-2">&#128218; <span>Contoh Perintah cURL (Bagi Developer Backend)</span></h2>
+                            <div class="neo-card p-5">
+                                <div class="text-xs uppercase font-black text-rose-600 mb-1">// A. Membuat Perintah QRIS Dinamis</div>
+                                <p class="text-xs text-neutral-600 font-semibold mb-3">Salin perintah di bawah ini untuk disuntikkan ke dalam sistem script website backend Anda.</p>
+                                <div class="neo-card p-3 mb-2 bg-[#fcfcfc] shadow-[3px_3px_0px_#111111]">
+                                    <pre class="overflow-x-auto text-xs"><code class="language-bash">curl -X POST https://restapi.amgeekz.my.id/qris/dynamic \
   -d base_amount=20000 \
   -d unique_code=777 \
   -d payload_static='00020101021126...6304ABCD' \
   -d qr=png</code></pre>
-                </div>
-                <div class="text-[10px] font-mono text-neutral-400 my-1">// Contoh Struktur Balasan Sukses dari Server (JSON Response)</div>
-                <div class="neo-card p-3">
-                  <pre class="overflow-x-auto text-xs"><code class="language-json">{
-  "base_amount": 20000,
-  "unique_code": 777,
-  "total": 20777,
-  "payload": "00020101021126...",
-  "qr_png_data_url": "data:image/png;base64,..."
+                                </div>
+                                <div class="text-[10px] font-mono text-neutral-400 my-1 font-bold">// Contoh Struktur Balasan Sukses dari Server (JSON Response)</div>
+                                <div class="neo-card p-3 shadow-[3px_3px_0px_#111111]">
+                                    <pre class="overflow-x-auto text-xs"><code class="language-json">{
+"base_amount": 20000,
+"unique_code": 777,
+"total": 20777,
+"payload": "00020101021126...",
+"qr_png_data_url": "data:image/png;base64,..."
 }</code></pre>
-                </div>
-              </div>
-              
-              <div class="neo-card p-5">
-                <div class="text-xs uppercase font-black text-rose-600 mb-1">// B. Perintah Kirim Notifikasi Pembayaran (Webhook Callback)</div>
-                <p class="text-xs text-neutral-600 font-semibold mb-3">Perintah manual ini digunakan apabila Anda ingin mencoba mengetes lemparan mutasi data tanpa melalui aplikasi HP.</p>
-                <div class="neo-card p-3 mb-3 bg-[#fcfcfc]">
-                  <pre class="overflow-x-auto text-xs"><code class="language-bash">curl -X POST 'https://restapi.amgeekz.my.id/webhook/payment?token=USER123' \
+                                </div>
+                            </div>
+                            <div class="neo-card p-5">
+                                <div class="text-xs uppercase font-black text-rose-600 mb-1">// B. Perintah Kirim Notifikasi Pembayaran (Webhook Callback)</div>
+                                <p class="text-xs text-neutral-600 font-semibold mb-3">Perintah manual ini digunakan apabila Anda ingin mencoba mengetes lemparan mutasi data tanpa melalui aplikasi HP.</p>
+                                <div class="neo-card p-3 mb-3 bg-[#fcfcfc] shadow-[3px_3px_0px_#111111]">
+                                    <pre class="overflow-x-auto text-xs"><code class="language-bash">curl -X POST 'https://restapi.amgeekz.my.id/webhook/payment?token=USER123' \
   -H 'Content-Type: application/json' \
   -d '{ "message": "Pembayaran Rp 15.250 diterima" }'</code></pre>
-                </div>
-                
-                <div class="neo-card-info p-4">
-                  <div class="flex items-start gap-3">
-                    <span class="text-xl font-mono text-black">&#9633;</span>
-                    <div class="flex-1 text-xs">
-                      <h4 class="font-black uppercase tracking-wide mb-1 text-emerald-950">Info Penting Otomatisasi Terintegrasi:</h4>
-                      <p class="text-emerald-900 font-semibold mb-3 leading-relaxed">Apabila aplikasi Android **Geekz Forwarder** sudah terpasang dan disetting dengan benar di HP Anda, maka Anda tidak perlu lagi mengetikkan kode cURL di atas. Setiap kali ada pembeli yang membayar, notifikasi HP akan langsung terkirim otomatis 100% ke website Anda tanpa henti.</p>
-                      <button onclick="showPage('forwarder')" class="neo-btn neo-btn-primary text-[10px] px-3 py-1.5">
-                        📥 Buka Panduan Cara Setting Aplikasi HP
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="neo-card p-5">
-                <div class="text-xs uppercase font-black text-rose-600 mb-1">// C. Perintah Mengambil Riwayat Log Dana Masuk (Summary)</div>
-                <p class="text-xs text-neutral-600 font-semibold mb-3">Untuk menarik rekaman data mutasi terakhir yang sukses diterima server log internal.</p>
-                <div class="neo-card p-3 mb-2 bg-[#fcfcfc]">
-                  <pre class="overflow-x-auto text-xs"><code class="language-bash">curl -X GET 'https://restapi.amgeekz.my.id/webhook/summary?token=USER123&limit=3'</code></pre>
-                </div>
-                <div class="text-[10px] font-mono text-neutral-400 my-1">// Hasil Teks Array dari Server</div>
-                <div class="neo-card p-3">
-                  <pre class="overflow-x-auto text-xs"><code class="language-json">{
-  "ok": true,
-  "token": "USER123",
-  "event_id": "a6ac10590d18d2190e7082552c03a0395bc9142c",
-  "received_at": "2025-09-24T11:49:30.018Z",
-  "amount": 10338,
-  "method": "POST",
-  "ip": "0.0.0.0",
-  "body": {
-    "message": "Pembayaran masuk Rp 10.338 dari ShopeePay"
-  }
+                                </div>
+                                <div class="neo-card-info p-5 shadow-[4px_4px_0px_#111111]">
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-2xl font-mono text-black">&#9633;</span>
+                                        <div class="flex-1 text-xs">
+                                            <h4 class="font-black uppercase tracking-wide mb-1 text-emerald-950">Info Penting Otomatisasi Terintegrasi:</h4>
+                                            <p class="text-emerald-900 font-semibold mb-3 leading-relaxed">Apabila aplikasi Android <span class="inline-tag">Geekz Forwarder</span> sudah terpasang dan disetting dengan benar di HP Anda, maka Anda tidak perlu lagi mengetikkan kode cURL di atas. Setiap kali ada pembeli yang membayar, notifikasi HP akan langsung terkirim otomatis 100% ke website Anda tanpa henti.</p>
+                                            <button onclick="showPage('forwarder')" class="neo-btn neo-btn-primary text-[10px] px-3 py-2 font-black">
+                                                &#128229; Buka Panduan Cara Setting Aplikasi HP
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="neo-card p-5">
+                                <div class="text-xs uppercase font-black text-rose-600 mb-1">// C. Perintah Mengambil Riwayat Log Dana Masuk (Summary)</div>
+                                <p class="text-xs text-neutral-600 font-semibold mb-3">Untuk menarik rekaman data mutasi terakhir yang sukses diterima server log internal.</p>
+                                <div class="neo-card p-3 mb-2 bg-[#fcfcfc] shadow-[3px_3px_0px_#111111]">
+                                    <pre class="overflow-x-auto text-xs"><code class="language-bash">curl -X GET 'https://restapi.amgeekz.my.id/webhook/summary?token=USER123&limit=3'</code></pre>
+                                </div>
+                                <div class="text-[10px] font-mono text-neutral-400 my-1 font-bold">// Hasil Teks Array dari Server</div>
+                                <div class="neo-card p-3 shadow-[3px_3px_0px_#111111]">
+                                    <pre class="overflow-x-auto text-xs"><code class="language-json">{
+"ok": true,
+"token": "USER123",
+"event_id": "a6ac10590d18d2190e7082552c03a0395bc9142c",
+"received_at": "2025-09-24T11:49:30.018Z",
+"amount": 10338,
+"method": "POST",
+"ip": "0.0.0.0",
+"body": {
+"message": "Pembayaran masuk Rp 10.338 dari ShopeePay"
+}
 }</code></pre>
-                </div>
-              </div>
-            </section>
+                                </div>
+                            </div>
+                        </section>
 
-            <section id="status-code">
-              <div class="neo-card p-5">
-                <h3 class="text-sm font-black uppercase tracking-wider text-black border-b-2 border-black pb-2 mb-3">// TABEL GLOSARIUM KODE STATUS (JIKA ADA MASALAH)</h3>
-                <div class="overflow-x-auto">
-                  <table class="w-full text-xs font-bold text-left border-2 border-black">
-                    <thead class="bg-neutral-100 border-b-2 border-black">
-                      <tr>
-                        <th class="p-2 border-r-2 border-black w-24">Kode Angka</th>
-                        <th class="p-2 border-r-2 border-black w-32">Nama Status</th>
-                        <th class="p-2">Arti Masalah & Solusi Cara Memperbaikinya</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-black/40 bg-white">
-                      <tr><td class="p-2 border-r-2 border-black text-emerald-600">200 / 201</td><td class="p-2 border-r-2 border-black">Sukses / Berhasil</td><td class="p-2 font-medium">Koneksi lancar! Permintaan diproses server tanpa error.</td></tr>
-                      <tr><td class="p-2 border-r-2 border-black text-amber-600">400</td><td class="p-2 border-r-2 border-black">Data Salah</td><td class="p-2 font-medium">Input data kurang atau keliru (contoh: mengisi kolom harga memakai huruf).</td></tr>
-                      <tr><td class="p-2 border-r-2 border-black text-rose-600">401</td><td class="p-2 border-r-2 border-black">Akses Ditolak</td><td class="p-2 font-medium">Kode token otentikasi salah, palsu, atau belum terdaftar.</td></tr>
-                      <tr><td class="p-2 border-r-2 border-black text-rose-600">404</td><td class="p-2 border-r-2 border-black">Alamat Salah</td><td class="p-2 font-medium">Salah mengetikkan URL endpoint tujuan pada server website Anda.</td></tr>
-                      <tr><td class="p-2 border-r-2 border-black text-red-700">500 / 502</td><td class="p-2 border-r-2 border-black">Server Rusak</td><td class="p-2 font-medium">Sistem website backend Anda mengalami crash, silakan periksa codingan server Anda.</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          <div id="history-page" class="page-section space-y-6">
-            <section class="neo-card p-5">
-              <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight">Cek Riwayat Pembayaran</h1>
-              <p class="text-xs text-neutral-500 font-bold mt-0.5">// Masukkan token dan batas limit untuk mengecek antrean log dana masuk secara realtime</p>
-              
-              <div class="grid gap-4 sm:grid-cols-3 text-xs mt-4 pt-4 border-t-2 border-black/10">
-                <div class="sm:col-span-2">
-                  <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Masukkan Token Rahasia</label>
-                  <input id="historyToken" type="text" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black font-bold" placeholder="USER123">
-                </div>
-                <div>
-                  <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Batas Limit Log</label>
-                  <input id="historyLimit" type="number" class="w-full px-3 py-2 border-2 border-black bg-white focus:outline-none rounded-xl font-mono text-black font-bold" value="10" placeholder="10">
-                </div>
-                <div class="sm:col-span-3">
-                  <button id="btnFetchHistory" class="neo-btn neo-btn-danger w-full sm:w-auto px-6 py-2.5 text-xs uppercase tracking-wider">Cari & Refresh Data ↻</button>
-                </div>
-              </div>
-            </section>
-
-            <div id="desktopHistoryContainer" class="hidden md:block neo-card overflow-hidden opacity-40">
-              <div class="max-h-[500px] overflow-y-auto">
-                <table class="w-full text-left border-collapse table-fixed">
-                  <thead class="bg-[#f1ebd9] border-b-4 border-black text-xs font-black uppercase tracking-wider sticky top-0 z-10">
-                    <tr>
-                      <th class="p-4 border-r-2 border-black w-32">ID Transaksi</th>
-                      <th class="p-4 border-r-2 border-black w-44">Waktu Masuk</th>
-                      <th class="p-4 border-r-2 border-black w-40">Jumlah Dana</th>
-                      <th class="p-4 border-r-2 border-black">Isi Notifikasi</th>
-                      <th class="p-4 w-32">IP Forwarder</th>
-                    </tr>
-                  </thead>
-                  <tbody id="desktopHistoryBody" class="bg-white font-bold text-xs">
-                    <tr>
-                      <td colspan="5" class="p-8 text-center text-neutral-400 uppercase tracking-wider">Silakan masukkan token dan klik tombol cari di atas.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div id="mobileHistoryContainer" class="md:hidden flex flex-col gap-4">
-              <div class="bg-white border-2 border-black rounded-xl p-6 text-center text-neutral-400 font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#000000]">
-                Silakan masukkan token dan klik tombol cari di atas.
-              </div>
-            </div>
-          </div>
-
-          <div id="forwarder-page" class="page-section space-y-6">
-            <section class="neo-card p-5">
-              <h1 class="text-2xl font-black tracking-tight uppercase mb-2">PANDUAN SETTING APLIKASI GEEKZ FORWARDER v2.0</h1>
-              <p class="text-xs md:text-sm font-semibold text-neutral-700 leading-relaxed mb-4">
-                Silakan ikuti 3 tahapan setting sederhana di bawah ini di dalam aplikasi HP Anda agar data dana masuk terkirim dengan lancar dan aman.
-              </p>
-              <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="neo-btn neo-btn-danger inline-block px-4 py-2 text-xs tracking-wider shadow-[2px_2px_0px_#000000]">
-                UNDUH FILE APLIKASI (.APK) SEKARANG
-              </a>
-            </section>
-
-            <section class="neo-card p-5">
-              <h2 class="text-sm uppercase font-black tracking-tight border-b-2 border-black pb-2 mb-4">// Langkah-Langkah Setting di HP Anda</h2>
-              
-              <div class="space-y-5 text-xs font-bold text-neutral-800">
-                <div class="flex gap-3">
-                  <div class="step-box shrink-0">1</div>
-                  <div>
-                    <p class="uppercase text-black font-black text-sm">HIDUPKAN TOMBOL UTAMA (SERVICE STATE)</p>
-                    <p class="text-neutral-500 mt-0.5 font-medium text-[12px] leading-relaxed">
-                      Buka aplikasi Geekz Forwarder yang sudah diinstal di HP, aktifkan izin **Akses Notifikasi** di menu pengaturan Android. Geser saklar tombol utama ke posisi <span class="text-emerald-600 font-bold">"Enabled (Aktif/Menyala)"</span>.
-                    </p>
-                  </div>
-                </div>
-                
-                <div class="flex gap-3 border-t-2 border-dashed border-black/10 pt-3">
-                  <div class="step-box shrink-0">2</div>
-                  <div>
-                    <p class="uppercase text-black font-black text-sm">PILIH APLIKASI TARGET DI MENU "APP REGISTRY"</p>
-                    <p class="text-neutral-500 mt-0.5 font-medium text-[12px] leading-relaxed">
-                      Masuk ke menu bernama <span class="bg-amber-100 border border-black px-1.5 py-0.5 rounded text-black font-bold">APP REGISTRY</span> di dalam aplikasi. Beri tanda centang pada nama aplikasi bank atau e-wallet tempat Anda menerima pembayaran (Contoh: DANA, OVO, ShopeePay, GoBiz, atau M-Banking milik Anda). Tujuannya agar aplikasi hanya membaca SMS/notifikasi dari aplikasi keuangan itu saja.
-                    </p>
-                  </div>
-                </div>
-                
-                <div class="flex gap-3 border-t-2 border-dashed border-black/10 pt-3">
-                  <div class="step-box shrink-0">3</div>
-                  <div class="flex-1 space-y-3">
-                    <p class="uppercase text-black font-black text-sm">MASUKKAN ALAMAT WEBHOOK DI BAGIAN "DATA PIPELINE (SINK)"</p>
-                    <p class="text-neutral-500 mt-0.5 font-medium text-[12px] leading-relaxed">
-                      Gulir ke bawah ke menu **DATA PIPELINE (SINK)** untuk mengisi data kemana notifikasi HP tersebut harus dilempar:
-                    </p>
-                    
-                    <div class="space-y-3 bg-neutral-50 p-3 border-2 border-black rounded-xl">
-                      <div>
-                        <p class="text-neutral-500 uppercase font-black text-[9px] tracking-wider mb-1">// Alamat URL Tujuan Pengiriman Dana:</p>
-                        <div class="bg-white p-2 font-mono text-xs text-black border-2 border-black rounded-lg break-all">
-                          https://restapi.amgeekz.my.id/webhook/payment?token=USER123
-                        </div>
-                        <p class="text-[10px] text-rose-600 font-bold mt-1">&#9632; PERINGATAN: Gantilah tulisan "USER123" di atas dengan kode token rahasia akun Anda sendiri.</p>
-                      </div>
-                      
-                      <div>
-                        <p class="text-neutral-500 uppercase font-black text-[9px] tracking-wider mb-1">// Model Pengiriman Data (Method):</p>
-                        <p class="text-neutral-800 font-semibold text-[11px]">Wajib diklik dan diubah pengaturannya ke pilihan: <span class="bg-white px-1.5 py-0.5 font-mono font-bold border border-black">JSON</span></p>
-                      </div>
+                        <!-- STATUS CODE TABLE -->
+                        <section id="status-code">
+                            <div class="neo-card p-5">
+                                <h3 class="text-sm font-black uppercase tracking-wider text-black border-b-3 border-black pb-2 mb-3">// TABEL GLOSARIUM KODE STATUS (JIKA ADA MASALAH)</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-xs font-bold text-left border-3 border-black rounded-xl overflow-hidden shadow-[4px_4px_0px_#111111]">
+                                        <thead>
+                                            <tr>
+                                                <th class="p-3 border-r-2 border-black w-24">Kode Angka</th>
+                                                <th class="p-3 border-r-2 border-black w-32">Nama Status</th>
+                                                <th class="p-3">Arti Masalah & Solusi Cara Memperbaikinya</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y-2 divide-black/40 bg-white">
+                                            <tr><td class="p-3 border-r-2 border-black text-emerald-600 font-black">200 / 201</td><td class="p-3 border-r-2 border-black">Sukses / Berhasil</td><td class="p-3 font-semibold">Koneksi lancar! Permintaan diproses server tanpa error.</td></tr>
+                                            <tr><td class="p-3 border-r-2 border-black text-amber-600 font-black">400</td><td class="p-3 border-r-2 border-black">Data Salah</td><td class="p-3 font-semibold">Input data kurang atau keliru (contoh: mengisi kolom harga memakai huruf).</td></tr>
+                                            <tr><td class="p-3 border-r-2 border-black text-rose-600 font-black">401</td><td class="p-3 border-r-2 border-black">Akses Ditolak</td><td class="p-3 font-semibold">Kode token otentikasi salah, palsu, atau belum terdaftar.</td></tr>
+                                            <tr><td class="p-3 border-r-2 border-black text-rose-600 font-black">404</td><td class="p-3 border-r-2 border-black">Alamat Salah</td><td class="p-3 font-semibold">Salah mengetikkan URL endpoint tujuan pada server website Anda.</td></tr>
+                                            <tr><td class="p-3 border-r-2 border-black text-red-700 font-black">500 / 502</td><td class="p-3 border-r-2 border-black">Server Rusak</td><td class="p-3 font-semibold">Sistem website backend Anda mengalami crash, silakan periksa codingan server Anda.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </section>
 
-            <section class="neo-card p-5">
-              <h3 class="text-xs font-black uppercase tracking-wider text-black border-b border-black pb-2 mb-2">// TABEL RINGKASAN SETTINGAN TERBAIK</h3>
-              <div class="overflow-x-auto">
-                <table class="w-full text-xs font-mono font-bold">
-                  <tbody class="divide-y divide-neutral-200 text-neutral-700">
-                    <tr><td class="py-2 uppercase">Layanan Utama Jalur Akses</td><td class="py-2 text-emerald-600 text-right">&#10003; HARUS MENYALA (TRUE)</td></tr>
-                    <tr><td class="py-2 uppercase">Filter Menu App Registry Target</td><td class="py-2 text-emerald-600 text-right">&#10003; SUDAH TERPILIH</td></tr>
-                    <tr><td class="py-2 uppercase">Tipe Data Format Sink</td><td class="py-2 text-black text-right">MIME PILIHAN APPLICATION/JSON</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-          
-          <div id="donate-page" class="page-section space-y-6">
-            <section class="neo-card p-5 text-center">
-              <h1 class="text-2xl font-black uppercase tracking-tight text-black mb-1">&#9632; Kotak Donasi Sukarela</h1>
-              <p class="text-[11px] font-mono text-neutral-500 font-bold">// Bantu kami menyewa server dan memelihara pembaruan sistem microservice gratis ini harian.</p>
-            </section>
+                    <!-- HISTORY PAGE -->
+                    <div id="history-page" class="page-section space-y-6">
+                        <section class="neo-card p-5">
+                            <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight">&#128269; Cek Riwayat Pembayaran</h1>
+                            <p class="text-xs text-neutral-500 font-bold mt-0.5">// Masukkan token dan batas limit untuk mengecek antrean log dana masuk secara realtime</p>
+                            <div class="stripe-accent my-3"></div>
+                            <div class="grid gap-4 sm:grid-cols-3 text-xs mt-4">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Masukkan Token Rahasia</label>
+                                    <input id="historyToken" type="text" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black font-bold shadow-[2px_2px_0px_#111111]" placeholder="USER123">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] uppercase font-black text-black tracking-wider mb-1.5">Batas Limit Log</label>
+                                    <input id="historyLimit" type="number" class="w-full px-3 py-2.5 border-3 border-black bg-white focus:outline-none rounded-xl font-mono text-black font-bold shadow-[2px_2px_0px_#111111]" value="10" placeholder="10">
+                                </div>
+                                <div class="sm:col-span-3">
+                                    <button id="btnFetchHistory" class="neo-btn neo-btn-danger w-full sm:w-auto px-6 py-3 text-xs uppercase tracking-wider font-black">&#128269; Cari & Refresh Data &#8635;</button>
+                                </div>
+                            </div>
+                        </section>
+                        <div id="desktopHistoryContainer" class="hidden md:block neo-card overflow-hidden opacity-40">
+                            <div class="max-h-[500px] overflow-y-auto">
+                                <table class="w-full text-left border-collapse table-fixed">
+                                    <thead class="text-xs font-black uppercase tracking-wider sticky top-0 z-10">
+                                        <tr>
+                                            <th class="p-4 border-r-2 border-black w-32">ID Transaksi</th>
+                                            <th class="p-4 border-r-2 border-black w-44">Waktu Masuk</th>
+                                            <th class="p-4 border-r-2 border-black w-40">Jumlah Dana</th>
+                                            <th class="p-4 border-r-2 border-black">Isi Notifikasi</th>
+                                            <th class="p-4 w-32">IP Forwarder</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="desktopHistoryBody" class="bg-white font-bold text-xs">
+                                        <tr>
+                                            <td colspan="5" class="p-8 text-center text-neutral-400 uppercase tracking-wider">Silakan masukkan token dan klik tombol cari di atas.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="mobileHistoryContainer" class="md:hidden flex flex-col gap-4">
+                            <div class="bg-white border-3 border-black rounded-xl p-6 text-center text-neutral-400 font-bold text-xs uppercase tracking-wider shadow-[4px_4px_0px_#111111]">
+                                Silakan masukkan token dan klik tombol cari di atas.
+                            </div>
+                        </div>
+                    </div>
 
-            <section class="max-w-md mx-auto">
-              <div class="neo-card p-6 text-center flex flex-col items-center shadow-[4px_4px_0px_#000000]">
-                <h2 class="text-xs font-black uppercase tracking-widest text-neutral-400 mb-4">// Silakan Scan Memakai Aplikasi Bank / E-Wallet Apapun</h2>
-                
-                <div class="p-3 bg-white mb-3 border-4 border-black rounded-2xl inline-block shadow-[3px_3px_0px_#000000]">
-                  <img 
-                    src="https://restapi.amgeekz.my.id/qris.jpg" 
-                    alt="QRIS Donasi"
-                    class="w-56 h-56 block"
-                    onerror="this.src='https://via.placeholder.com/256x256/ffffff/000000?text=QRIS+Donasi'"
-                  >
-                </div>
-                
-                <div class="text-xs font-bold text-neutral-500 space-y-1 mt-3">
-                  <p class="text-neutral-800 uppercase font-black tracking-wider">// QRIS Interoperabilitas Nasional</p>
-                  <p class="font-medium text-neutral-600 leading-normal px-2">Sistem QRIS universal ini mendukung penuh seluruh aplikasi pembayaran digital seperti DANA, GoPay, OVO, ShopeePay, LinkAja, AstraPay, serta seluruh mobile banking bank nasional Indonesia.</p>
-                </div>
-              </div>
-            </section>
-          </div>
-        </main>
-      </div>
+                    <!-- FORWARDER PAGE -->
+                    <div id="forwarder-page" class="page-section space-y-6">
+                        <section class="neo-card-accent-pink p-5">
+                            <h1 class="text-2xl font-black tracking-tight uppercase mb-2">&#128241; PANDUAN SETTING APLIKASI GEEKZ FORWARDER v2.0</h1>
+                            <p class="text-xs md:text-sm font-semibold text-neutral-700 leading-relaxed mb-4">
+                                Silakan ikuti 3 tahapan setting sederhana di bawah ini di dalam aplikasi HP Anda agar data dana masuk terkirim dengan lancar dan aman.
+                            </p>
+                            <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="neo-btn neo-btn-danger inline-block px-5 py-3 text-xs tracking-wider shadow-[4px_4px_0px_#111111] font-black">
+                                &#128229; UNDUH FILE APLIKASI (.APK) SEKARANG
+                            </a>
+                        </section>
+                        <section class="neo-card p-5">
+                            <h2 class="text-sm uppercase font-black tracking-tight border-b-3 border-black pb-2 mb-4">// Langkah-Langkah Setting di HP Anda</h2>
+                            <div class="space-y-5 text-xs font-bold text-neutral-800">
+                                <div class="flex gap-3">
+                                    <div class="step-box shrink-0">1</div>
+                                    <div>
+                                        <p class="uppercase text-black font-black text-sm">HIDUPKAN TOMBOL UTAMA (SERVICE STATE)</p>
+                                        <p class="text-neutral-500 mt-0.5 font-semibold text-[12px] leading-relaxed">
+                                            Buka aplikasi Geekz Forwarder yang sudah diinstal di HP, aktifkan izin <span class="inline-tag">Akses Notifikasi</span> di menu pengaturan Android. Geser saklar tombol utama ke posisi <span class="text-emerald-600 font-bold">"Enabled (Aktif/Menyala)"</span>.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 border-t-3 border-dashed border-black/10 pt-3">
+                                    <div class="step-box shrink-0">2</div>
+                                    <div>
+                                        <p class="uppercase text-black font-black text-sm">PILIH APLIKASI TARGET DI MENU "APP REGISTRY"</p>
+                                        <p class="text-neutral-500 mt-0.5 font-semibold text-[12px] leading-relaxed">
+                                            Masuk ke menu bernama <span class="inline-tag">APP REGISTRY</span> di dalam aplikasi. Beri tanda centang pada nama aplikasi bank atau e-wallet tempat Anda menerima pembayaran (Contoh: DANA, OVO, ShopeePay, GoBiz, atau M-Banking milik Anda). Tujuannya agar aplikasi hanya membaca SMS/notifikasi dari aplikasi keuangan itu saja.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 border-t-3 border-dashed border-black/10 pt-3">
+                                    <div class="step-box shrink-0">3</div>
+                                    <div class="flex-1 space-y-3">
+                                        <p class="uppercase text-black font-black text-sm">MASUKKAN ALAMAT WEBHOOK DI BAGIAN "DATA PIPELINE (SINK)"</p>
+                                        <p class="text-neutral-500 mt-0.5 font-semibold text-[12px] leading-relaxed">
+                                            Gulir ke bawah ke menu <span class="inline-tag">DATA PIPELINE (SINK)</span> untuk mengisi data kemana notifikasi HP tersebut harus dilempar:
+                                        </p>
+                                        <div class="space-y-3 bg-neutral-50 p-4 border-3 border-black rounded-xl shadow-[3px_3px_0px_#111111]">
+                                            <div>
+                                                <p class="text-neutral-500 uppercase font-black text-[9px] tracking-wider mb-1">// Alamat URL Tujuan Pengiriman Dana:</p>
+                                                <div class="bg-white p-3 font-mono text-xs text-black border-3 border-black rounded-lg break-all shadow-[2px_2px_0px_#111111]">
+                                                    https://restapi.amgeekz.my.id/webhook/payment?token=USER123
+                                                </div>
+                                                <p class="text-[10px] text-rose-600 font-bold mt-1">&#9632; PERINGATAN: Gantilah tulisan "USER123" di atas dengan kode token rahasia akun Anda sendiri.</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-neutral-500 uppercase font-black text-[9px] tracking-wider mb-1">// Model Pengiriman Data (Method):</p>
+                                                <p class="text-neutral-800 font-semibold text-[11px]">Wajib diklik dan diubah pengaturannya ke pilihan: <span class="inline-tag">JSON</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="neo-card-accent-yellow p-5">
+                            <h3 class="text-xs font-black uppercase tracking-wider text-black border-b-3 border-black pb-2 mb-3">// TABEL RINGKASAN SETTINGAN TERBAIK</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs font-mono font-bold">
+                                    <tbody class="divide-y-2 divide-neutral-200 text-neutral-700">
+                                        <tr><td class="py-3 uppercase font-black">Layanan Utama Jalur Akses</td><td class="py-3 text-emerald-600 text-right font-black">&#10003; HARUS MENYALA (TRUE)</td></tr>
+                                        <tr><td class="py-3 uppercase font-black">Filter Menu App Registry Target</td><td class="py-3 text-emerald-600 text-right font-black">&#10003; SUDAH TERPILIH</td></tr>
+                                        <tr><td class="py-3 uppercase font-black">Tipe Data Format Sink</td><td class="py-3 text-black text-right font-black">MIME PILIHAN APPLICATION/JSON</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- DONATE PAGE -->
+                    <div id="donate-page" class="page-section space-y-6">
+                        <section class="neo-card p-5 text-center">
+                            <h1 class="text-2xl font-black uppercase tracking-tight text-black mb-1">&#9632; Kotak Donasi Sukarela</h1>
+                            <p class="text-[11px] font-mono text-neutral-500 font-bold">// Bantu kami menyewa server dan memelihara pembaruan sistem microservice gratis ini harian.</p>
+                        </section>
+                        <section class="max-w-md mx-auto">
+                            <div class="neo-card-accent-yellow p-6 text-center flex flex-col items-center shadow-[6px_6px_0px_#111111]">
+                                <h2 class="text-xs font-black uppercase tracking-widest text-neutral-400 mb-4">// Silakan Scan Memakai Aplikasi Bank / E-Wallet Apapun</h2>
+                                <div class="p-4 bg-white mb-4 border-4 border-black rounded-2xl inline-block shadow-[5px_5px_0px_#111111]">
+                                    <img
+                                    src="https://restapi.amgeekz.my.id/qris.jpg"
+                                    alt="QRIS Donasi"
+                                    class="w-56 h-56 block"
+                                    onerror="this.src='https://via.placeholder.com/256x256/ffffff/000000?text=QRIS+Donasi'"
+                                    >
+                                </div>
+                                <div class="text-xs font-bold text-neutral-500 space-y-1 mt-3">
+                                    <p class="text-neutral-800 uppercase font-black tracking-wider">// QRIS Interoperabilitas Nasional</p>
+                                    <p class="font-semibold text-neutral-600 leading-normal px-2">Sistem QRIS universal ini mendukung penuh seluruh aplikasi pembayaran digital seperti DANA, GoPay, OVO, ShopeePay, LinkAja, AstraPay, serta seluruh mobile banking bank nasional Indonesia.</p>
+                                </div>
+                                <div class="stripe-accent w-full mt-4"></div>
+                                <p class="text-[10px] font-black text-neutral-400 mt-2 uppercase tracking-widest">Terima kasih atas dukungan Anda! &#x2764;&#xFE0F;</p>
+                            </div>
+                        </section>
+                    </div>
+                </main>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <button id="toTop" class="fixed bottom-6 right-6 neo-btn neo-btn-primary font-bold text-xs px-3.5 py-2.5 shadow-2xl transition-all duration-200 hidden z-50">&#9650; KE ATAS</button>
+    <!-- BACK TO TOP BUTTON -->
+    <button id="toTop" class="fixed bottom-6 right-6 neo-btn neo-btn-primary font-extrabold text-xs px-4 py-3 shadow-2xl transition-all duration-200 hidden z-50 bg-yellow-300 hover:bg-yellow-400 border-3 border-black">&#9650; KE ATAS</button>
 
-<script>
-  hljs.highlightAll();
+    <script>
+        hljs.highlightAll();
 
-  function showPage(pageId) {
-    document.querySelectorAll('.page-section').forEach(page => {
-      page.classList.remove('active');
-    });
-    
-    document.getElementById(pageId + '-page').classList.add('active');
-    
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.classList.remove('active');
-    });
-    const targetLinks = document.querySelectorAll(`.nav-link[data-page="${pageId}"]`);
-    targetLinks.forEach(link => link.classList.add('active'));
-    
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', function() {
-      const page = this.getAttribute('data-page');
-      showPage(page);
-      
-      if (window.innerWidth < 768) {
-        drawer.classList.add('hidden');
-      }
-    });
-  });
-
-  const drawer = document.getElementById('drawer');
-  document.getElementById('openMenu').onclick = () => drawer.classList.remove('hidden');
-  document.getElementById('closeMenu').onclick = () => drawer.classList.add('hidden');
-  drawer.onclick = (e) => { if (e.target === drawer.firstElementChild) drawer.classList.add('hidden'); };
-  drawer.querySelectorAll('[data-close]').forEach(a => a.onclick = () => drawer.classList.add('hidden'));
-
-  const toTop = document.getElementById('toTop');
-  window.onscroll = () => { toTop.classList.toggle('hidden', window.scrollY < 400); };
-  toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  const baseInput = document.getElementById('baseUrl');
-
-  // OTOMATISASI BASE URL: Deteksi origin tempat file ini di-load
-  function getBase() {
-    return window.location.origin.replace(/\/$/, '');
-  }
-
-  (function initBase() {
-    if (baseInput) {
-      baseInput.value = getBase();
-    }
-  })();
-
-  function showJSON(el, text) {
-    try { 
-      el.textContent = JSON.stringify(JSON.parse(text), null, 2); 
-    } catch { 
-      el.textContent = text; 
-    }
-    hljs.highlightElement(el);
-  }
-
-  // REFRESH DATA ENGINE
-  const btnFetchHistory = document.getElementById('btnFetchHistory');
-  if (btnFetchHistory) {
-    btnFetchHistory.onclick = async () => {
-      const token = document.getElementById('historyToken').value.trim();
-      const limit = document.getElementById('historyLimit').value.trim() || '10';
-      const desktopContainer = document.getElementById('desktopHistoryContainer');
-      const desktopBody = document.getElementById('desktopHistoryBody');
-      const mobileContainer = document.getElementById('mobileHistoryContainer');
-
-      if (!token) {
-        alert('Masukkan token terlebih dahulu!');
-        return;
-      }
-
-      btnFetchHistory.disabled = true;
-      btnFetchHistory.textContent = 'Mencari Data...';
-
-      const url = `${getBase()}/webhook/status?token=${encodeURIComponent(token)}&limit=${limit}`;
-
-      try {
-        const r = await fetch(url);
-        if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
-        const resData = await r.json();
-
-        desktopContainer.classList.remove('opacity-40');
-        
-        let tRows = '';
-        let mCards = '';
-
-        if (!resData.data || resData.data.length === 0) {
-          const empty = `
-            <div class="bg-white border-2 border-black rounded-xl p-6 text-center text-neutral-500 font-bold text-xs uppercase tracking-wider">
-              Belum ada data pembayaran masuk untuk token ini.
-            </div>`;
-          tRows = `<tr><td colspan="5" class="p-8 text-center text-neutral-500 uppercase tracking-wider font-bold text-xs">Belum ada data pembayaran masuk untuk token ini.</td></tr>`;
-          mCards = empty;
-        } else {
-          resData.data.forEach(ev => {
-            const dateStr = new Date(ev.received_at).toLocaleString('id-ID');
-            const msgStr = ev.body && ev.body.message ? ev.body.message : (ev.body && ev.body.text ? ev.body.text : JSON.stringify(ev.body || {}));
-            const rupiahStr = Number(ev.amount).toLocaleString('id-ID');
-
-            tRows += `
-              <tr class="bg-white border-b-2 border-black hover:bg-[#fbf8ee]">
-                <td class="p-4 border-r-2 border-black font-mono text-neutral-600 break-all">${ev.event_id || 'unknown'}</td>
-                <td class="p-4 border-r-2 border-black text-neutral-800 whitespace-nowrap">${dateStr}</td>
-                <td class="p-4 border-r-2 border-black font-mono text-sm text-emerald-600 font-black whitespace-nowrap">Rp ${rupiahStr}</td>
-                <td class="p-4 border-r-2 border-black text-neutral-700 break-words font-medium">${msgStr}</td>
-                <td class="p-4 font-mono text-neutral-400 whitespace-nowrap">${ev.ip || '0.0.0.0'}</td>
-              </tr>`;
-
-            mCards += `
-              <div class="bg-white border-2 border-black rounded-xl p-4 shadow-[4px_4px_0px_#000000] flex flex-col gap-2 font-bold">
-                <div class="flex items-center justify-between border-b-2 border-dashed border-black/20 pb-2">
-                  <span class="font-mono text-[10px] text-neutral-500">${ev.event_id || 'unknown'}</span>
-                  <span class="text-[10px] text-neutral-600">${dateStr}</span>
-                </div>
-                <div class="text-base font-mono font-black text-emerald-600">Rp ${rupiahStr}</div>
-                <div class="text-xs text-neutral-700 bg-[#fbf8ee] p-2.5 border border-black rounded-lg font-medium break-words">${msgStr}</div>
-                <div class="text-[10px] text-neutral-400 font-mono text-right">IP: ${ev.ip || '0.0.0.0'}</div>
-              </div>`;
-          });
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId + '-page').classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            const targetLinks = document.querySelectorAll(`.nav-link[data-page="${pageId}"]`);
+            targetLinks.forEach(link => link.classList.add('active'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        desktopBody.innerHTML = tRows;
-        mobileContainer.innerHTML = mCards;
-
-      } catch (err) {
-        alert(`Gagal mengambil data: ${err.message}`);
-        const errBlock = `
-          <div class="bg-red-50 text-red-600 border-2 border-black rounded-xl p-4 font-bold text-xs uppercase tracking-wider">
-            Gagal tersambung ke server. Periksa koneksi internet Anda.
-          </div>`;
-        desktopBody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-600 font-bold">${errBlock}</td></tr>`;
-        mobileContainer.innerHTML = errBlock;
-      } finally {
-        btnFetchHistory.disabled = false;
-        btnFetchHistory.textContent = 'Cari & Refresh Data ↻';
-      }
-    };
-  }
-
-  // QRIS Dynamic Test
-  const btnDynamic = document.getElementById('btnDynamic');
-  const btnDynamicReset = document.getElementById('btnDynamicReset');
-  const outDynamic = document.getElementById('outDynamic');
-  const jsonDynamic = document.getElementById('jsonDynamic');
-  const metaDynamic = document.getElementById('metaDynamic');
-  const imgQR = document.getElementById('imgQR');
-
-  if (btnDynamic) {
-    btnDynamic.onclick = async () => {
-      const base = document.getElementById('tiBase').value;
-      const uniqIn = document.getElementById('tiUnique').value;
-      const auto = document.getElementById('tiAutoUnique').checked;
-      const amount = document.getElementById('tiAmount').value;
-      const payloadStatic = document.getElementById('tiPayload').value;
-
-      const url = getBase() + '/qris/dynamic';
-      const form = new URLSearchParams();
-
-      if (amount) {
-        form.append('amount', amount);
-      } else {
-        if (!base) { alert('Isi nominal terlebih dahulu!'); return; }
-        form.append('base_amount', base);
-        const uniq = auto ? Math.floor(Math.random()*999)+1 : (uniqIn || '');
-        if (!uniq) { alert('Kode unik wajib diisi!'); return; }
-        form.append('unique_code', uniq);
-      }
-      
-      if (payloadStatic) form.append('payload_static', payloadStatic);
-      form.append('qr', 'png');
-
-      btnDynamic.disabled = true;
-      btnDynamic.textContent = 'Menghubungi Server...';
-      
-      try {
-        const start = performance.now();
-        const r = await fetch(url, { 
-          method:'POST', 
-          headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, 
-          body:form 
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                const page = this.getAttribute('data-page');
+                showPage(page);
+                if (window.innerWidth < 768) {
+                    drawer.classList.add('hidden');
+                }
+            });
         });
-        const text = await r.text();
-        const dur = Math.round(performance.now() - start);
-        
-        metaDynamic.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
-        showJSON(jsonDynamic, text);
 
-        try {
-          const obj = JSON.parse(text);
-          imgQR.src = obj.qr_png_data_url || '';
-        } catch { imgQR.src = ''; }
+        const drawer = document.getElementById('drawer');
+        document.getElementById('openMenu').onclick = () => drawer.classList.remove('hidden');
+        document.getElementById('closeMenu').onclick = () => drawer.classList.add('hidden');
+        drawer.onclick = (e) => { if (e.target === drawer.firstElementChild) drawer.classList.add('hidden'); };
+        drawer.querySelectorAll('[data-close]').forEach(a => a.onclick = () => drawer.classList.add('hidden'));
 
-        outDynamic.classList.remove('hidden');
-        outDynamic.scrollIntoView({ behavior: 'smooth' });
-      } catch (err) {
-        metaDynamic.textContent = `Error: ${err.message}`;
-        showJSON(jsonDynamic, String(err));
-        outDynamic.classList.remove('hidden');
-      } finally {
-        btnDynamic.disabled = false;
-        btnDynamic.textContent = 'PROSES & BUAT GAMBAR QRIS';
-      }
-    };
+        const toTop = document.getElementById('toTop');
+        window.onscroll = () => { toTop.classList.toggle('hidden', window.scrollY < 400); };
+        toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    btnDynamicReset.onclick = () => {
-      document.getElementById('tiBase').value = '';
-      document.getElementById('tiUnique').value = '';
-      document.getElementById('tiAutoUnique').checked = false;
-      document.getElementById('tiAmount').value = '';
-      document.getElementById('tiPayload').value = '';
-      outDynamic.classList.add('hidden');
-    };
-  }
+        const baseInput = document.getElementById('baseUrl');
 
-  // QR Converter
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
-  const previewSection = document.getElementById('previewSection');
-  const imagePreview = document.getElementById('imagePreview');
-  const btnConvert = document.getElementById('btnConvert');
-  const btnResetConverter = document.getElementById('btnResetConverter');
-  const outConverter = document.getElementById('outConverter');
-  const jsonConverter = document.getElementById('jsonConverter');
-  const metaConverter = document.getElementById('metaConverter');
-  const btnCopyPayload = document.getElementById('btnCopyPayload');
-
-  let currentFile = null;
-
-  if (dropZone) {
-    dropZone.addEventListener('click', () => fileInput.click());
-    
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      if (e.dataTransfer.files.length) {
-        handleFile(e.dataTransfer.files[0]);
-      }
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length) {
-        handleFile(e.target.files[0]);
-      }
-    });
-
-    function handleFile(file) {
-      if (!file.type.startsWith('image/')) {
-        alert('File wajib berformat gambar!');
-        return;
-      }
-
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Ukuran file maksimal hanya boleh 2MB!');
-        return;
-      }
-
-      currentFile = file;
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imagePreview.src = e.target.result;
-        previewSection.classList.remove('hidden');
-        btnConvert.disabled = false;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    if (btnConvert) {
-      btnConvert.onclick = async () => {
-        if (!currentFile) {
-          metaConverter.textContent = 'Error: File gambar kosong';
-          showJSON(jsonConverter, JSON.stringify({ error: 'Tidak ada file' }));
-          outConverter.classList.remove('hidden');
-          return;
+        function getBase() {
+            return window.location.origin.replace(/\/$/, '');
         }
 
-        btnConvert.disabled = true;
-        btnConvert.textContent = 'Membaca Gambar...';
+        (function initBase() {
+            if (baseInput) {
+                baseInput.value = getBase();
+            }
+        })();
 
-        const formData = new FormData();
-        formData.append('image', currentFile);
-
-        try {
-          const start = performance.now();
-          const url = getBase() + '/qris/decode';
-          
-          const response = await fetch(url, { method: 'POST', body: formData });
-          const responseText = await response.text();
-          const dur = Math.round(performance.now() - start);
-
-          metaConverter.textContent = `Status: ${response.status} • ${dur} ms`;
-          showJSON(jsonConverter, responseText);
-          outConverter.classList.remove('hidden');
-          outConverter.scrollIntoView({ behavior: 'smooth' });
-          
-        } catch (err) {
-          metaConverter.textContent = `Error: ${err.message}`;
-          showJSON(jsonConverter, JSON.stringify({ error: err.message }));
-          outConverter.classList.remove('hidden');
-        } finally {
-          btnConvert.disabled = false;
-          btnConvert.textContent = 'Mulai Baca Gambar';
+        function showJSON(el, text) {
+            try {
+                el.textContent = JSON.stringify(JSON.parse(text), null, 2);
+            } catch {
+                el.textContent = text;
+            }
+            hljs.highlightElement(el);
         }
-      };
-    }
 
-    if (btnCopyPayload) {
-      btnCopyPayload.onclick = () => {
-        const payloadText = jsonConverter.textContent;
-        navigator.clipboard.writeText(payloadText).then(() => {
-          alert('Teks berhasil disalin!');
-        });
-      };
-    }
+        const btnFetchHistory = document.getElementById('btnFetchHistory');
+        if (btnFetchHistory) {
+            btnFetchHistory.onclick = async () => {
+                const token = document.getElementById('historyToken').value.trim();
+                const limit = document.getElementById('historyLimit').value.trim() || '10';
+                const desktopContainer = document.getElementById('desktopHistoryContainer');
+                const desktopBody = document.getElementById('desktopHistoryBody');
+                const mobileContainer = document.getElementById('mobileHistoryContainer');
 
-    if (btnResetConverter) {
-      btnResetConverter.onclick = () => {
-        fileInput.value = '';
-        previewSection.classList.add('hidden');
-        outConverter.classList.add('hidden');
-        btnConvert.disabled = true;
-        currentFile = null;
-      };
-    }
-  }
+                if (!token) {
+                    alert('Masukkan token terlebih dahulu!');
+                    return;
+                }
 
-  // Webhook Test
-  const btnWebhook = document.getElementById('btnWebhook');
-  const btnWebhookReset = document.getElementById('btnWebhookReset');
-  const outWebhook = document.getElementById('outWebhook');
-  const jsonWebhook = document.getElementById('jsonWebhook');
-  const metaWebhook = document.getElementById('metaWebhook');
+                btnFetchHistory.disabled = true;
+                btnFetchHistory.textContent = 'Mencari Data...';
 
-  if (btnWebhook) {
-    btnWebhook.onclick = async () => {
-      const token = document.getElementById('tiToken').value;
-      const mode = document.getElementById('tiMode').value;
-      const body = document.getElementById('tiBody').value;
-      
-      if (!token) { alert('Kolom token wajib diisi!'); return; }
-      
-      const url = `${getBase()}/webhook/payment?token=${encodeURIComponent(token)}`;
-      let headers = {};
-      let payload;
+                const url = `${getBase()}/webhook/status?token=${encodeURIComponent(token)}&limit=${limit}`;
 
-      if (mode === 'json') {
-        headers['Content-Type'] = 'application/json';
-        payload = body;
-      } else if (mode === 'form') {
-        headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        try {
-          const bodyObj = JSON.parse(body);
-          const params = new URLSearchParams();
-          for (const [key, value] of Object.entries(bodyObj)) { params.append(key, value); }
-          payload = params;
-        } catch {
-          payload = new URLSearchParams();
-          payload.append('message', body);
+                try {
+                    const r = await fetch(url);
+                    if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
+                    const resData = await r.json();
+
+                    desktopContainer.classList.remove('opacity-40');
+
+                    let tRows = '';
+                    let mCards = '';
+
+                    if (!resData.data || resData.data.length === 0) {
+                        const empty = `
+                            <div class="bg-white border-3 border-black rounded-xl p-6 text-center text-neutral-500 font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#111111]">
+                                Belum ada data pembayaran masuk untuk token ini.
+                            </div>`;
+                        tRows =
+                            `<tr><td colspan="5" class="p-8 text-center text-neutral-500 uppercase tracking-wider font-bold text-xs">Belum ada data pembayaran masuk untuk token ini.</td></tr>`;
+                        mCards = empty;
+                    } else {
+                        resData.data.forEach(ev => {
+                            const dateStr = new Date(ev.received_at).toLocaleString('id-ID');
+                            const msgStr = ev.body && ev.body.message ? ev.body.message : (ev.body && ev
+                                .body.text ? ev.body.text : JSON.stringify(ev.body || {}));
+                            const rupiahStr = Number(ev.amount).toLocaleString('id-ID');
+
+                            tRows += `
+                                <tr class="bg-white border-b-3 border-black hover:bg-[#fffef5]">
+                                    <td class="p-4 border-r-2 border-black font-mono text-neutral-600 break-all">${ev.event_id || 'unknown'}</td>
+                                    <td class="p-4 border-r-2 border-black text-neutral-800 whitespace-nowrap">${dateStr}</td>
+                                    <td class="p-4 border-r-2 border-black font-mono text-sm text-emerald-600 font-black whitespace-nowrap">Rp ${rupiahStr}</td>
+                                    <td class="p-4 border-r-2 border-black text-neutral-700 break-words font-semibold">${msgStr}</td>
+                                    <td class="p-4 font-mono text-neutral-400 whitespace-nowrap">${ev.ip || '0.0.0.0'}</td>
+                                </tr>`;
+
+                            mCards += `
+                                <div class="bg-white border-3 border-black rounded-xl p-4 shadow-[5px_5px_0px_#111111] flex flex-col gap-2 font-bold">
+                                    <div class="flex items-center justify-between border-b-2 border-dashed border-black/20 pb-2">
+                                        <span class="font-mono text-[10px] text-neutral-500">${ev.event_id || 'unknown'}</span>
+                                        <span class="text-[10px] text-neutral-600">${dateStr}</span>
+                                    </div>
+                                    <div class="text-base font-mono font-black text-emerald-600">Rp ${rupiahStr}</div>
+                                    <div class="text-xs text-neutral-700 bg-[#fffef5] p-3 border-2 border-black rounded-lg font-semibold break-words">${msgStr}</div>
+                                    <div class="text-[10px] text-neutral-400 font-mono text-right">IP: ${ev.ip || '0.0.0.0'}</div>
+                                </div>`;
+                        });
+                    }
+
+                    desktopBody.innerHTML = tRows;
+                    mobileContainer.innerHTML = mCards;
+
+                } catch (err) {
+                    alert(`Gagal mengambil data: ${err.message}`);
+                    const errBlock = `
+                        <div class="bg-red-50 text-red-600 border-3 border-black rounded-xl p-4 font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#111111]">
+                            Gagal tersambung ke server. Periksa koneksi internet Anda.
+                        </div>`;
+                    desktopBody.innerHTML =
+                        `<tr><td colspan="5" class="p-8 text-center text-red-600 font-bold">${errBlock}</td></tr>`;
+                    mobileContainer.innerHTML = errBlock;
+                } finally {
+                    btnFetchHistory.disabled = false;
+                    btnFetchHistory.textContent = 'Cari & Refresh Data ↻';
+                }
+            };
         }
-      } else {
-        headers['Content-Type'] = 'text/plain';
-        payload = body;
-      }
 
-      btnWebhook.disabled = true;
-      btnWebhook.textContent = 'Mengirimkan...';
-      
-      try {
-        const start = performance.now();
-        const response = await fetch(url, { method: 'POST', headers, body: payload });
-        const responseText = await response.text();
-        const dur = Math.round(performance.now() - start);
-        
-        metaWebhook.textContent = `Status: ${response.status} • ${dur} ms`;
-        showJSON(jsonWebhook, responseText);
-        outWebhook.classList.remove('hidden');
-        outWebhook.scrollIntoView({ behavior: 'smooth' });
-      } catch (err) {
-        metaWebhook.textContent = `Error: ${err.message}`;
-        showJSON(jsonWebhook, JSON.stringify({ error: err.message }));
-        outWebhook.classList.remove('hidden');
-      } finally {
-        btnWebhook.disabled = false;
-        btnWebhook.textContent = 'KIRIM SIMULASI SEKARANG';
-      }
-    };
+        const btnDynamic = document.getElementById('btnDynamic');
+        const btnDynamicReset = document.getElementById('btnDynamicReset');
+        const outDynamic = document.getElementById('outDynamic');
+        const jsonDynamic = document.getElementById('jsonDynamic');
+        const metaDynamic = document.getElementById('metaDynamic');
+        const imgQR = document.getElementById('imgQR');
 
-    if (btnWebhookReset) {
-      btnWebhookReset.onclick = () => {
-        document.getElementById('tiToken').value = '';
-        document.getElementById('tiMode').value = 'json';
-        document.getElementById('tiBody').value = '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }';
-        outWebhook.classList.add('hidden');
-      };
-    }
-  }
-</script>
+        if (btnDynamic) {
+            btnDynamic.onclick = async () => {
+                const base = document.getElementById('tiBase').value;
+                const uniqIn = document.getElementById('tiUnique').value;
+                const auto = document.getElementById('tiAutoUnique').checked;
+                const amount = document.getElementById('tiAmount').value;
+                const payloadStatic = document.getElementById('tiPayload').value;
+
+                const url = getBase() + '/qris/dynamic';
+                const form = new URLSearchParams();
+
+                if (amount) {
+                    form.append('amount', amount);
+                } else {
+                    if (!base) { alert('Isi nominal terlebih dahulu!'); return; }
+                    form.append('base_amount', base);
+                    const uniq = auto ? Math.floor(Math.random() * 999) + 1 : (uniqIn || '');
+                    if (!uniq) { alert('Kode unik wajib diisi!'); return; }
+                    form.append('unique_code', uniq);
+                }
+
+                if (payloadStatic) form.append('payload_static', payloadStatic);
+                form.append('qr', 'png');
+
+                btnDynamic.disabled = true;
+                btnDynamic.textContent = 'Menghubungi Server...';
+
+                try {
+                    const start = performance.now();
+                    const r = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: form
+                    });
+                    const text = await r.text();
+                    const dur = Math.round(performance.now() - start);
+
+                    metaDynamic.textContent = `Status: ${r.status} • ${dur} ms • ${url}`;
+                    showJSON(jsonDynamic, text);
+
+                    try {
+                        const obj = JSON.parse(text);
+                        imgQR.src = obj.qr_png_data_url || '';
+                    } catch { imgQR.src = ''; }
+
+                    outDynamic.classList.remove('hidden');
+                    outDynamic.scrollIntoView({ behavior: 'smooth' });
+                } catch (err) {
+                    metaDynamic.textContent = `Error: ${err.message}`;
+                    showJSON(jsonDynamic, String(err));
+                    outDynamic.classList.remove('hidden');
+                } finally {
+                    btnDynamic.disabled = false;
+                    btnDynamic.textContent = 'PROSES & BUAT GAMBAR QRIS';
+                }
+            };
+
+            btnDynamicReset.onclick = () => {
+                document.getElementById('tiBase').value = '';
+                document.getElementById('tiUnique').value = '';
+                document.getElementById('tiAutoUnique').checked = false;
+                document.getElementById('tiAmount').value = '';
+                document.getElementById('tiPayload').value = '';
+                outDynamic.classList.add('hidden');
+            };
+        }
+
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const imagePreview = document.getElementById('imagePreview');
+        const btnConvert = document.getElementById('btnConvert');
+        const btnResetConverter = document.getElementById('btnResetConverter');
+        const outConverter = document.getElementById('outConverter');
+        const jsonConverter = document.getElementById('jsonConverter');
+        const metaConverter = document.getElementById('metaConverter');
+        const btnCopyPayload = document.getElementById('btnCopyPayload');
+
+        let currentFile = null;
+
+        if (dropZone) {
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+
+            function handleFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('File wajib berformat gambar!');
+                    return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file maksimal hanya boleh 2MB!');
+                    return;
+                }
+                currentFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    previewSection.classList.remove('hidden');
+                    btnConvert.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            if (btnConvert) {
+                btnConvert.onclick = async () => {
+                    if (!currentFile) {
+                        metaConverter.textContent = 'Error: File gambar kosong';
+                        showJSON(jsonConverter, JSON.stringify({ error: 'Tidak ada file' }));
+                        outConverter.classList.remove('hidden');
+                        return;
+                    }
+                    btnConvert.disabled = true;
+                    btnConvert.textContent = 'Membaca Gambar...';
+                    const formData = new FormData();
+                    formData.append('image', currentFile);
+                    try {
+                        const start = performance.now();
+                        const url = getBase() + '/qris/decode';
+                        const response = await fetch(url, { method: 'POST', body: formData });
+                        const responseText = await response.text();
+                        const dur = Math.round(performance.now() - start);
+                        metaConverter.textContent = `Status: ${response.status} • ${dur} ms`;
+                        showJSON(jsonConverter, responseText);
+                        outConverter.classList.remove('hidden');
+                        outConverter.scrollIntoView({ behavior: 'smooth' });
+                    } catch (err) {
+                        metaConverter.textContent = `Error: ${err.message}`;
+                        showJSON(jsonConverter, JSON.stringify({ error: err.message }));
+                        outConverter.classList.remove('hidden');
+                    } finally {
+                        btnConvert.disabled = false;
+                        btnConvert.textContent = 'Mulai Baca Gambar';
+                    }
+                };
+            }
+
+            if (btnCopyPayload) {
+                btnCopyPayload.onclick = () => {
+                    const payloadText = jsonConverter.textContent;
+                    navigator.clipboard.writeText(payloadText).then(() => {
+                        alert('Teks berhasil disalin!');
+                    });
+                };
+            }
+
+            if (btnResetConverter) {
+                btnResetConverter.onclick = () => {
+                    fileInput.value = '';
+                    previewSection.classList.add('hidden');
+                    outConverter.classList.add('hidden');
+                    btnConvert.disabled = true;
+                    currentFile = null;
+                };
+            }
+        }
+
+        const btnWebhook = document.getElementById('btnWebhook');
+        const btnWebhookReset = document.getElementById('btnWebhookReset');
+        const outWebhook = document.getElementById('outWebhook');
+        const jsonWebhook = document.getElementById('jsonWebhook');
+        const metaWebhook = document.getElementById('metaWebhook');
+
+        if (btnWebhook) {
+            btnWebhook.onclick = async () => {
+                const token = document.getElementById('tiToken').value;
+                const mode = document.getElementById('tiMode').value;
+                const body = document.getElementById('tiBody').value;
+                if (!token) { alert('Kolom token wajib diisi!'); return; }
+                const url = `${getBase()}/webhook/payment?token=${encodeURIComponent(token)}`;
+                let headers = {};
+                let payload;
+                if (mode === 'json') {
+                    headers['Content-Type'] = 'application/json';
+                    payload = body;
+                } else if (mode === 'form') {
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                    try {
+                        const bodyObj = JSON.parse(body);
+                        const params = new URLSearchParams();
+                        for (const [key, value] of Object.entries(bodyObj)) { params.append(key, value); }
+                        payload = params;
+                    } catch {
+                        payload = new URLSearchParams();
+                        payload.append('message', body);
+                    }
+                } else {
+                    headers['Content-Type'] = 'text/plain';
+                    payload = body;
+                }
+                btnWebhook.disabled = true;
+                btnWebhook.textContent = 'Mengirimkan...';
+                try {
+                    const start = performance.now();
+                    const response = await fetch(url, { method: 'POST', headers, body: payload });
+                    const responseText = await response.text();
+                    const dur = Math.round(performance.now() - start);
+                    metaWebhook.textContent = `Status: ${response.status} • ${dur} ms`;
+                    showJSON(jsonWebhook, responseText);
+                    outWebhook.classList.remove('hidden');
+                    outWebhook.scrollIntoView({ behavior: 'smooth' });
+                } catch (err) {
+                    metaWebhook.textContent = `Error: ${err.message}`;
+                    showJSON(jsonWebhook, JSON.stringify({ error: err.message }));
+                    outWebhook.classList.remove('hidden');
+                } finally {
+                    btnWebhook.disabled = false;
+                    btnWebhook.textContent = 'KIRIM SIMULASI SEKARANG';
+                }
+            };
+
+            if (btnWebhookReset) {
+                btnWebhookReset.onclick = () => {
+                    document.getElementById('tiToken').value = '';
+                    document.getElementById('tiMode').value = 'json';
+                    document.getElementById('tiBody').value =
+                        '{ "message": "Pembayaran masuk Rp 10.338 dari ShopeePay" }';
+                    outWebhook.classList.add('hidden');
+                };
+            }
+        }
+    </script>
 </body>
 </html>
