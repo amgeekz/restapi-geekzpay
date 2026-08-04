@@ -2,6 +2,7 @@
  * GeekzPay PWA Monitor
  * Elegant & Professional Version with Dark Mode
  * Polling Mode - Simple & Stabil
+ * Menggunakan Font Awesome
  */
 
 // ============================================
@@ -113,12 +114,11 @@ window.toggleTheme = toggleTheme;
 function applyTheme(theme) {
     if (theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        DOM.themeIcon.textContent = '☀️';
+        DOM.themeIcon.innerHTML = '<i class="fas fa-sun"></i>';
     } else {
         document.documentElement.removeAttribute('data-theme');
-        DOM.themeIcon.textContent = '🌙';
+        DOM.themeIcon.innerHTML = '<i class="fas fa-moon"></i>';
     }
-    // Update meta theme-color
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
         meta.content = theme === 'dark' ? '#0f1420' : '#f0f4f8';
@@ -237,7 +237,6 @@ function renderChart() {
 // INIT
 // ============================================
 function init() {
-    // Apply theme
     applyTheme(state.theme);
     
     if (state.token) {
@@ -259,8 +258,7 @@ function init() {
     registerServiceWorker();
     checkNotificationPermission();
     
-    console.log('◆ GeekzPay Monitor loaded');
-    console.log(`◆ Theme: ${state.theme}`);
+    console.log('GeekzPay Monitor loaded');
 }
 
 // ============================================
@@ -539,10 +537,10 @@ function changeSoundVolume(value) {
 window.changeSoundVolume = changeSoundVolume;
 
 function updateSoundUI() {
-    DOM.toggleSoundBtn.textContent = state.soundEnabled ? '🔊 Suara' : '🔇 Mute';
+    DOM.toggleSoundBtn.innerHTML = state.soundEnabled ? '<i class="fas fa-volume-up"></i> Suara' : '<i class="fas fa-volume-mute"></i> Mute';
     DOM.toggleSoundBtn.className = state.soundEnabled ? 'btn btn-soft active' : 'btn btn-soft';
     
-    DOM.toggleTtsBtn.textContent = state.ttsEnabled ? '🗣️ Voice' : '🔇 Mute';
+    DOM.toggleTtsBtn.innerHTML = state.ttsEnabled ? '<i class="fas fa-microphone"></i> Voice' : '<i class="fas fa-microphone-slash"></i> Mute';
     DOM.toggleTtsBtn.className = state.ttsEnabled ? 'btn btn-soft active' : 'btn btn-soft';
     
     document.querySelectorAll('.sound-btn').forEach(btn => {
@@ -603,7 +601,7 @@ function renderTransactions() {
     if (state.history.length === 0) {
         DOM.transactionList.innerHTML = `
             <div class="empty-state">
-                <div class="empty-icon">📭</div>
+                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
                 <p>Belum ada transaksi</p>
                 <span>Masukkan token dan tunggu notifikasi</span>
             </div>`;
@@ -654,7 +652,7 @@ function formatTime(iso) {
     catch { return iso || ''; }
 }
 function showToast(msg) {
-    DOM.toastMessage.textContent = msg;
+    DOM.toastMessage.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
     DOM.toast.classList.add('show');
     clearTimeout(DOM.toast._timeout);
     DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 3000);

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GeekzPay Monitor</title>
     
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
     <link rel="manifest" href="/pwa/manifest.json">
     <meta name="theme-color" content="#0f1420">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,7 +27,7 @@
     <!-- HEADER -->
     <header class="header">
         <div class="header-left">
-            <div class="logo-icon">⚡</div>
+            <div class="logo-icon"><i class="fas fa-bolt"></i></div>
             <div>
                 <h1>GeekzPay</h1>
                 <span class="header-sub">Monitor</span>
@@ -32,7 +35,7 @@
         </div>
         <div class="header-right">
             <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                <span class="theme-icon">🌙</span>
+                <span class="theme-icon"><i class="fas fa-moon"></i></span>
             </button>
             <div class="status-badge">
                 <span class="status-dot" id="statusDot"></span>
@@ -43,45 +46,45 @@
 
     <!-- PERMISSION BANNER -->
     <div id="permissionBanner" class="permission-banner" style="display:none;">
-        <span>🔔 Izinkan notifikasi</span>
+        <span><i class="fas fa-bell"></i> Izinkan notifikasi</span>
         <button class="btn btn-primary" onclick="requestNotificationPermission()">Izinkan</button>
     </div>
 
     <!-- QRIS WIDGET BUTTON -->
     <button class="btn-qris" onclick="openQRISWidget()">
-        <span>⊞</span> Tampilkan QRIS
+        <i class="fas fa-qrcode"></i> Tampilkan QRIS
     </button>
 
     <!-- STATS UTAMA -->
     <section class="stats-grid">
         <div class="stat-card">
             <div class="stat-value" id="totalCount">0</div>
-            <div class="stat-label">Total Transaksi</div>
+            <div class="stat-label"><i class="fas fa-credit-card"></i> Total Transaksi</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="totalAmount">Rp 0</div>
-            <div class="stat-label">Total Nominal</div>
+            <div class="stat-label"><i class="fas fa-money-bill-wave"></i> Total Nominal</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="newCount">0</div>
-            <div class="stat-label">Baru</div>
+            <div class="stat-label"><i class="fas fa-star"></i> Baru</div>
         </div>
     </section>
 
     <!-- STATISTIK DETAIL -->
     <section class="stats-detail-grid">
         <div class="stat-detail-card">
-            <div class="stat-detail-label">Hari Ini</div>
+            <div class="stat-detail-label"><i class="fas fa-calendar-day"></i> Hari Ini</div>
             <div class="stat-detail-value" id="todayCount">0</div>
             <div class="stat-detail-sub" id="todayAmount">Rp 0</div>
         </div>
         <div class="stat-detail-card">
-            <div class="stat-detail-label">Bulan Ini</div>
+            <div class="stat-detail-label"><i class="fas fa-calendar-alt"></i> Bulan Ini</div>
             <div class="stat-detail-value" id="monthCount">0</div>
             <div class="stat-detail-sub" id="monthAmount">Rp 0</div>
         </div>
         <div class="stat-detail-card highlight">
-            <div class="stat-detail-label">Total</div>
+            <div class="stat-detail-label"><i class="fas fa-database"></i> Total</div>
             <div class="stat-detail-value" id="allCount">0</div>
             <div class="stat-detail-sub" id="allAmount">Rp 0</div>
         </div>
@@ -90,7 +93,7 @@
     <!-- GRAFIK -->
     <section class="chart-section">
         <div class="chart-header">
-            <span class="chart-icon">📊</span>
+            <span class="chart-icon"><i class="fas fa-chart-bar"></i></span>
             <span class="chart-title">7 Hari Terakhir</span>
         </div>
         <div class="chart-container" id="chartContainer">
@@ -102,21 +105,21 @@
     <section class="token-section">
         <div class="token-input-group">
             <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay">
-            <button class="btn btn-primary" onclick="saveToken()">Simpan</button>
+            <button class="btn btn-primary" onclick="saveToken()"><i class="fas fa-save"></i> Simpan</button>
         </div>
     </section>
 
     <!-- CONTROLS -->
     <section class="controls">
-        <button class="btn btn-soft" id="toggleSoundBtn" onclick="toggleSound()">🔊 Suara</button>
-        <button class="btn btn-soft" id="toggleTtsBtn" onclick="toggleTts()">🗣️ Voice</button>
-        <button class="btn btn-danger" onclick="clearHistory()">✕ Reset</button>
+        <button class="btn btn-soft" id="toggleSoundBtn" onclick="toggleSound()"><i class="fas fa-volume-up"></i> Suara</button>
+        <button class="btn btn-soft" id="toggleTtsBtn" onclick="toggleTts()"><i class="fas fa-microphone"></i> Voice</button>
+        <button class="btn btn-danger" onclick="clearHistory()"><i class="fas fa-trash"></i> Reset</button>
     </section>
 
     <!-- SOUND SETTINGS -->
     <section class="sound-section">
         <div class="sound-header">
-            <span class="sound-icon">🔊</span>
+            <span class="sound-icon"><i class="fas fa-music"></i></span>
             <span class="sound-title">Suara Notifikasi</span>
         </div>
         <div class="sound-grid">
@@ -126,7 +129,7 @@
             <button class="sound-btn" data-sound="success" onclick="changeSoundType('success')">Sukses</button>
         </div>
         <div class="volume-control">
-            <span class="volume-label">Volume</span>
+            <span class="volume-label"><i class="fas fa-volume-up"></i> Volume</span>
             <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.8" oninput="changeSoundVolume(this.value)">
             <span class="volume-value" id="soundVolumeLabel">80%</span>
         </div>
@@ -135,12 +138,12 @@
     <!-- TRANSACTION LIST -->
     <section class="transaction-section">
         <div class="transaction-header">
-            <span class="transaction-title">Riwayat Transaksi</span>
+            <span class="transaction-title"><i class="fas fa-history"></i> Riwayat Transaksi</span>
             <span class="transaction-count" id="historyCount">0</span>
         </div>
         <div id="transactionList" class="transaction-list">
             <div class="empty-state">
-                <div class="empty-icon">📭</div>
+                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
                 <p>Belum ada transaksi</p>
                 <span>Masukkan token dan tunggu notifikasi</span>
             </div>
@@ -151,19 +154,19 @@
     <div id="qrisOverlay" class="qris-overlay" onclick="closeQRISWidget(event)">
         <div class="qris-modal" onclick="event.stopPropagation()">
             <div class="qris-modal-header">
-                <span class="qris-modal-title">⊞ QRIS</span>
-                <button class="qris-close" onclick="closeQRISWidget()">✕</button>
+                <span class="qris-modal-title"><i class="fas fa-qrcode"></i> QRIS</span>
+                <button class="qris-close" onclick="closeQRISWidget()"><i class="fas fa-times"></i></button>
             </div>
             <div class="qris-modal-body">
                 <img id="qrisImage" src="/qris.jpg" alt="QRIS" class="qris-image">
-                <p class="qris-hint">Scan menggunakan aplikasi bank atau e-wallet</p>
+                <p class="qris-hint"><i class="fas fa-mobile-screen"></i> Scan menggunakan aplikasi bank atau e-wallet</p>
             </div>
         </div>
     </div>
 
     <!-- TOAST -->
     <div id="toast" class="toast">
-        <span id="toastMessage">Pembayaran baru masuk!</span>
+        <span id="toastMessage"><i class="fas fa-check-circle"></i> Pembayaran baru masuk!</span>
     </div>
 
     <audio id="notificationSound" preload="auto" style="display:none;">
