@@ -1,7 +1,7 @@
 /**
  * GeekzPay PWA Monitor
- * SSE Real-time dengan Auto Reconnect
- * Tombol minimal, semua otomatis
+ * SSE + Fallback Polling
+ * Auto-reconnect dengan exponential backoff
  */
 
 // ============================================
@@ -10,8 +10,10 @@
 const CONFIG = {
     API_BASE: 'https://restapi.amgeekz.my.id',
     MAX_HISTORY: 200,
-    RECONNECT_DELAY: 3000,
-    MAX_RECONNECT_ATTEMPTS: 20
+    SSE_RECONNECT_DELAY: 2000,
+    SSE_MAX_RETRIES: 30,
+    POLLING_INTERVAL: 5000, // Fallback: polling 5 detik
+    HEARTBEAT_TIMEOUT: 15000 // 15 detik tanpa heartbeat = mati
 };
 
 // ============================================
@@ -27,13 +29,21 @@ const state = {
     lastIds: new Set(JSON.parse(localStorage.getItem('geekzpay_last_ids') || '[]')),
     newCount: parseInt(localStorage.getItem('geekzpay_new_count')) || 0,
     stats: JSON.parse(localStorage.getItem('geekzpay_stats') || '{"daily":{},"monthly":{},"total":0,"totalAmount":0}'),
+    
+    // SSE State
     eventSource: null,
     isConnected: false,
-    audioContext: null,
     reconnectAttempts: 0,
     isProcessing: false,
     processedEvents: new Set(),
-    reconnectTimer: null
+    reconnectTimer: null,
+    heartbeatTimer: null,
+    lastHeartbeat: Date.now(),
+    
+    // Fallback Polling
+    pollingInterval: null,
+    isPolling: false,
+    useFallback: false
 };
 
 // ============================================
@@ -214,7 +224,7 @@ function renderChart() {
 function init() {
     if (state.token) {
         DOM.tokenInput.value = state.token;
-        connectSSE();
+        startSSE();
     } else {
         DOM.tokenInput.value = '';
         setStatus('paused', 'Waiting Token');
@@ -231,34 +241,16 @@ function init() {
     registerServiceWorker();
     checkNotificationPermission();
     
-    console.log('◆ GeekzPay Monitor PWA loaded (SSE Auto-Reconnect)');
+    console.log('◆ GeekzPay Monitor loaded (SSE + Fallback Polling)');
 }
 
 // ============================================
-// NOTIFICATION PERMISSION
+// SSE - START
 // ============================================
-function checkNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-        DOM.permissionBanner.style.display = 'flex';
-    }
-}
-
-function requestNotificationPermission() {
-    if ('Notification' in window) {
-        Notification.requestPermission().then(p => {
-            if (p === 'granted') {
-                DOM.permissionBanner.style.display = 'none';
-                showToast('◆ Notifikasi diizinkan');
-            }
-        });
-    }
-}
-window.requestNotificationPermission = requestNotificationPermission;
-
-// ============================================
-// SSE - CONNECT (AUTO RECONNECT)
-// ============================================
-function connectSSE() {
+function startSSE() {
+    // Matikan polling jika aktif
+    stopPolling();
+    
     if (!state.token) {
         showToast('⊘ Masukkan token terlebih dahulu');
         return;
@@ -271,6 +263,8 @@ function connectSSE() {
 
     setStatus('loading', 'Connecting...');
     DOM.statusDot.style.background = '#ffa502';
+    state.useFallback = false;
+    state.reconnectAttempts = 0;
 
     const url = `${CONFIG.API_BASE}/pwa/events?token=${encodeURIComponent(state.token)}`;
     
@@ -283,13 +277,47 @@ function connectSSE() {
             DOM.statusDot.style.background = '#00c853';
             state.isConnected = true;
             state.reconnectAttempts = 0;
+            state.lastHeartbeat = Date.now();
             showToast('◆ Terhubung ke server');
+            
+            // Ambil history
             setTimeout(fetchHistory, 1000);
+            
+            // Monitor heartbeat
+            clearInterval(state.heartbeatTimer);
+            state.heartbeatTimer = setInterval(() => {
+                const elapsed = Date.now() - state.lastHeartbeat;
+                if (elapsed > CONFIG.HEARTBEAT_TIMEOUT && state.isConnected) {
+                    console.warn('⊘ Heartbeat timeout, reconnect...');
+                    state.isConnected = false;
+                    if (state.eventSource) {
+                        state.eventSource.close();
+                        state.eventSource = null;
+                    }
+                    reconnectSSE();
+                }
+            }, 5000);
         };
 
+        // Event: connected
+        state.eventSource.addEventListener('connected', (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('◆ SSE confirmed:', data);
+                state.lastHeartbeat = Date.now();
+            } catch (e) {}
+        });
+
+        // Event: ping (heartbeat dari server)
+        state.eventSource.addEventListener('ping', (event) => {
+            state.lastHeartbeat = Date.now();
+        });
+
+        // Event: payment
         state.eventSource.addEventListener('payment', (event) => {
             try {
                 const data = JSON.parse(event.data);
+                state.lastHeartbeat = Date.now();
                 const eventId = data.event_id || data.id;
                 if (eventId && !state.processedEvents.has(eventId) && !state.lastIds.has(eventId)) {
                     state.processedEvents.add(eventId);
@@ -298,8 +326,8 @@ function connectSSE() {
             } catch (e) { console.error(e); }
         });
 
-        state.eventSource.onerror = () => {
-            console.warn('⊘ SSE Error');
+        state.eventSource.onerror = (error) => {
+            console.warn('⊘ SSE Error:', error);
             state.isConnected = false;
             if (state.eventSource) {
                 state.eventSource.close();
@@ -309,26 +337,125 @@ function connectSSE() {
             setStatus('error', 'Disconnected');
             DOM.statusDot.style.background = '#ff1744';
             
-            // Auto reconnect dengan exponential backoff
-            if (state.reconnectAttempts < CONFIG.MAX_RECONNECT_ATTEMPTS) {
-                state.reconnectAttempts++;
-                const delay = Math.min(CONFIG.RECONNECT_DELAY * state.reconnectAttempts, 30000);
-                console.log(`◆ Reconnect in ${delay}ms (${state.reconnectAttempts}/${CONFIG.MAX_RECONNECT_ATTEMPTS})`);
-                
-                clearTimeout(state.reconnectTimer);
-                state.reconnectTimer = setTimeout(() => {
-                    if (!state.isConnected) connectSSE();
-                }, delay);
-            } else {
-                setStatus('error', 'Max Retry');
-                showToast('⊘ Gagal konek, refresh halaman');
-            }
+            // Coba reconnect
+            reconnectSSE();
         };
 
     } catch (error) {
         console.error('⊘ SSE Failed:', error);
         setStatus('error', 'Connection Failed');
-        setTimeout(connectSSE, CONFIG.RECONNECT_DELAY);
+        // Fallback ke polling
+        startPollingFallback();
+    }
+}
+
+// ============================================
+// RECONNECT SSE
+// ============================================
+function reconnectSSE() {
+    if (state.reconnectAttempts >= CONFIG.SSE_MAX_RETRIES) {
+        console.warn('⊘ SSE max retries reached, switching to polling');
+        startPollingFallback();
+        return;
+    }
+    
+    state.reconnectAttempts++;
+    const delay = Math.min(CONFIG.SSE_RECONNECT_DELAY * Math.pow(1.5, state.reconnectAttempts - 1), 30000);
+    
+    console.log(`◆ Reconnect attempt ${state.reconnectAttempts} in ${delay}ms`);
+    setStatus('loading', `Reconnect ${state.reconnectAttempts}...`);
+    DOM.statusDot.style.background = '#ffa502';
+    
+    clearTimeout(state.reconnectTimer);
+    state.reconnectTimer = setTimeout(() => {
+        if (!state.isConnected) {
+            startSSE();
+        }
+    }, delay);
+}
+
+// ============================================
+// FALLBACK: POLLING
+// ============================================
+function startPollingFallback() {
+    if (state.pollingInterval) return;
+    
+    state.useFallback = true;
+    state.isPolling = true;
+    setStatus('loading', 'Polling Mode');
+    DOM.statusDot.style.background = '#ffa502';
+    showToast('◆ Mode polling aktif');
+    console.log('◆ Fallback polling started');
+    
+    // Polling immediately
+    pollData();
+    
+    // Polling setiap 5 detik
+    state.pollingInterval = setInterval(pollData, CONFIG.POLLING_INTERVAL);
+}
+
+function stopPolling() {
+    if (state.pollingInterval) {
+        clearInterval(state.pollingInterval);
+        state.pollingInterval = null;
+        state.isPolling = false;
+        state.useFallback = false;
+        console.log('◆ Polling stopped');
+    }
+}
+
+async function pollData() {
+    if (!state.token) return;
+    
+    try {
+        const response = await fetch(`${CONFIG.API_BASE}/webhook/status?token=${encodeURIComponent(state.token)}&limit=10`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        const items = Array.isArray(data?.data) ? data.data : [];
+        
+        let newItems = 0;
+        items.forEach(item => {
+            const id = item.event_id || item.id;
+            if (id && !state.lastIds.has(id)) {
+                state.lastIds.add(id);
+                state.processedEvents.add(id);
+                newItems++;
+                const amount = item.amount || 0;
+                state.history.unshift({
+                    id, amount,
+                    time: item.received_at || new Date().toISOString(),
+                    message: item.body?.message || 'Pembayaran masuk',
+                    raw: item
+                });
+                updateStats(amount);
+                
+                // Notifikasi tetap jalan
+                if (state.soundEnabled) playNotificationSound();
+                if (state.ttsEnabled) speakPayment(amount);
+                showToast(`◆ Pembayaran Rp ${formatRupiah(amount)} masuk`);
+                sendPushNotification({ id, amount, message: item.body?.message || 'Pembayaran masuk' });
+            }
+        });
+        
+        if (newItems > 0) {
+            if (state.history.length > CONFIG.MAX_HISTORY) {
+                state.history = state.history.slice(0, CONFIG.MAX_HISTORY);
+            }
+            saveState();
+            renderTransactions();
+            updateStatsUI();
+            renderStats();
+            renderChart();
+            updateBadge();
+            console.log(`◆ Polling: ${newItems} new items`);
+        }
+        
+        setStatus('online', 'Polling');
+        DOM.statusDot.style.background = '#ffa502';
+        
+    } catch (error) {
+        console.warn('⊘ Polling error:', error);
     }
 }
 
@@ -441,7 +568,7 @@ function saveToken() {
     localStorage.setItem('geekzpay_token', state.token);
     showToast('◆ Token tersimpan');
     
-    // Reset state untuk token baru
+    // Reset state
     state.lastIds = new Set();
     state.processedEvents = new Set();
     state.history = [];
@@ -453,12 +580,15 @@ function saveToken() {
     updateStatsUI();
     renderStats();
     renderChart();
-    connectSSE();
+    
+    // Mulai SSE
+    stopPolling();
+    startSSE();
 }
 window.saveToken = saveToken;
 
 // ============================================
-// CLEAR HISTORY (Reset)
+// CLEAR HISTORY
 // ============================================
 function clearHistory() {
     if (!confirm('Hapus semua history & statistik?')) return;
@@ -673,7 +803,12 @@ function updateBadge() {
 // ============================================
 function setStatus(type, text) {
     DOM.statusText.textContent = text;
-    const colors = { online: '#00c853', loading: '#ffa502', error: '#ff1744', paused: '#ffa502' };
+    const colors = { 
+        online: '#00c853', 
+        loading: '#ffa502', 
+        error: '#ff1744', 
+        paused: '#ffa502' 
+    };
     DOM.statusDot.style.background = colors[type] || '#888';
 }
 
