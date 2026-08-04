@@ -13,9 +13,6 @@ const ASSETS = [
     '/icon128.png'
 ];
 
-// ============================================
-// INSTALL
-// ============================================
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -27,9 +24,6 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// ============================================
-// ACTIVATE
-// ============================================
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then(keys => {
@@ -42,14 +36,11 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// ============================================
-// FETCH
-// ============================================
 self.addEventListener('fetch', (event) => {
-    // Skip API calls
     if (event.request.url.includes('/webhook/') || 
         event.request.url.includes('/qris/') ||
-        event.request.url.includes('/diag')) {
+        event.request.url.includes('/diag') ||
+        event.request.url.includes('/pwa/events')) {
         return event.respondWith(fetch(event.request));
     }
 
@@ -78,9 +69,6 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
-// ============================================
-// PUSH NOTIFICATION
-// ============================================
 self.addEventListener('push', (event) => {
     let data = {
         title: '◆ Pembayaran Masuk',
@@ -114,9 +102,6 @@ self.addEventListener('push', (event) => {
     );
 });
 
-// ============================================
-// NOTIFICATION CLICK
-// ============================================
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(

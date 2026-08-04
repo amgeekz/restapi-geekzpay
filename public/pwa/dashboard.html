@@ -49,7 +49,7 @@
     </div>
 
     <!-- ============================================
-    STATS NEOBRUTALISM
+    STATS UTAMA
     ============================================ -->
     <section class="stats-grid">
         <div class="stat-card">
@@ -67,7 +67,41 @@
     </section>
 
     <!-- ============================================
-    TOKEN INPUT NEOBRUTALISM
+    STATISTIK HARIAN & BULANAN - BARU
+    ============================================ -->
+    <section class="stats-detail-grid">
+        <div class="stat-detail-card neo-card">
+            <div class="stat-detail-label">📅 Hari Ini</div>
+            <div class="stat-detail-value" id="todayCount">0</div>
+            <div class="stat-detail-sub" id="todayAmount">Rp 0</div>
+        </div>
+        <div class="stat-detail-card neo-card">
+            <div class="stat-detail-label">📆 Bulan Ini</div>
+            <div class="stat-detail-value" id="monthCount">0</div>
+            <div class="stat-detail-sub" id="monthAmount">Rp 0</div>
+        </div>
+        <div class="stat-detail-card neo-card">
+            <div class="stat-detail-label">📊 Semua</div>
+            <div class="stat-detail-value" id="allCount">0</div>
+            <div class="stat-detail-sub" id="allAmount">Rp 0</div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    GRAFIK SEDERHANA (7 Hari Terakhir)
+    ============================================ -->
+    <section class="neo-card chart-section">
+        <div class="chart-header">
+            <span class="sticker-badge">📊</span>
+            <span class="chart-title">7 HARI TERAKHIR</span>
+        </div>
+        <div class="chart-container" id="chartContainer">
+            <!-- Bar chart akan di-render oleh JS -->
+        </div>
+    </section>
+
+    <!-- ============================================
+    TOKEN INPUT
     ============================================ -->
     <section class="neo-card token-section">
         <div class="token-input-group">
@@ -77,17 +111,18 @@
     </section>
 
     <!-- ============================================
-    CONTROLS NEOBRUTALISM
+    CONTROLS
     ============================================ -->
     <section class="controls">
         <button class="neo-btn neo-btn-success" id="toggleSoundBtn" onclick="toggleSound()">♫ Suara ON</button>
+        <button class="neo-btn neo-btn-success" id="toggleTtsBtn" onclick="toggleTts()">🔊 Voice ON</button>
         <button class="neo-btn neo-btn-primary" onclick="testSound()">♫ Test</button>
-        <button class="neo-btn neo-btn-go" onclick="fetchData()">⟳ Refresh</button>
+        <button class="neo-btn neo-btn-go" onclick="fetchHistory()">⟳ History</button>
         <button class="neo-btn neo-btn-danger" onclick="clearHistory()">✕ Clear</button>
     </section>
 
     <!-- ============================================
-    SOUND SETTINGS NEOBRUTALISM
+    SOUND SETTINGS
     ============================================ -->
     <section class="neo-card sound-settings">
         <div class="sound-settings-header">
@@ -110,21 +145,21 @@
         </div>
         <div class="sound-volume-control">
             <label>♫ Volume</label>
-            <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.7" 
+            <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.8" 
                    oninput="changeSoundVolume(this.value)">
-            <span id="soundVolumeLabel">70%</span>
+            <span id="soundVolumeLabel">80%</span>
         </div>
     </section>
 
     <!-- ============================================
-    TRANSACTION LIST NEOBRUTALISM
+    TRANSACTION LIST
     ============================================ -->
     <section class="transaction-section">
         <div id="transactionList" class="transaction-list">
             <div class="empty-state neo-card">
                 <div class="empty-icon">⊘</div>
                 <p>Belum ada transaksi</p>
-                <small>Masukkan token dan tunggu notifikasi</small>
+                <small>Masukkan token dan tunggu notifikasi real-time</small>
             </div>
         </div>
     </section>
