@@ -4,20 +4,20 @@
   "description": "Monitor pembayaran QRIS GeekzPay real-time",
   "start_url": "/pwa/dashboard.html",
   "display": "standalone",
-  "background_color": "#0f0f1a",
-  "theme_color": "#1a1a2e",
+  "background_color": "#fcf7e8",
+  "theme_color": "#fcf7e8",
   "orientation": "portrait",
   "categories": ["finance", "business"],
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
+      "src": "/icon48.png",
+      "sizes": "48x48",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
+      "src": "/icon128.png",
+      "sizes": "128x128",
       "type": "image/png",
       "purpose": "any maskable"
     }

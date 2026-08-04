@@ -1,6 +1,16 @@
 /* ============================================
-   RESET & BASE
+   NEOBRUTALISM THEME - SAMA SEPERTI WEBSITE
    ============================================ */
+:root {
+    --bg: #fcf7e8;
+    --black: #111111;
+    --pink: #ff4088;
+    --yellow: #ffe600;
+    --lime: #b4ff00;
+    --green: #00c853;
+    --red: #ff1744;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -8,12 +18,49 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0f0f1a;
-    color: #e0e0e0;
-    min-height: 100vh;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle, #11111111 1px, transparent 1px);
+    background-size: 24px 24px;
+    font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', 'Arial Black', sans-serif;
+    color: var(--black);
     padding: 16px;
     padding-bottom: 80px;
+    min-height: 100vh;
+}
+
+/* ============================================
+   NEOBRUTALISM CARDS
+   ============================================ */
+.neo-card {
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #111111;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+.neo-card:hover {
+    box-shadow: 9px 9px 0px #111111;
+    transform: translate(-2px, -2px);
+}
+
+.neo-card-accent-yellow {
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #ffe600;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.neo-card-accent-pink {
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #ff4088;
+    padding: 16px;
+    margin-bottom: 12px;
 }
 
 /* ============================================
@@ -23,34 +70,41 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    border-radius: 16px;
-    border: 1px solid #2a2a4a;
-    margin-bottom: 20px;
+    padding: 12px 16px;
 }
 
-.header h1 {
-    font-size: 18px;
-    font-weight: 700;
-    background: linear-gradient(90deg, #00d4ff, #7b2ffc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-left h1 {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
 }
 
 .status-badge {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
-    color: #888;
+    font-size: 11px;
+    font-weight: 800;
+    color: #666;
 }
 
 .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #00ff88;
+    background: #00c853;
+    border: 2px solid #111111;
     animation: pulse 1.5s infinite;
 }
 
@@ -60,31 +114,72 @@ body {
 }
 
 /* ============================================
-   STATS
+   STICKER BADGE
+   ============================================ */
+.sticker-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 1.4;
+    background: #ffe600;
+    color: #111111;
+    box-shadow: 3px 3px 0px #111111;
+    transform: rotate(-1.5deg);
+}
+
+.sticker-badge-pink {
+    background: #ff4088;
+    color: #ffffff;
+    transform: rotate(1deg);
+}
+
+/* ============================================
+   PERMISSION BANNER
+   ============================================ */
+.permission-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.permission-banner p {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+/* ============================================
+   STATS GRID
    ============================================ */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 12px;
 }
 
 .stat-card {
-    background: #1a1a2e;
-    padding: 16px 12px;
-    border-radius: 12px;
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 16px;
+    box-shadow: 4px 4px 0px #111111;
+    padding: 14px 10px;
     text-align: center;
-    border: 1px solid #2a2a4a;
 }
 
 .stat-value {
     font-size: 22px;
-    font-weight: 700;
-    color: #00d4ff;
+    font-weight: 900;
+    color: #111111;
 }
 
 .stat-label {
-    font-size: 10px;
+    font-size: 9px;
+    font-weight: 800;
     color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -95,7 +190,7 @@ body {
    TOKEN INPUT
    ============================================ */
 .token-section {
-    margin-bottom: 16px;
+    padding: 12px 16px;
 }
 
 .token-input-group {
@@ -106,60 +201,186 @@ body {
 .token-input-group input {
     flex: 1;
     padding: 10px 14px;
-    border: 1px solid #2a2a4a;
-    border-radius: 10px;
-    background: #1a1a2e;
-    color: #e0e0e0;
-    font-size: 14px;
+    border: 3px solid #111111;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #111111;
+    font-size: 13px;
+    font-weight: 700;
     outline: none;
+    box-shadow: 3px 3px 0px #111111;
 }
 
 .token-input-group input:focus {
-    border-color: #00d4ff;
+    border-color: #ff4088;
 }
 
 /* ============================================
-   BUTTONS
+   BUTTONS NEOBRUTALISM
    ============================================ */
 .controls {
     display: flex;
     gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
-.btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
+.neo-btn {
+    border: 3px solid #111111;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 8px 14px;
+    box-shadow: 4px 4px 0px #111111;
+    transition: all 0.12s ease;
     cursor: pointer;
-    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
     flex: 1;
     min-width: 60px;
+    text-align: center;
+}
+.neo-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0px #111111;
+}
+.neo-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 6px 6px 0px #111111;
 }
 
-.btn:active { transform: scale(0.95); }
-
-.btn-primary {
-    background: linear-gradient(135deg, #00d4ff, #7b2ffc);
-    color: white;
+.neo-btn-primary {
+    background: #ffffff;
+    color: #111111;
+}
+.neo-btn-primary:hover {
+    background: #ffe600;
 }
 
-.btn-danger {
-    background: #ff4757;
-    color: white;
+.neo-btn-danger {
+    background: #ff4088;
+    color: #ffffff;
+}
+.neo-btn-danger:hover {
+    background: #e6006e;
 }
 
-.btn-success {
-    background: #00ff88;
-    color: #0f0f1a;
+.neo-btn-success {
+    background: #00c853;
+    color: #111111;
+}
+.neo-btn-success:hover {
+    background: #00e676;
 }
 
-.btn-warning {
+.neo-btn-warning {
     background: #ffa502;
-    color: #0f0f1a;
+    color: #111111;
+}
+.neo-btn-warning:hover {
+    background: #ffbe33;
+}
+
+/* ============================================
+   SOUND SETTINGS
+   ============================================ */
+.sound-settings {
+    padding: 14px 16px;
+}
+
+.sound-settings-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.sound-settings-title {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #111111;
+}
+
+.sound-type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.sound-type-btn {
+    padding: 8px 4px;
+    border: 3px solid #111111;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #666;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    box-shadow: 3px 3px 0px #111111;
+}
+
+.sound-type-btn:hover {
+    border-color: #ff4088;
+    color: #111111;
+}
+
+.sound-type-btn.active {
+    border-color: #ff4088;
+    background: #ff4088;
+    color: #ffffff;
+    box-shadow: 3px 3px 0px #111111;
+}
+
+.sound-type-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #111111;
+}
+
+.sound-volume-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sound-volume-control label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #666;
+    min-width: 50px;
+}
+
+.sound-volume-control input[type="range"] {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #111111;
+    border-radius: 3px;
+    outline: none;
+}
+
+.sound-volume-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffe600;
+    border: 3px solid #111111;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px #111111;
+}
+
+.sound-volume-control #soundVolumeLabel {
+    font-size: 12px;
+    font-weight: 900;
+    color: #111111;
+    min-width: 40px;
+    text-align: right;
 }
 
 /* ============================================
@@ -176,19 +397,20 @@ body {
 }
 
 .transaction-item {
-    background: #1a1a2e;
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 14px;
+    box-shadow: 4px 4px 0px #111111;
     padding: 12px 16px;
-    border-radius: 12px;
-    border-left: 4px solid #00d4ff;
-    animation: slideIn 0.3s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    animation: slideIn 0.3s ease;
 }
 
 .transaction-item.new {
-    border-left-color: #00ff88;
-    background: #1a2a2e;
+    border-left: 6px solid #00c853;
+    background: #f0fff7;
 }
 
 @keyframes slideIn {
@@ -197,19 +419,21 @@ body {
 }
 
 .transaction-item .amount {
-    font-size: 18px;
-    font-weight: 700;
-    color: #00ff88;
+    font-size: 17px;
+    font-weight: 900;
+    color: #00c853;
 }
 
 .transaction-item .info {
-    font-size: 12px;
-    color: #888;
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
 }
 
 .transaction-item .time {
-    font-size: 11px;
-    color: #555;
+    font-size: 10px;
+    font-weight: 700;
+    color: #999;
 }
 
 /* ============================================
@@ -217,17 +441,26 @@ body {
    ============================================ */
 .empty-state {
     text-align: center;
-    padding: 40px 20px;
-    color: #555;
+    padding: 30px 20px;
 }
 
 .empty-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
+    font-size: 40px;
+    font-weight: 900;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    font-weight: 800;
+    font-size: 14px;
+    color: #555;
 }
 
 .empty-state small {
-    color: #444;
+    font-weight: 700;
+    font-size: 11px;
+    color: #999;
     display: block;
     margin-top: 4px;
 }
@@ -240,16 +473,17 @@ body {
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: #1a1a2e;
-    padding: 12px 24px;
-    border-radius: 12px;
-    border: 1px solid #2a2a4a;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    background: #ffffff;
+    padding: 12px 20px;
+    border: 3px solid #111111;
+    border-radius: 16px;
+    box-shadow: 6px 6px 0px #111111;
     display: none;
     z-index: 999;
-    backdrop-filter: blur(10px);
     max-width: 90%;
     text-align: center;
+    font-weight: 800;
+    font-size: 13px;
 }
 
 .toast.show {
@@ -268,19 +502,33 @@ body {
 @media (max-width: 480px) {
     .stats-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
+        gap: 6px;
     }
     
     .stat-value {
         font-size: 18px;
     }
     
-    .btn {
-        font-size: 11px;
-        padding: 6px 12px;
+    .neo-btn {
+        font-size: 10px;
+        padding: 6px 10px;
     }
     
-    .header h1 {
-        font-size: 15px;
+    .header-left h1 {
+        font-size: 13px;
+    }
+    
+    .sound-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .transaction-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .transaction-item .time {
+        align-self: flex-end;
     }
 }

@@ -3,23 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ GeekzPay Monitor</title>
+    <title>GeekzPay Monitor</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
-    <meta name="theme-color" content="#0f0f1a">
+    <meta name="theme-color" content="#fcf7e8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GeekzPay">
+    <link rel="apple-touch-icon" href="/icon-192.png">
     
     <!-- CSS -->
     <link rel="stylesheet" href="/pwa/dashboard.css">
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="header">
+    <!-- ============================================
+    HEADER NEOBRUTALISM
+    ============================================ -->
+    <header class="neo-card header">
         <div class="header-left">
-            <h1>⚡ GeekzPay Monitor</h1>
+            <span class="sticker-badge sticker-badge-pink">⚡</span>
+            <h1>GEEKZPAY MONITOR</h1>
         </div>
         <div class="header-right">
             <div class="status-badge">
@@ -29,59 +34,109 @@
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="container">
-        <!-- Stats Cards -->
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value" id="totalCount">0</div>
-                <div class="stat-label">Total Transaksi</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalAmount">Rp 0</div>
-                <div class="stat-label">Total Nominal</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="newCount">0</div>
-                <div class="stat-label">Baru</div>
-            </div>
-        </section>
-
-        <!-- Token Input -->
-        <section class="token-section">
-            <div class="token-input-group">
-                <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay..." 
-                       value="USER123">
-                <button class="btn btn-primary" onclick="saveToken()">Simpan</button>
-            </div>
-        </section>
-
-        <!-- Controls -->
-        <section class="controls">
-            <button class="btn btn-success" id="toggleSoundBtn" onclick="toggleSound()">🔊 Suara ON</button>
-            <button class="btn btn-primary" onclick="fetchData()">🔄 Refresh</button>
-            <button class="btn btn-danger" onclick="clearHistory()">🗑️ Clear</button>
-        </section>
-
-        <!-- Transaction List -->
-        <section class="transaction-section">
-            <div id="transactionList" class="transaction-list">
-                <div class="empty-state">
-                    <div class="empty-icon">📭</div>
-                    <p>Belum ada transaksi</p>
-                    <small>Masukkan token dan tunggu notifikasi</small>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="toast">
-        <span id="toastMessage">💳 Pembayaran baru masuk!</span>
+    <!-- ============================================
+    REQUEST PERMISSION NOTIFIKASI
+    ============================================ -->
+    <div id="permissionBanner" class="neo-card-accent-yellow permission-banner" style="display:none;">
+        <p>⌘ Izinkan notifikasi untuk menerima alert pembayaran</p>
+        <button class="neo-btn neo-btn-primary" onclick="requestNotificationPermission()">
+            Izinkan Notifikasi
+        </button>
     </div>
 
-    <!-- Audio for notification (fallback) -->
-    <audio id="notificationSound" preload="auto">
+    <!-- ============================================
+    STATS NEOBRUTALISM
+    ============================================ -->
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="totalCount">0</div>
+            <div class="stat-label">Total Transaksi</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalAmount">Rp 0</div>
+            <div class="stat-label">Total Nominal</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="newCount">0</div>
+            <div class="stat-label">Baru</div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    TOKEN INPUT NEOBRUTALISM
+    ============================================ -->
+    <section class="neo-card token-section">
+        <div class="token-input-group">
+            <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay..." 
+                   value="727e391bee5756aebc03084e04e0c9f229666b58542e169b49f419ad0904a297">
+            <button class="neo-btn neo-btn-primary" onclick="saveToken()">Simpan</button>
+        </div>
+    </section>
+
+    <!-- ============================================
+    CONTROLS NEOBRUTALISM
+    ============================================ -->
+    <section class="controls">
+        <button class="neo-btn neo-btn-success" id="toggleSoundBtn" onclick="toggleSound()">♫ Suara ON</button>
+        <button class="neo-btn neo-btn-primary" onclick="testSound()">♫ Test</button>
+        <button class="neo-btn neo-btn-primary" onclick="fetchData()">⟳ Refresh</button>
+        <button class="neo-btn neo-btn-danger" onclick="clearHistory()">✕ Clear</button>
+    </section>
+
+    <!-- ============================================
+    SOUND SETTINGS NEOBRUTALISM
+    ============================================ -->
+    <section class="neo-card sound-settings">
+        <div class="sound-settings-header">
+            <span class="sticker-badge">♫</span>
+            <span class="sound-settings-title">PILIH SUARA NOTIFIKASI</span>
+        </div>
+        <div class="sound-type-grid">
+            <button class="sound-type-btn active" data-sound="dana" onclick="changeSoundType('dana')">
+                ⌘ DANA
+            </button>
+            <button class="sound-type-btn" data-sound="cash_register" onclick="changeSoundType('cash_register')">
+                ⌘ Kasir
+            </button>
+            <button class="sound-type-btn" data-sound="ding_dong" onclick="changeSoundType('ding_dong')">
+                ⌘ Bel
+            </button>
+            <button class="sound-type-btn" data-sound="success" onclick="changeSoundType('success')">
+                ⌘ Sukses
+            </button>
+        </div>
+        <div class="sound-volume-control">
+            <label>♫ Volume</label>
+            <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.7" 
+                   oninput="changeSoundVolume(this.value)">
+            <span id="soundVolumeLabel">70%</span>
+        </div>
+    </section>
+
+    <!-- ============================================
+    TRANSACTION LIST NEOBRUTALISM
+    ============================================ -->
+    <section class="transaction-section">
+        <div id="transactionList" class="transaction-list">
+            <div class="empty-state neo-card">
+                <div class="empty-icon">⊘</div>
+                <p>Belum ada transaksi</p>
+                <small>Masukkan token dan tunggu notifikasi</small>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+    TOAST NOTIFICATION
+    ============================================ -->
+    <div id="toast" class="toast neo-card">
+        <span id="toastMessage">◆ Pembayaran baru masuk!</span>
+    </div>
+
+    <!-- ============================================
+    AUDIO FALLBACK
+    ============================================ -->
+    <audio id="notificationSound" preload="auto" style="display:none;">
         <source src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoAAACBhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqF" type="audio/wav">
     </audio>
 
