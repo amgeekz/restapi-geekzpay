@@ -166,6 +166,7 @@ if (btnFetchHistory) {
             if (!r.ok) throw new Error(`HTTP Error: ${r.status}`);
             const resData = await r.json();
 
+            // Reset opacity
             desktopContainer.classList.remove('opacity-40');
 
             let tRows = '';
@@ -186,20 +187,20 @@ if (btnFetchHistory) {
                         <tr>
                             <td>${ev.event_id || 'unknown'}</td>
                             <td>${dateStr}</td>
-                            <td><strong>Rp ${rupiahStr}</strong></td>
+                            <td><strong style="color:var(--success);">Rp ${rupiahStr}</strong></td>
                             <td>${msgStr}</td>
                             <td>${ev.ip || '0.0.0.0'}</td>
                         </tr>`;
 
                     mCards += `
-                        <div class="card" style="margin-bottom:8px;">
-                            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);">
+                        <div class="card" style="margin-bottom:8px;padding:12px;">
+                            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
                                 <span>${ev.event_id || 'unknown'}</span>
                                 <span>${dateStr}</span>
                             </div>
-                            <div style="font-size:16px;font-weight:700;color:var(--success);">Rp ${rupiahStr}</div>
-                            <div style="font-size:12px;color:var(--text-secondary);">${msgStr}</div>
-                            <div style="font-size:10px;color:var(--text-muted);text-align:right;">IP: ${ev.ip || '0.0.0.0'}</div>
+                            <div style="font-size:15px;font-weight:700;color:var(--success);">Rp ${rupiahStr}</div>
+                            <div style="font-size:11px;color:var(--text-secondary);word-break:break-word;">${msgStr}</div>
+                            <div style="font-size:9px;color:var(--text-muted);text-align:right;margin-top:4px;">IP: ${ev.ip || '0.0.0.0'}</div>
                         </div>`;
                 });
             }
@@ -209,7 +210,7 @@ if (btnFetchHistory) {
 
         } catch (err) {
             showToast(`Gagal mengambil data: ${err.message}`);
-            const errBlock = `<div class="empty-card" style="color:var(--danger);">Gagal tersambung ke server. Periksa koneksi internet Anda.</div>`;
+            const errBlock = `<div class="empty-card" style="color:var(--danger);">Gagal tersambung ke server: ${err.message}</div>`;
             desktopBody.innerHTML = `<tr><td colspan="5" class="empty" style="color:var(--danger);">${err.message}</td></tr>`;
             mobileContainer.innerHTML = errBlock;
         } finally {
