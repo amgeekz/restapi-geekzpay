@@ -1,6 +1,7 @@
 /**
  * GeekzPay PWA Monitor
- * POLLING SAJA - Simple & Stabil
+ * Elegant & Professional Version
+ * Polling Mode - Simple & Stabil
  */
 
 // ============================================
@@ -9,7 +10,7 @@
 const CONFIG = {
     API_BASE: 'https://restapi.amgeekz.my.id',
     MAX_HISTORY: 200,
-    POLLING_INTERVAL: 3000 // 3 detik
+    POLLING_INTERVAL: 3000
 };
 
 // ============================================
@@ -91,7 +92,8 @@ const DOM = {
     toggleSoundBtn: document.getElementById('toggleSoundBtn'),
     toggleTtsBtn: document.getElementById('toggleTtsBtn'),
     sound: document.getElementById('notificationSound'),
-    permissionBanner: document.getElementById('permissionBanner')
+    permissionBanner: document.getElementById('permissionBanner'),
+    historyCount: document.getElementById('historyCount')
 };
 
 // ============================================
@@ -195,7 +197,7 @@ function renderChart() {
         return `
             <div class="chart-bar-wrapper">
                 <div class="chart-bar-value">${day.count > 0 ? day.count : ''}</div>
-                <div class="chart-bar" style="height: ${height}%; background: ${isToday ? '#ff4088' : '#00c853'};"></div>
+                <div class="chart-bar ${isToday ? 'today' : ''}" style="height: ${height}%;"></div>
                 <div class="chart-bar-label">${day.label}</div>
             </div>
         `;
@@ -212,8 +214,8 @@ function init() {
     } else {
         DOM.tokenInput.value = '';
         setStatus('paused', 'Waiting Token');
-        DOM.statusDot.style.background = '#ffa502';
-        showToast('◆ Masukkan token terlebih dahulu');
+        DOM.statusDot.style.background = '#f5a623';
+        showToast('Masukkan token terlebih dahulu');
     }
     
     calculateStatsFromHistory();
@@ -225,7 +227,7 @@ function init() {
     registerServiceWorker();
     checkNotificationPermission();
     
-    console.log('◆ GeekzPay Monitor loaded (Polling mode)');
+    console.log('◆ GeekzPay Monitor loaded');
 }
 
 // ============================================
@@ -242,7 +244,7 @@ function requestNotificationPermission() {
         Notification.requestPermission().then(p => {
             if (p === 'granted') {
                 DOM.permissionBanner.style.display = 'none';
-                showToast('◆ Notifikasi diizinkan');
+                showToast('Notifikasi diizinkan');
             }
         });
     }
@@ -250,7 +252,7 @@ function requestNotificationPermission() {
 window.requestNotificationPermission = requestNotificationPermission;
 
 // ============================================
-// POLLING - START
+// POLLING
 // ============================================
 function startPolling() {
     if (state.pollingInterval) {
@@ -259,19 +261,16 @@ function startPolling() {
     }
     
     if (!state.token) {
-        showToast('⊘ Masukkan token terlebih dahulu');
+        showToast('Masukkan token terlebih dahulu');
         return;
     }
 
     state.isPolling = true;
-    setStatus('online', 'Polling');
-    DOM.statusDot.style.background = '#00c853';
-    showToast('◆ Monitoring aktif');
+    setStatus('online', 'Online');
+    DOM.statusDot.style.background = '#22b573';
+    showToast('Monitoring aktif');
     
-    // Polling immediately
     pollData();
-    
-    // Polling setiap 3 detik
     state.pollingInterval = setInterval(pollData, CONFIG.POLLING_INTERVAL);
 }
 
@@ -280,7 +279,7 @@ function stopPolling() {
         clearInterval(state.pollingInterval);
         state.pollingInterval = null;
         state.isPolling = false;
-        console.log('◆ Polling stopped');
+        console.log('Polling stopped');
     }
 }
 
@@ -313,10 +312,9 @@ async function pollData() {
                 });
                 updateStats(amount);
                 
-                // Notifikasi
                 if (state.soundEnabled) playNotificationSound();
                 if (state.ttsEnabled) speakPayment(amount);
-                showToast(`◆ Pembayaran Rp ${formatRupiah(amount)} masuk`);
+                showToast(`Pembayaran Rp ${formatRupiah(amount)} masuk`);
                 sendPushNotification({ id, amount, message: item.body?.message || 'Pembayaran masuk' });
             }
         });
@@ -332,16 +330,16 @@ async function pollData() {
             renderStats();
             renderChart();
             updateBadge();
-            console.log(`◆ ${newItems} new payment(s) detected`);
+            console.log(`${newItems} new payment(s) detected`);
         }
         
-        setStatus('online', 'Polling');
-        DOM.statusDot.style.background = '#00c853';
+        setStatus('online', 'Online');
+        DOM.statusDot.style.background = '#22b573';
         
     } catch (error) {
-        console.warn('⊘ Polling error:', error);
+        console.warn('Polling error:', error);
         setStatus('error', 'Error');
-        DOM.statusDot.style.background = '#ff1744';
+        DOM.statusDot.style.background = '#ef5a6b';
     }
 }
 window.pollData = pollData;
@@ -352,15 +350,14 @@ window.pollData = pollData;
 function saveToken() {
     const newToken = DOM.tokenInput.value.trim();
     if (!newToken) {
-        showToast('⊘ Token tidak boleh kosong');
+        showToast('Token tidak boleh kosong');
         return;
     }
     
     state.token = newToken;
     localStorage.setItem('geekzpay_token', state.token);
-    showToast('◆ Token tersimpan');
+    showToast('Token tersimpan');
     
-    // Reset state
     state.lastIds = new Set();
     state.history = [];
     state.newCount = 0;
@@ -395,7 +392,7 @@ function clearHistory() {
     updateBadge();
     if (navigator.clearAppBadge) navigator.clearAppBadge();
     
-    showToast('◆ Data dibersihkan');
+    showToast('Data dibersihkan');
 }
 window.clearHistory = clearHistory;
 
@@ -476,7 +473,7 @@ function toggleSound() {
     state.soundEnabled = !state.soundEnabled;
     localStorage.setItem('geekzpay_sound', String(state.soundEnabled));
     updateSoundUI();
-    showToast(state.soundEnabled ? '◆ Suara ON' : '⊘ Suara OFF');
+    showToast(state.soundEnabled ? 'Suara ON' : 'Suara OFF');
 }
 window.toggleSound = toggleSound;
 
@@ -484,24 +481,19 @@ function toggleTts() {
     state.ttsEnabled = !state.ttsEnabled;
     localStorage.setItem('geekzpay_tts', String(state.ttsEnabled));
     updateSoundUI();
-    showToast(state.ttsEnabled ? '◆ Voice ON' : '⊘ Voice OFF');
+    showToast(state.ttsEnabled ? 'Voice ON' : 'Voice OFF');
     if (state.ttsEnabled) speakPayment(10000);
 }
 window.toggleTts = toggleTts;
-
-function testSound() {
-    playNotificationSound();
-    setTimeout(() => speakPayment(8500), 500);
-}
-window.testSound = testSound;
 
 function changeSoundType(type) {
     if (SOUNDS[type]) {
         state.soundType = type;
         localStorage.setItem('geekzpay_sound_type', type);
         updateSoundUI();
-        testSound();
-        showToast(`◆ Suara: ${SOUNDS[type].label}`);
+        playNotificationSound();
+        setTimeout(() => speakPayment(8500), 500);
+        showToast(`Suara: ${SOUNDS[type].label}`);
     }
 }
 window.changeSoundType = changeSoundType;
@@ -514,13 +506,13 @@ function changeSoundVolume(value) {
 window.changeSoundVolume = changeSoundVolume;
 
 function updateSoundUI() {
-    DOM.toggleSoundBtn.textContent = state.soundEnabled ? '♫ Suara' : '♫ Mute';
-    DOM.toggleSoundBtn.className = state.soundEnabled ? 'neo-btn neo-btn-success' : 'neo-btn neo-btn-warning';
+    DOM.toggleSoundBtn.textContent = state.soundEnabled ? '🔊 Suara' : '🔇 Mute';
+    DOM.toggleSoundBtn.className = state.soundEnabled ? 'btn btn-soft active' : 'btn btn-soft';
     
-    DOM.toggleTtsBtn.textContent = state.ttsEnabled ? '🔊 Voice' : '🔊 Mute';
-    DOM.toggleTtsBtn.className = state.ttsEnabled ? 'neo-btn neo-btn-success' : 'neo-btn neo-btn-warning';
+    DOM.toggleTtsBtn.textContent = state.ttsEnabled ? '🗣️ Voice' : '🔇 Mute';
+    DOM.toggleTtsBtn.className = state.ttsEnabled ? 'btn btn-soft active' : 'btn btn-soft';
     
-    document.querySelectorAll('.sound-type-btn').forEach(btn => {
+    document.querySelectorAll('.sound-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.sound === state.soundType);
     });
     
@@ -530,12 +522,36 @@ function updateSoundUI() {
 }
 
 // ============================================
+// QRIS WIDGET
+// ============================================
+function openQRISWidget() {
+    const overlay = document.getElementById('qrisOverlay');
+    if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+window.openQRISWidget = openQRISWidget;
+
+function closeQRISWidget(event) {
+    if (event && event.target !== event.currentTarget) {
+        return;
+    }
+    const overlay = document.getElementById('qrisOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+window.closeQRISWidget = closeQRISWidget;
+
+// ============================================
 // PUSH NOTIFICATION
 // ============================================
 function sendPushNotification(entry) {
     if ('Notification' in window && Notification.permission === 'granted') {
         try {
-            new Notification('◆ Pembayaran Masuk', {
+            new Notification('Pembayaran Masuk', {
                 body: `Rp ${formatRupiah(entry.amount)} - ${entry.message}`,
                 icon: '/icon128.png',
                 badge: '/icon48.png',
@@ -553,11 +569,12 @@ function sendPushNotification(entry) {
 function renderTransactions() {
     if (state.history.length === 0) {
         DOM.transactionList.innerHTML = `
-            <div class="empty-state neo-card">
-                <div class="empty-icon">⊘</div>
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
                 <p>Belum ada transaksi</p>
-                <small>Masukkan token dan tunggu notifikasi</small>
+                <span>Masukkan token dan tunggu notifikasi</span>
             </div>`;
+        DOM.historyCount.textContent = '0';
         return;
     }
     
@@ -572,6 +589,8 @@ function renderTransactions() {
                 <div class="time">${formatTime(item.time)}</div>
             </div>`;
     }).join('');
+    
+    DOM.historyCount.textContent = state.history.length;
 }
 
 function updateStatsUI() {
@@ -591,8 +610,6 @@ function updateBadge() {
 // ============================================
 function setStatus(type, text) {
     DOM.statusText.textContent = text;
-    const colors = { online: '#00c853', loading: '#ffa502', error: '#ff1744', paused: '#ffa502' };
-    DOM.statusDot.style.background = colors[type] || '#888';
 }
 
 // ============================================
@@ -616,8 +633,8 @@ function showToast(msg) {
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/pwa/sw.js')
-            .then(() => console.log('◆ Service Worker registered'))
-            .catch(() => console.warn('⊘ SW failed'));
+            .then(() => console.log('Service Worker registered'))
+            .catch(() => console.warn('SW failed'));
     }
 }
 
@@ -627,6 +644,7 @@ function registerServiceWorker() {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'm' || e.key === 'M') toggleSound();
     if (e.key === 't' || e.key === 'T') toggleTts();
+    if (e.key === 'Escape') closeQRISWidget();
     if (e.key === 'Enter' && document.activeElement === DOM.tokenInput) saveToken();
 });
 
@@ -638,40 +656,3 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
-
-// ============================================
-// QRIS WIDGET FUNCTIONS - SEDERHANA
-// ============================================
-
-/** Buka QRIS Widget */
-function openQRISWidget() {
-    const overlay = document.getElementById('qrisOverlay');
-    if (overlay) {
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-}
-window.openQRISWidget = openQRISWidget;
-
-/** Tutup QRIS Widget */
-function closeQRISWidget(event) {
-    // Jika event dan target adalah overlay (klik di luar modal)
-    if (event && event.target !== event.currentTarget) {
-        return;
-    }
-    const overlay = document.getElementById('qrisOverlay');
-    if (overlay) {
-        overlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-}
-window.closeQRISWidget = closeQRISWidget;
-
-// ============================================
-// TUTUP QRIS DENGAN TOMBOL ESC
-// ============================================
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeQRISWidget();
-    }
-});
