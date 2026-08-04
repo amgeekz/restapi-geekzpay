@@ -549,6 +549,54 @@ app.get('/pwa/*', (req, res) => {
 });
 
 // ============================================
+// SSE ENDPOINT - DENGAN HEARTBEAT
+// ============================================
+app.get('/pwa/events', (req, res) => {
+    const token = req.query.token;
+    if (!token) {
+        return res.status(401).json({ error: 'Token required' });
+    }
+
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+    });
+
+    // Heartbeat setiap 15 detik
+    const heartbeat = setInterval(() => {
+        try {
+            res.write(`: heartbeat\n\n`);
+        } catch (e) {
+            clearInterval(heartbeat);
+        }
+    }, 15000);
+
+    if (!sseClients.has(token)) {
+        sseClients.set(token, new Set());
+    }
+    sseClients.get(token).add(res);
+
+    // Kirim status koneksi
+    res.write(`event: connected\ndata: {"status":"connected","token":"${token}"}\n\n`);
+
+    req.on('close', () => {
+        clearInterval(heartbeat);
+        const clients = sseClients.get(token);
+        if (clients) {
+            clients.delete(res);
+            if (clients.size === 0) {
+                sseClients.delete(token);
+            }
+        }
+        console.log(`◆ SSE client disconnected: ${token}`);
+    });
+
+    console.log(`◆ SSE client connected: ${token}`);
+});
+
+// ============================================
 // ROUTE UTAMA
 // ============================================
 app.get(['/', '/docs'], (req, res) => {
