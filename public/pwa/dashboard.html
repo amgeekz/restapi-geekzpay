@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GeekzPay Monitor</title>
     
-    <!-- PWA Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
     <meta name="theme-color" content="#fcf7e8">
-    
-    <!-- iOS Support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="GeekzPay">
@@ -17,14 +14,11 @@
     <link rel="apple-touch-icon" sizes="128x128" href="/icon128.png">
     <link rel="apple-touch-icon" sizes="48x48" href="/icon48.png">
     
-    <!-- CSS -->
     <link rel="stylesheet" href="/pwa/dashboard.css">
 </head>
 <body>
 
-    <!-- ============================================
-    HEADER NEOBRUTALISM
-    ============================================ -->
+    <!-- HEADER -->
     <header class="neo-card header">
         <div class="header-left">
             <span class="sticker-badge sticker-badge-pink">⚡</span>
@@ -38,9 +32,7 @@
         </div>
     </header>
 
-    <!-- ============================================
-    REQUEST PERMISSION NOTIFIKASI
-    ============================================ -->
+    <!-- PERMISSION BANNER -->
     <div id="permissionBanner" class="neo-card-accent-yellow permission-banner" style="display:none;">
         <p>⌘ Izinkan notifikasi untuk menerima alert pembayaran</p>
         <button class="neo-btn neo-btn-primary" onclick="requestNotificationPermission()">
@@ -48,9 +40,7 @@
         </button>
     </div>
 
-    <!-- ============================================
-    STATS UTAMA
-    ============================================ -->
+    <!-- STATS UTAMA -->
     <section class="stats-grid">
         <div class="stat-card">
             <div class="stat-value" id="totalCount">0</div>
@@ -66,9 +56,7 @@
         </div>
     </section>
 
-    <!-- ============================================
-    STATISTIK HARIAN & BULANAN - BARU
-    ============================================ -->
+    <!-- STATISTIK HARIAN & BULANAN -->
     <section class="stats-detail-grid">
         <div class="stat-detail-card neo-card">
             <div class="stat-detail-label">📅 Hari Ini</div>
@@ -87,22 +75,16 @@
         </div>
     </section>
 
-    <!-- ============================================
-    GRAFIK SEDERHANA (7 Hari Terakhir)
-    ============================================ -->
+    <!-- GRAFIK -->
     <section class="neo-card chart-section">
         <div class="chart-header">
             <span class="sticker-badge">📊</span>
             <span class="chart-title">7 HARI TERAKHIR</span>
         </div>
-        <div class="chart-container" id="chartContainer">
-            <!-- Bar chart akan di-render oleh JS -->
-        </div>
+        <div class="chart-container" id="chartContainer"></div>
     </section>
 
-    <!-- ============================================
-    TOKEN INPUT
-    ============================================ -->
+    <!-- TOKEN INPUT -->
     <section class="neo-card token-section">
         <div class="token-input-group">
             <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay...">
@@ -110,50 +92,34 @@
         </div>
     </section>
 
-    <!-- ============================================
-    CONTROLS
-    ============================================ -->
+    <!-- CONTROLS - HANYA 4 TOMBOL -->
     <section class="controls">
-        <button class="neo-btn neo-btn-success" id="toggleSoundBtn" onclick="toggleSound()">♫ Suara ON</button>
-        <button class="neo-btn neo-btn-success" id="toggleTtsBtn" onclick="toggleTts()">🔊 Voice ON</button>
+        <button class="neo-btn neo-btn-success" id="toggleSoundBtn" onclick="toggleSound()">♫ Suara</button>
+        <button class="neo-btn neo-btn-success" id="toggleTtsBtn" onclick="toggleTts()">🔊 Voice</button>
         <button class="neo-btn neo-btn-primary" onclick="testSound()">♫ Test</button>
-        <button class="neo-btn neo-btn-go" onclick="fetchHistory()">⟳ History</button>
-        <button class="neo-btn neo-btn-danger" onclick="clearHistory()">✕ Clear</button>
+        <button class="neo-btn neo-btn-go" onclick="clearHistory()">✕ Reset</button>
     </section>
 
-    <!-- ============================================
-    SOUND SETTINGS
-    ============================================ -->
+    <!-- SOUND SETTINGS -->
     <section class="neo-card sound-settings">
         <div class="sound-settings-header">
             <span class="sticker-badge">♫</span>
             <span class="sound-settings-title">PILIH SUARA NOTIFIKASI</span>
         </div>
         <div class="sound-type-grid">
-            <button class="sound-type-btn active" data-sound="dana" onclick="changeSoundType('dana')">
-                ⌘ DANA
-            </button>
-            <button class="sound-type-btn" data-sound="cash_register" onclick="changeSoundType('cash_register')">
-                ⌘ Kasir
-            </button>
-            <button class="sound-type-btn" data-sound="ding_dong" onclick="changeSoundType('ding_dong')">
-                ⌘ Bel
-            </button>
-            <button class="sound-type-btn" data-sound="success" onclick="changeSoundType('success')">
-                ⌘ Sukses
-            </button>
+            <button class="sound-type-btn active" data-sound="dana" onclick="changeSoundType('dana')">⌘ DANA</button>
+            <button class="sound-type-btn" data-sound="cash_register" onclick="changeSoundType('cash_register')">⌘ Kasir</button>
+            <button class="sound-type-btn" data-sound="ding_dong" onclick="changeSoundType('ding_dong')">⌘ Bel</button>
+            <button class="sound-type-btn" data-sound="success" onclick="changeSoundType('success')">⌘ Sukses</button>
         </div>
         <div class="sound-volume-control">
             <label>♫ Volume</label>
-            <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.8" 
-                   oninput="changeSoundVolume(this.value)">
+            <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.8" oninput="changeSoundVolume(this.value)">
             <span id="soundVolumeLabel">80%</span>
         </div>
     </section>
 
-    <!-- ============================================
-    TRANSACTION LIST
-    ============================================ -->
+    <!-- TRANSACTION LIST -->
     <section class="transaction-section">
         <div id="transactionList" class="transaction-list">
             <div class="empty-state neo-card">
@@ -164,21 +130,16 @@
         </div>
     </section>
 
-    <!-- ============================================
-    TOAST NOTIFICATION
-    ============================================ -->
+    <!-- TOAST -->
     <div id="toast" class="toast neo-card">
         <span id="toastMessage">◆ Pembayaran baru masuk!</span>
     </div>
 
-    <!-- ============================================
-    AUDIO FALLBACK
-    ============================================ -->
+    <!-- AUDIO FALLBACK -->
     <audio id="notificationSound" preload="auto" style="display:none;">
         <source src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoAAACBhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqF" type="audio/wav">
     </audio>
 
-    <!-- JavaScript -->
     <script src="/pwa/dashboard.js"></script>
 </body>
 </html>

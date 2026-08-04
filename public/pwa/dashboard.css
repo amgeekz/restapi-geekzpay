@@ -178,6 +178,122 @@ body {
 }
 
 /* ============================================
+   STATISTIK DETAIL
+   ============================================ */
+.stats-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.stat-detail-card {
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 16px;
+    box-shadow: 4px 4px 0px #111111;
+    padding: 12px 10px;
+    text-align: center;
+}
+
+.stat-detail-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-detail-value {
+    font-size: 20px;
+    font-weight: 900;
+    color: #111111;
+    margin: 2px 0;
+}
+
+.stat-detail-sub {
+    font-size: 11px;
+    font-weight: 700;
+    color: #00c853;
+}
+
+/* ============================================
+   GRAFIK CHART
+   ============================================ */
+.chart-section {
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.chart-title {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #111111;
+}
+
+.chart-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 80px;
+    gap: 6px;
+    padding: 4px 0;
+}
+
+.chart-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.chart-bar {
+    width: 100%;
+    min-height: 4px;
+    border: 2px solid #111111;
+    border-radius: 4px 4px 0 0;
+    background: #00c853;
+    transition: height 0.5s ease;
+    box-shadow: 2px -2px 0px #111111;
+}
+
+.chart-bar-label {
+    font-size: 8px;
+    font-weight: 800;
+    color: #666;
+    margin-top: 4px;
+    text-transform: uppercase;
+}
+
+.chart-bar-value {
+    font-size: 7px;
+    font-weight: 700;
+    color: #999;
+    margin-bottom: 2px;
+}
+
+.chart-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+/* ============================================
    TOKEN INPUT
    ============================================ */
 .token-section {
@@ -207,13 +323,13 @@ body {
 }
 
 /* ============================================
-   BUTTONS NEOBRUTALISM
+   BUTTONS - HANYA 4 TOMBOL
    ============================================ */
 .controls {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     margin-bottom: 12px;
-    flex-wrap: wrap;
 }
 
 .neo-btn {
@@ -221,19 +337,13 @@ body {
     border-radius: 14px;
     font-weight: 800;
     font-size: 11px;
-    padding: 8px 12px;
+    padding: 10px 8px;
     box-shadow: 4px 4px 0px #111111;
     transition: all 0.12s ease;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    flex: 1;
-    min-width: 50px;
     text-align: center;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
 }
 .neo-btn:active {
     transform: translate(3px, 3px);
@@ -502,124 +612,7 @@ body {
 }
 
 /* ============================================
-   STATISTIK DETAIL - BARU
-   ============================================ */
-.stats-detail-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.stat-detail-card {
-    background: #ffffff;
-    border: 3px solid #111111;
-    border-radius: 16px;
-    box-shadow: 4px 4px 0px #111111;
-    padding: 12px 10px;
-    text-align: center;
-}
-
-.stat-detail-label {
-    font-size: 9px;
-    font-weight: 800;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.stat-detail-value {
-    font-size: 20px;
-    font-weight: 900;
-    color: #111111;
-    margin: 2px 0;
-}
-
-.stat-detail-sub {
-    font-size: 11px;
-    font-weight: 700;
-    color: #00c853;
-}
-
-/* ============================================
-   GRAFIK CHART
-   ============================================ */
-.chart-section {
-    padding: 14px 16px;
-    margin-bottom: 12px;
-}
-
-.chart-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.chart-title {
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.5px;
-    color: #111111;
-}
-
-.chart-container {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    height: 100px;
-    gap: 6px;
-    padding: 4px 0;
-}
-
-.chart-bar-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    justify-content: flex-end;
-}
-
-.chart-bar {
-    width: 100%;
-    min-height: 4px;
-    border: 2px solid #111111;
-    border-radius: 4px 4px 0 0;
-    background: #00c853;
-    transition: height 0.5s ease;
-    box-shadow: 2px -2px 0px #111111;
-    position: relative;
-}
-
-.chart-bar-label {
-    font-size: 8px;
-    font-weight: 800;
-    color: #666;
-    margin-top: 4px;
-    text-transform: uppercase;
-}
-
-.chart-bar-value {
-    font-size: 7px;
-    font-weight: 700;
-    color: #999;
-    margin-bottom: 2px;
-}
-
-.chart-empty {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ccc;
-    font-weight: 700;
-    font-size: 12px;
-}
-
-/* ============================================
-   RESPONSIVE - UPDATE
+   RESPONSIVE
    ============================================ */
 @media (max-width: 480px) {
     .stats-grid {
@@ -645,13 +638,17 @@ body {
     }
     
     .chart-container {
-        height: 70px;
+        height: 60px;
+    }
+    
+    .controls {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
     }
     
     .neo-btn {
         font-size: 9px;
-        padding: 6px 8px;
-        min-width: 40px;
+        padding: 8px 4px;
     }
     
     .header-left h1 {
