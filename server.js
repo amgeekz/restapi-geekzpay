@@ -422,29 +422,45 @@ app.get('/js/*', (req, res) => {
 });
 
 // ============================================
-// [BARU] ROUTE UNTUK PWA
+// SERVE ICONS
 // ============================================
-// Serve PWA dashboard
+app.get('/icon48.png', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'icon48.png'));
+});
+
+app.get('/icon128.png', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'icon128.png'));
+});
+
+// ============================================
+// SERVE PWA FILES
+// ============================================
 app.get('/pwa/dashboard.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'pwa', 'dashboard.html'));
+    res.sendFile(path.join(__dirname, 'public', 'pwa', 'dashboard.html'));
 });
 
-// Serve PWA assets (CSS, JS, dll)
-app.get('/pwa/*', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'pwa', req.params[0]);
-  res.sendFile(filePath);
+app.get('/pwa/dashboard.css', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pwa', 'dashboard.css'));
 });
 
-// Serve manifest.json
+app.get('/pwa/dashboard.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pwa', 'dashboard.js'));
+});
+
 app.get('/pwa/manifest.json', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'pwa', 'manifest.json'));
+    res.setHeader('Content-Type', 'application/json');
+    res.sendFile(path.join(__dirname, 'public', 'pwa', 'manifest.json'));
 });
 
-// Serve service worker (dengan header khusus)
 app.get('/pwa/sw.js', (req, res) => {
-  res.setHeader('Service-Worker-Allowed', '/');
-  res.setHeader('Content-Type', 'application/javascript');
-  res.sendFile(path.join(__dirname, 'public', 'pwa', 'sw.js'));
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'public', 'pwa', 'sw.js'));
+});
+
+app.get('/pwa/*', (req, res) => {
+    const filePath = path.join(__dirname, 'public', 'pwa', req.params[0]);
+    res.sendFile(filePath);
 });
 
 // ============================================
