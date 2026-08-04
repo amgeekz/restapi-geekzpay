@@ -6,7 +6,7 @@
     <title>GeekzPay Monitor</title>
     
     <link rel="manifest" href="/pwa/manifest.json">
-    <meta name="theme-color" content="#f0f4f8">
+    <meta name="theme-color" content="#0f1420">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="GeekzPay">
@@ -31,6 +31,9 @@
             </div>
         </div>
         <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
             <div class="status-badge">
                 <span class="status-dot" id="statusDot"></span>
                 <span id="statusText">Online</span>

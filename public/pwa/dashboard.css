@@ -1,7 +1,8 @@
 /* ============================================
-   ROOT VARIABLES
+   ROOT VARIABLES - LIGHT & DARK
    ============================================ */
 :root {
+    /* Light Mode */
     --bg: #f0f4f8;
     --card-bg: #ffffff;
     --text-primary: #1a2332;
@@ -10,9 +11,9 @@
     --border: #e8edf2;
     --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
     --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.10);
-    --radius: 14px;
-    --radius-sm: 10px;
-    --transition: all 0.25s ease;
+    --input-bg: #f0f4f8;
+    --hover-bg: #f0f4f8;
+    --empty-icon: rgba(0,0,0,0.1);
     
     --primary: #4f6ef7;
     --primary-dark: #3a56d4;
@@ -20,6 +21,21 @@
     --danger: #ef5a6b;
     --warning: #f5a623;
     --purple: #7c5cfc;
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+    --bg: #0f1420;
+    --card-bg: #1a2332;
+    --text-primary: #e8edf2;
+    --text-secondary: #a0b0c0;
+    --text-muted: #6a7a8e;
+    --border: #2a3348;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.40);
+    --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.60);
+    --input-bg: #0f1420;
+    --hover-bg: #253040;
+    --empty-icon: rgba(255,255,255,0.08);
 }
 
 * {
@@ -37,6 +53,7 @@ body {
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     line-height: 1.5;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* ============================================
@@ -48,9 +65,10 @@ body {
     align-items: center;
     padding: 16px 20px;
     background: var(--card-bg);
-    border-radius: var(--radius);
+    border-radius: 14px;
     box-shadow: var(--shadow);
     margin-bottom: 20px;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .header-left {
@@ -69,6 +87,7 @@ body {
     align-items: center;
     justify-content: center;
     color: #fff;
+    flex-shrink: 0;
 }
 
 .header-left h1 {
@@ -77,6 +96,7 @@ body {
     letter-spacing: -0.5px;
     color: var(--text-primary);
     line-height: 1.2;
+    transition: color 0.3s ease;
 }
 
 .header-sub {
@@ -90,6 +110,7 @@ body {
 .header-right {
     display: flex;
     align-items: center;
+    gap: 12px;
 }
 
 .status-badge {
@@ -102,6 +123,7 @@ body {
     background: var(--bg);
     padding: 6px 14px;
     border-radius: 20px;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .status-dot {
@@ -109,7 +131,38 @@ body {
     height: 8px;
     border-radius: 50%;
     background: var(--success);
-    transition: var(--transition);
+    transition: background 0.3s ease;
+}
+
+/* ============================================
+   THEME TOGGLE
+   ============================================ */
+.theme-toggle {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    background: var(--border);
+    transform: rotate(20deg);
+}
+
+.theme-icon {
+    transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .theme-icon {
+    transform: rotate(180deg);
 }
 
 /* ============================================
@@ -122,10 +175,17 @@ body {
     padding: 12px 16px;
     background: #fef9e7;
     border: 1px solid #faeec9;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     margin-bottom: 16px;
     font-size: 13px;
     font-weight: 500;
+    transition: background 0.3s ease, border 0.3s ease;
+}
+
+[data-theme="dark"] .permission-banner {
+    background: #2a2330;
+    border-color: #3a2a40;
+    color: var(--text-secondary);
 }
 
 .permission-banner .btn {
@@ -142,11 +202,11 @@ body {
     background: linear-gradient(135deg, var(--primary), var(--purple));
     color: #fff;
     border: none;
-    border-radius: var(--radius);
+    border-radius: 14px;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -177,10 +237,10 @@ body {
 .stat-card {
     background: var(--card-bg);
     padding: 14px 10px;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     text-align: center;
     box-shadow: var(--shadow);
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .stat-card:hover {
@@ -192,6 +252,7 @@ body {
     font-weight: 800;
     color: var(--text-primary);
     letter-spacing: -0.5px;
+    transition: color 0.3s ease;
 }
 
 .stat-label {
@@ -216,10 +277,10 @@ body {
 .stat-detail-card {
     background: var(--card-bg);
     padding: 12px 10px;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     text-align: center;
     box-shadow: var(--shadow);
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .stat-detail-card.highlight {
@@ -242,6 +303,7 @@ body {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    transition: color 0.3s ease;
 }
 
 .stat-detail-value {
@@ -250,12 +312,14 @@ body {
     color: var(--text-primary);
     margin: 2px 0;
     letter-spacing: -0.5px;
+    transition: color 0.3s ease;
 }
 
 .stat-detail-sub {
     font-size: 11px;
     font-weight: 600;
     color: var(--success);
+    transition: color 0.3s ease;
 }
 
 /* ============================================
@@ -264,9 +328,10 @@ body {
 .chart-section {
     background: var(--card-bg);
     padding: 16px;
-    border-radius: var(--radius);
+    border-radius: 14px;
     box-shadow: var(--shadow);
     margin-bottom: 16px;
+    transition: all 0.3s ease;
 }
 
 .chart-header {
@@ -284,6 +349,7 @@ body {
     font-size: 13px;
     font-weight: 700;
     color: var(--text-secondary);
+    transition: color 0.3s ease;
 }
 
 .chart-container {
@@ -308,7 +374,7 @@ body {
     min-height: 4px;
     border-radius: 4px 4px 0 0;
     background: var(--primary);
-    transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease;
     opacity: 0.7;
 }
 
@@ -322,6 +388,7 @@ body {
     font-weight: 600;
     color: var(--text-muted);
     margin-top: 4px;
+    transition: color 0.3s ease;
 }
 
 .chart-bar-value {
@@ -338,6 +405,7 @@ body {
     font-size: 13px;
     font-weight: 500;
     padding: 16px 0;
+    transition: color 0.3s ease;
 }
 
 /* ============================================
@@ -346,9 +414,10 @@ body {
 .token-section {
     background: var(--card-bg);
     padding: 14px 16px;
-    border-radius: var(--radius);
+    border-radius: 14px;
     box-shadow: var(--shadow);
     margin-bottom: 14px;
+    transition: all 0.3s ease;
 }
 
 .token-input-group {
@@ -360,13 +429,13 @@ body {
     flex: 1;
     padding: 10px 14px;
     border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 500;
     font-family: 'Inter', sans-serif;
     outline: none;
-    transition: var(--transition);
-    background: var(--bg);
+    transition: all 0.3s ease;
+    background: var(--input-bg);
     color: var(--text-primary);
 }
 
@@ -375,18 +444,22 @@ body {
     box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
 }
 
+.token-input-group input::placeholder {
+    color: var(--text-muted);
+}
+
 /* ============================================
    BUTTONS
    ============================================ */
 .btn {
     padding: 10px 18px;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .btn-primary {
@@ -411,10 +484,11 @@ body {
 .btn-soft {
     background: var(--bg);
     color: var(--text-secondary);
+    transition: all 0.3s ease;
 }
 
 .btn-soft:hover {
-    background: #e2e8f0;
+    background: var(--border);
 }
 
 .btn-soft.active {
@@ -441,9 +515,10 @@ body {
 .sound-section {
     background: var(--card-bg);
     padding: 16px;
-    border-radius: var(--radius);
+    border-radius: 14px;
     box-shadow: var(--shadow);
     margin-bottom: 16px;
+    transition: all 0.3s ease;
 }
 
 .sound-header {
@@ -461,6 +536,7 @@ body {
     font-size: 13px;
     font-weight: 700;
     color: var(--text-secondary);
+    transition: color 0.3s ease;
 }
 
 .sound-grid {
@@ -473,13 +549,13 @@ body {
 .sound-btn {
     padding: 8px 4px;
     border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     background: transparent;
     font-size: 10px;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     color: var(--text-secondary);
 }
 
@@ -504,6 +580,7 @@ body {
     font-size: 11px;
     font-weight: 600;
     color: var(--text-muted);
+    transition: color 0.3s ease;
 }
 
 .volume-control input[type="range"] {
@@ -514,6 +591,7 @@ body {
     background: var(--border);
     border-radius: 2px;
     outline: none;
+    transition: background 0.3s ease;
 }
 
 .volume-control input[type="range"]::-webkit-slider-thumb {
@@ -524,6 +602,7 @@ body {
     border-radius: 50%;
     background: var(--primary);
     cursor: pointer;
+    transition: background 0.3s ease;
 }
 
 .volume-value {
@@ -532,6 +611,7 @@ body {
     color: var(--text-secondary);
     min-width: 40px;
     text-align: right;
+    transition: color 0.3s ease;
 }
 
 /* ============================================
@@ -539,9 +619,10 @@ body {
    ============================================ */
 .transaction-section {
     background: var(--card-bg);
-    border-radius: var(--radius);
+    border-radius: 14px;
     box-shadow: var(--shadow);
     overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .transaction-header {
@@ -550,12 +631,14 @@ body {
     align-items: center;
     padding: 14px 16px;
     border-bottom: 1px solid var(--border);
+    transition: border 0.3s ease;
 }
 
 .transaction-title {
     font-size: 13px;
     font-weight: 700;
     color: var(--text-secondary);
+    transition: color 0.3s ease;
 }
 
 .transaction-count {
@@ -565,6 +648,7 @@ body {
     background: var(--bg);
     padding: 2px 10px;
     border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
 .transaction-list {
@@ -578,7 +662,7 @@ body {
     align-items: center;
     padding: 12px 16px;
     border-bottom: 1px solid var(--border);
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .transaction-item:last-child {
@@ -586,28 +670,35 @@ body {
 }
 
 .transaction-item:hover {
-    background: var(--bg);
+    background: var(--hover-bg);
 }
 
 .transaction-item .amount {
     font-size: 16px;
     font-weight: 700;
     color: var(--success);
+    transition: color 0.3s ease;
 }
 
 .transaction-item .info {
     font-size: 12px;
     color: var(--text-secondary);
+    transition: color 0.3s ease;
 }
 
 .transaction-item .time {
     font-size: 11px;
     color: var(--text-muted);
+    transition: color 0.3s ease;
 }
 
 .transaction-item.new {
-    background: #f0f7ff;
+    background: rgba(79, 110, 247, 0.08);
     border-left: 3px solid var(--primary);
+}
+
+[data-theme="dark"] .transaction-item.new {
+    background: rgba(79, 110, 247, 0.15);
 }
 
 @keyframes slideIn {
@@ -637,11 +728,13 @@ body {
     font-weight: 600;
     color: var(--text-secondary);
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
 .empty-state span {
     font-size: 12px;
     color: var(--text-muted);
+    transition: color 0.3s ease;
 }
 
 /* ============================================
@@ -675,6 +768,7 @@ body {
     padding: 24px;
     animation: slideUp 0.3s ease;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.20);
+    transition: background 0.3s ease;
 }
 
 @keyframes slideUp {
@@ -692,6 +786,8 @@ body {
 .qris-modal-title {
     font-size: 18px;
     font-weight: 800;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
 }
 
 .qris-close {
@@ -702,7 +798,7 @@ body {
     border-radius: 50%;
     font-size: 14px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     color: var(--text-secondary);
 }
 
@@ -733,6 +829,7 @@ body {
     color: var(--text-muted);
     font-weight: 500;
     text-align: center;
+    transition: color 0.3s ease;
 }
 
 /* ============================================
@@ -746,7 +843,7 @@ body {
     background: var(--text-primary);
     color: #fff;
     padding: 12px 24px;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.20);
     display: none;
     z-index: 999;
@@ -754,6 +851,12 @@ body {
     font-weight: 500;
     max-width: 90%;
     text-align: center;
+    transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .toast {
+    background: var(--card-bg);
+    color: var(--text-primary);
 }
 
 .toast.show {

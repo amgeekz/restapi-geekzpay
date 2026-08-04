@@ -1,6 +1,6 @@
 /**
  * GeekzPay PWA Monitor
- * Elegant & Professional Version
+ * Elegant & Professional Version with Dark Mode
  * Polling Mode - Simple & Stabil
  */
 
@@ -22,6 +22,7 @@ const state = {
     soundType: localStorage.getItem('geekzpay_sound_type') || 'dana',
     soundVolume: parseFloat(localStorage.getItem('geekzpay_sound_volume')) || 0.8,
     ttsEnabled: localStorage.getItem('geekzpay_tts') !== 'false',
+    theme: localStorage.getItem('geekzpay_theme') || 'light',
     history: JSON.parse(localStorage.getItem('geekzpay_history') || '[]'),
     lastIds: new Set(JSON.parse(localStorage.getItem('geekzpay_last_ids') || '[]')),
     newCount: parseInt(localStorage.getItem('geekzpay_new_count')) || 0,
@@ -93,8 +94,36 @@ const DOM = {
     toggleTtsBtn: document.getElementById('toggleTtsBtn'),
     sound: document.getElementById('notificationSound'),
     permissionBanner: document.getElementById('permissionBanner'),
-    historyCount: document.getElementById('historyCount')
+    historyCount: document.getElementById('historyCount'),
+    themeToggle: document.getElementById('themeToggle'),
+    themeIcon: document.querySelector('.theme-icon')
 };
+
+// ============================================
+// THEME FUNCTIONS
+// ============================================
+function toggleTheme() {
+    const newTheme = state.theme === 'light' ? 'dark' : 'light';
+    state.theme = newTheme;
+    localStorage.setItem('geekzpay_theme', newTheme);
+    applyTheme(newTheme);
+}
+window.toggleTheme = toggleTheme;
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        DOM.themeIcon.textContent = '☀️';
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        DOM.themeIcon.textContent = '🌙';
+    }
+    // Update meta theme-color
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+        meta.content = theme === 'dark' ? '#0f1420' : '#f0f4f8';
+    }
+}
 
 // ============================================
 // SAVE STATE
@@ -208,6 +237,9 @@ function renderChart() {
 // INIT
 // ============================================
 function init() {
+    // Apply theme
+    applyTheme(state.theme);
+    
     if (state.token) {
         DOM.tokenInput.value = state.token;
         startPolling();
@@ -228,6 +260,7 @@ function init() {
     checkNotificationPermission();
     
     console.log('◆ GeekzPay Monitor loaded');
+    console.log(`◆ Theme: ${state.theme}`);
 }
 
 // ============================================
@@ -646,6 +679,10 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 't' || e.key === 'T') toggleTts();
     if (e.key === 'Escape') closeQRISWidget();
     if (e.key === 'Enter' && document.activeElement === DOM.tokenInput) saveToken();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+        e.preventDefault();
+        toggleTheme();
+    }
 });
 
 // ============================================
