@@ -1,0 +1,456 @@
+/* ============================================
+   ROOT & BASE
+   ============================================ */
+:root {
+    color-scheme: light;
+    --bg: #fcf7e8;
+    --card: #ffffff;
+    --black: #111111;
+    --pink: #ff4088;
+    --yellow: #ffe600;
+    --lime: #b4ff00;
+    --cyan: #00e5ff;
+    --orange: #ff6d00;
+    --purple: #7c3aed;
+    --green: #00c853;
+    --red: #ff1744;
+    --shadow-sm: 3px 3px 0px #111111;
+    --shadow-md: 5px 5px 0px #111111;
+    --shadow-lg: 8px 8px 0px #111111;
+    --border: 3px solid #111111;
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle, #11111111 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', 'Arial Black', sans-serif;
+    color: var(--black);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+.flex>* {
+    min-width: 0;
+}
+.grid>* {
+    min-width: 0;
+}
+
+p code,
+li code,
+td code,
+th code,
+h1 code,
+h2 code,
+h3 code,
+a code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+pre {
+    margin: 0;
+}
+pre code {
+    font-size: .92rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+.input,
+.select,
+.textarea {
+    font-size: 16px;
+    min-width: 0;
+    width: 100%;
+}
+
+@media (max-width:480px) {
+    pre code {
+        font-size: .86rem;
+    }
+    .btn {
+        padding: .75rem 1rem;
+        font-size: .95rem;
+    }
+}
+
+/* ========== NEO-BRUTALISM ENHANCED STYLES ========== */
+
+.neo-card {
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #111111;
+    position: relative;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.neo-card:hover {
+    box-shadow: 9px 9px 0px #111111;
+    transform: translate(-2px, -2px);
+}
+
+.neo-card-terminal {
+    background: #fffef5;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #111111;
+    position: relative;
+}
+.neo-card-terminal::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    width: 50px;
+    height: 14px;
+    background: #ffe600;
+    border: 3px solid #111111;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    z-index: 2;
+}
+
+.neo-card-warning {
+    background: #fffdf0;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #111111;
+    position: relative;
+}
+
+.neo-card-info {
+    background: #f0fff7;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #111111;
+}
+
+.neo-card-accent-pink {
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #ff4088;
+    position: relative;
+}
+
+.neo-card-accent-yellow {
+    background: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    box-shadow: 6px 6px 0px #ffe600;
+}
+
+.neo-code-block {
+    background: #fafafa;
+    border: 3px solid #111111;
+    border-radius: 16px;
+    box-shadow: 4px 4px 0px #111111;
+    overflow: hidden;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.neo-btn {
+    border: 3px solid #111111;
+    border-radius: 16px;
+    font-weight: 800;
+    box-shadow: 5px 5px 0px #111111;
+    transition: all 0.12s ease;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.neo-btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0px #111111;
+}
+.neo-btn:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 7px 7px 0px #111111;
+}
+
+.neo-btn-primary {
+    background-color: #ffffff;
+    color: #111111;
+}
+.neo-btn-primary:hover:not(:disabled) {
+    background-color: #ffe600;
+}
+
+.neo-btn-danger {
+    background-color: #ff4088;
+    color: #ffffff;
+    border-color: #111111;
+}
+.neo-btn-danger:hover:not(:disabled) {
+    background-color: #ff1a6e;
+    box-shadow: 7px 7px 0px #111111;
+}
+
+.neo-btn-secondary {
+    background-color: #ffffff;
+    color: #111111;
+}
+.neo-btn-secondary:hover:not(:disabled) {
+    background-color: #e8e8e8;
+}
+
+.neo-btn-go {
+    background-color: #00c853;
+    color: #111111;
+    border-color: #111111;
+}
+.neo-btn-go:hover:not(:disabled) {
+    background-color: #00e676;
+    box-shadow: 7px 7px 0px #111111;
+}
+
+/* ============================================
+   DROP ZONE
+   ============================================ */
+.drop-zone {
+    border: 3px dashed #111111;
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 4px 4px 0px #111111;
+}
+.drop-zone:hover {
+    background: #fffef5;
+    border-style: solid;
+    box-shadow: 6px 6px 0px #111111;
+    transform: translate(-1px, -1px);
+}
+
+/* ============================================
+   STEP BOX
+   ============================================ */
+.step-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 3px solid #111111;
+    border-radius: 9999px;
+    background-color: #ffe600;
+    color: #111111;
+    font-weight: 900;
+    margin-right: 10px;
+    box-shadow: 2.5px 2.5px 0px #111111;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   PAGE SECTIONS
+   ============================================ */
+.page-section {
+    display: none;
+}
+.page-section.active {
+    display: block;
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+.nav-link {
+    cursor: pointer;
+    border: 3px solid #111111;
+    border-radius: 14px;
+    padding: 10px 18px;
+    background: #ffffff;
+    box-shadow: 4px 4px 0px #111111;
+    font-weight: 800;
+    font-size: 0.88rem;
+    transition: all 0.12s ease;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    position: relative;
+}
+.nav-link:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 6px 6px 0px #111111;
+}
+.nav-link.active {
+    background: #ff4088;
+    color: #ffffff;
+    box-shadow: 4px 4px 0px #111111;
+}
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #ff4088;
+}
+
+.nav-section-link {
+    color: #111111;
+    transition: all 0.12s ease;
+}
+.nav-section-link:hover {
+    color: #ff4088;
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 4px;
+    text-decoration-color: #ffe600;
+}
+
+/* ============================================
+   STICKER BADGE
+   ============================================ */
+.sticker-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 3px solid #111111;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    box-shadow: 3px 3px 0px #111111;
+    transform: rotate(-1.5deg);
+    background: #ffe600;
+    color: #111111;
+}
+.sticker-badge-pink {
+    background: #ff4088;
+    color: #fff;
+    transform: rotate(1deg);
+}
+.sticker-badge-lime {
+    background: #b4ff00;
+    color: #111111;
+    transform: rotate(-2deg);
+}
+
+/* ============================================
+   INLINE TAG
+   ============================================ */
+.inline-tag {
+    display: inline-block;
+    background: #ffe600;
+    color: #111111;
+    padding: 2px 8px;
+    border: 2px solid #111111;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8em;
+    box-shadow: 2px 2px 0px #111111;
+}
+
+/* ============================================
+   STRIPE ACCENT
+   ============================================ */
+.stripe-accent {
+    background: repeating-linear-gradient(-35deg,
+            #ffe600 0px,
+            #ffe600 8px,
+            #111111 8px,
+            #111111 10px);
+    height: 6px;
+    border-radius: 3px;
+    margin: 8px 0;
+    border: 2px solid #111111;
+}
+
+/* ============================================
+   ROTATED WRAPPER
+   ============================================ */
+.rotated-wrapper {
+    transform: rotate(-0.8deg);
+    display: inline-block;
+}
+
+/* ============================================
+   HLJS OVERRIDE
+   ============================================ */
+.hljs {
+    background: transparent !important;
+    color: #111111 !important;
+}
+.hljs-string {
+    color: #00875a !important;
+}
+.hljs-number {
+    color: #c62828 !important;
+}
+.hljs-attr {
+    color: #1565c0 !important;
+}
+.hljs-keyword {
+    color: #e65100 !important;
+}
+
+/* ============================================
+   DRAWER
+   ============================================ */
+#drawer .nav-link {
+    display: block;
+    margin-bottom: 8px;
+    text-align: center;
+}
+#drawer .nav-link.active::after {
+    display: none;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #fcf7e8;
+    border-left: 2px solid #111111;
+}
+::-webkit-scrollbar-thumb {
+    background: #111111;
+    border-radius: 6px;
+    border: 2px solid #fcf7e8;
+}
+
+/* ============================================
+   TABLE ENHANCEMENT
+   ============================================ */
+table thead th {
+    background: #ffe600;
+    color: #111111;
+    border-bottom: 3px solid #111111;
+}
+table tbody tr:hover td {
+    background: #fffef5;
+}
