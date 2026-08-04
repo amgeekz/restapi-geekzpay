@@ -549,7 +549,7 @@ app.get('/pwa/*', (req, res) => {
 });
 
 // ============================================
-// SSE ENDPOINT - DENGAN HEARTBEAT
+// SSE ENDPOINT - DENGAN HEARTBEAT + KEEP-ALIVE
 // ============================================
 app.get('/pwa/events', (req, res) => {
     const token = req.query.token;
@@ -557,29 +557,36 @@ app.get('/pwa/events', (req, res) => {
         return res.status(401).json({ error: 'Token required' });
     }
 
+    // Header SSE
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'X-Accel-Buffering': 'no'
     });
 
-    // Heartbeat setiap 15 detik
+    res.write(`event: connected\ndata: {"status":"connected","token":"${token}"}\n\n`);
+
+    // ===== HEARTBEAT SETIAP 10 DETIK =====
     const heartbeat = setInterval(() => {
         try {
             res.write(`: heartbeat\n\n`);
+            if (Math.floor(Date.now() / 30000) % 2 === 0) {
+                res.write(`event: ping\ndata: {"time":"${new Date().toISOString()}"}\n\n`);
+            }
         } catch (e) {
             clearInterval(heartbeat);
         }
-    }, 15000);
+    }, 10000);
 
     if (!sseClients.has(token)) {
         sseClients.set(token, new Set());
     }
     sseClients.get(token).add(res);
 
-    // Kirim status koneksi
-    res.write(`event: connected\ndata: {"status":"connected","token":"${token}"}\n\n`);
+    // Log
+    console.log(`◆ SSE connected: ${token} (${sseClients.get(token).size} clients)`);
 
     req.on('close', () => {
         clearInterval(heartbeat);
@@ -590,10 +597,10 @@ app.get('/pwa/events', (req, res) => {
                 sseClients.delete(token);
             }
         }
-        console.log(`◆ SSE client disconnected: ${token}`);
+        console.log(`◆ SSE disconnected: ${token}`);
     });
 
-    console.log(`◆ SSE client connected: ${token}`);
+    req.setTimeout(0);
 });
 
 // ============================================
