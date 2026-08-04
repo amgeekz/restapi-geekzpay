@@ -2,7 +2,7 @@
  * GeekzPay PWA Monitor
  * Elegant & Professional Version with Dark Mode
  * Polling Mode - Simple & Stabil
- * Dengan QRIS Upload
+ * Dengan QRIS Upload (tanpa QRIS bawaan)
  */
 
 // ============================================
@@ -34,7 +34,7 @@ const state = {
 };
 
 // ============================================
-// QRIS STATE
+// QRIS STATE - TANPA DEFAULT
 // ============================================
 const QRIS_STATE = {
     imageData: localStorage.getItem('geekzpay_qris') || null,
@@ -161,8 +161,13 @@ function initQRISUpload() {
         modalImage.src = QRIS_STATE.imageData;
     }
     
-    // Click untuk upload
-    dropZone.addEventListener('click', () => fileInput.click());
+    // File input change (dari tombol)
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleQRISFile(e.target.files[0]);
+        }
+        fileInput.value = '';
+    });
     
     // Drag & Drop
     dropZone.addEventListener('dragover', (e) => {
@@ -179,13 +184,6 @@ function initQRISUpload() {
         dropZone.classList.remove('dragover');
         if (e.dataTransfer.files.length) {
             handleQRISFile(e.dataTransfer.files[0]);
-        }
-    });
-    
-    // File input change
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length) {
-            handleQRISFile(e.target.files[0]);
         }
     });
 }

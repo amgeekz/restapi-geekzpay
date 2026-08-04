@@ -55,14 +55,19 @@
         <div class="qris-upload-area">
             <div class="qris-upload-box" id="qrisDropZone">
                 <i class="fas fa-cloud-upload-alt qris-upload-icon"></i>
-                <p class="qris-upload-text">Tarik atau klik untuk upload QRIS</p>
+                <p class="qris-upload-text">Tarik file ke sini atau klik tombol</p>
+                <button class="qris-upload-btn" onclick="document.getElementById('qrisFileInput').click()">
+                    <i class="fas fa-folder-open"></i> Pilih File
+                </button>
                 <small class="qris-upload-hint">PNG, JPG, JPEG (Maks. 2MB)</small>
                 <input type="file" id="qrisFileInput" accept="image/*" style="display:none;">
             </div>
+            
             <div id="qrisPreviewContainer" style="display:none;" class="qris-preview-container">
                 <img id="qrisPreview" class="qris-preview-image" alt="QRIS">
                 <button class="qris-remove-btn" onclick="removeQRIS()"><i class="fas fa-times"></i></button>
             </div>
+            
             <button class="btn-qris" onclick="openQRISWidget()" id="qrisShowBtn" style="display:none;">
                 <i class="fas fa-qrcode"></i> Tampilkan QRIS
             </button>
