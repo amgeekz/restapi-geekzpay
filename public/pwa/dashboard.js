@@ -1,8 +1,7 @@
 /**
  * GeekzPay PWA Monitor
- * Elegant & Professional Version with Dark Mode
- * Polling Mode - Simple & Stabil
- * Dengan QRIS Upload (Upload box hidden jika ada QRIS)
+ * Page Terpisah (Dashboard, Riwayat, Pengaturan)
+ * Suara: Koin (default) + Upload Custom
  */
 
 // ============================================
@@ -20,7 +19,7 @@ const CONFIG = {
 const state = {
     token: localStorage.getItem('geekzpay_token') || '',
     soundEnabled: localStorage.getItem('geekzpay_sound') !== 'false',
-    soundType: localStorage.getItem('geekzpay_sound_type') || 'dana',
+    soundType: localStorage.getItem('geekzpay_sound_type') || 'coin',
     soundVolume: parseFloat(localStorage.getItem('geekzpay_sound_volume')) || 0.8,
     ttsEnabled: localStorage.getItem('geekzpay_tts') !== 'false',
     theme: localStorage.getItem('geekzpay_theme') || 'light',
@@ -30,7 +29,9 @@ const state = {
     stats: JSON.parse(localStorage.getItem('geekzpay_stats') || '{"daily":{},"monthly":{},"total":0,"totalAmount":0}'),
     pollingInterval: null,
     isPolling: false,
-    isProcessing: false
+    isProcessing: false,
+    customSound: localStorage.getItem('geekzpay_custom_sound') || null,
+    customSoundName: localStorage.getItem('geekzpay_custom_sound_name') || null
 };
 
 // ============================================
@@ -42,127 +43,111 @@ const QRIS_STATE = {
 };
 
 // ============================================
-// SOUND CONFIGURATION
+// PLAY NOTIFICATION SOUND
 // ============================================
-const SOUNDS = {
-    dana: {
-        label: 'DANA',
-        beeps: [
-            { freq: 880, duration: 0.08, delay: 0 },
-            { freq: 1100, duration: 0.06, delay: 0.1 },
-            { freq: 1320, duration: 0.1, delay: 0.18 }
-        ]
-    },
-    cash_register: {
-        label: 'Kasir',
-        beeps: [
-            { freq: 1200, duration: 0.08, delay: 0 },
-            { freq: 800, duration: 0.08, delay: 0.12 },
-            { freq: 1400, duration: 0.1, delay: 0.25 },
-            { freq: 1000, duration: 0.12, delay: 0.38 }
-        ]
-    },
-    ding_dong: {
-        label: 'Bel',
-        beeps: [
-            { freq: 880, duration: 0.15, delay: 0 },
-            { freq: 1100, duration: 0.2, delay: 0.2 }
-        ]
-    },
-    success: {
-        label: 'Sukses',
-        beeps: [
-            { freq: 523, duration: 0.1, delay: 0 },
-            { freq: 659, duration: 0.1, delay: 0.12 },
-            { freq: 784, duration: 0.15, delay: 0.25 }
-        ]
+function playNotificationSound() {
+    if (!state.soundEnabled) return;
+    
+    // Jika ada custom sound, mainkan
+    if (state.customSound) {
+        try {
+            const audio = new Audio(state.customSound);
+            audio.volume = state.soundVolume;
+            audio.play().catch(() => {});
+            return;
+        } catch (e) {}
     }
-};
-
-// ============================================
-// DOM REFS
-// ============================================
-const DOM = {
-    tokenInput: document.getElementById('tokenInput'),
-    statusText: document.getElementById('statusText'),
-    statusDot: document.getElementById('statusDot'),
-    totalCount: document.getElementById('totalCount'),
-    totalAmount: document.getElementById('totalAmount'),
-    newCount: document.getElementById('newCount'),
-    todayCount: document.getElementById('todayCount'),
-    todayAmount: document.getElementById('todayAmount'),
-    monthCount: document.getElementById('monthCount'),
-    monthAmount: document.getElementById('monthAmount'),
-    allCount: document.getElementById('allCount'),
-    allAmount: document.getElementById('allAmount'),
-    chartContainer: document.getElementById('chartContainer'),
-    transactionList: document.getElementById('transactionList'),
-    toast: document.getElementById('toast'),
-    toastMessage: document.getElementById('toastMessage'),
-    toggleSoundBtn: document.getElementById('toggleSoundBtn'),
-    toggleTtsBtn: document.getElementById('toggleTtsBtn'),
-    sound: document.getElementById('notificationSound'),
-    permissionBanner: document.getElementById('permissionBanner'),
-    historyCount: document.getElementById('historyCount'),
-    themeToggle: document.getElementById('themeToggle'),
-    themeIcon: document.querySelector('.theme-icon'),
-    // QRIS
-    qrisDropZone: document.getElementById('qrisDropZone'),
-    qrisFileInput: document.getElementById('qrisFileInput'),
-    qrisPreviewContainer: document.getElementById('qrisPreviewContainer'),
-    qrisPreview: document.getElementById('qrisPreview'),
-    qrisShowBtn: document.getElementById('qrisShowBtn'),
-    qrisModalImage: document.getElementById('qrisModalImage'),
-    qrisOverlay: document.getElementById('qrisOverlay')
-};
-
-// ============================================
-// THEME FUNCTIONS
-// ============================================
-function toggleTheme() {
-    const newTheme = state.theme === 'light' ? 'dark' : 'light';
-    state.theme = newTheme;
-    localStorage.setItem('geekzpay_theme', newTheme);
-    applyTheme(newTheme);
-}
-window.toggleTheme = toggleTheme;
-
-function applyTheme(theme) {
-    if (theme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        DOM.themeIcon.innerHTML = '<i class="fas fa-sun"></i>';
-    } else {
-        document.documentElement.removeAttribute('data-theme');
-        DOM.themeIcon.innerHTML = '<i class="fas fa-moon"></i>';
-    }
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) {
-        meta.content = theme === 'dark' ? '#0f1420' : '#f0f4f8';
+    
+    // Default: Suara koin jatuh
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const volume = state.soundVolume;
+        const freqs = [1800, 1400, 1000, 700];
+        
+        freqs.forEach((freq, i) => {
+            setTimeout(() => {
+                try {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.value = freq;
+                    osc.type = 'sine';
+                    const now = ctx.currentTime;
+                    gain.gain.setValueAtTime(0.01, now);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.25, now + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                    
+                    // Noise efek koin
+                    const bufSize = ctx.sampleRate * 0.02;
+                    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let j = 0; j < bufSize; j++) {
+                        data[j] = (Math.random() * 2 - 1) * 0.03;
+                    }
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = buf;
+                    const ng = ctx.createGain();
+                    ng.gain.value = volume * 0.08;
+                    noise.connect(ng);
+                    ng.connect(ctx.destination);
+                    noise.start(now);
+                    noise.stop(now + 0.08);
+                } catch (e) {}
+            }, i * 100);
+        });
+    } catch (e) {
+        // Fallback
+        try {
+            const audio = document.getElementById('notificationSound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.volume = state.soundVolume;
+                audio.play().catch(() => {});
+            }
+        } catch (err) {}
     }
 }
+
+// ============================================
+// PAGE NAVIGATION
+// ============================================
+function navigateTo(page) {
+    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    
+    document.querySelectorAll('.page-nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.page-nav-btn[data-page="${page}"]`).classList.add('active');
+}
+
+document.querySelectorAll('.page-nav-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        navigateTo(this.dataset.page);
+    });
+});
 
 // ============================================
 // QRIS UPLOAD FUNCTIONS
 // ============================================
 
 function initQRISUpload() {
-    const dropZone = DOM.qrisDropZone;
-    const fileInput = DOM.qrisFileInput;
-    const previewContainer = DOM.qrisPreviewContainer;
-    const previewImage = DOM.qrisPreview;
-    const showBtn = DOM.qrisShowBtn;
-    const modalImage = DOM.qrisModalImage;
+    const dropZone = document.getElementById('qrisDropZone');
+    const fileInput = document.getElementById('qrisFileInput');
+    const previewContainer = document.getElementById('qrisPreviewContainer');
+    const previewImage = document.getElementById('qrisPreview');
+    const showBtn = document.getElementById('qrisShowBtn');
+    const modalImage = document.getElementById('qrisModalImage');
     
-    // Jika ada QRIS tersimpan - sembunyikan upload box
     if (QRIS_STATE.imageData) {
         previewImage.src = QRIS_STATE.imageData;
         previewContainer.style.display = 'inline-block';
         showBtn.style.display = 'flex';
         modalImage.src = QRIS_STATE.imageData;
-        dropZone.style.display = 'none'; // Sembunyikan upload box
+        dropZone.style.display = 'none';
     }
     
-    // File input change (dari tombol)
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) {
             handleQRISFile(e.target.files[0]);
@@ -170,7 +155,6 @@ function initQRISUpload() {
         fileInput.value = '';
     });
     
-    // Drag & Drop
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.add('dragover');
@@ -208,11 +192,11 @@ function handleQRISFile(file) {
         localStorage.setItem('geekzpay_qris', imageData);
         localStorage.setItem('geekzpay_qris_name', file.name);
         
-        DOM.qrisPreview.src = imageData;
-        DOM.qrisPreviewContainer.style.display = 'inline-block';
-        DOM.qrisShowBtn.style.display = 'flex';
-        DOM.qrisModalImage.src = imageData;
-        DOM.qrisDropZone.style.display = 'none'; // Sembunyikan upload box
+        document.getElementById('qrisPreview').src = imageData;
+        document.getElementById('qrisPreviewContainer').style.display = 'inline-block';
+        document.getElementById('qrisShowBtn').style.display = 'flex';
+        document.getElementById('qrisModalImage').src = imageData;
+        document.getElementById('qrisDropZone').style.display = 'none';
         
         showToast(`QRIS "${file.name}" berhasil diupload!`);
     };
@@ -226,10 +210,10 @@ function removeQRIS() {
     localStorage.removeItem('geekzpay_qris');
     localStorage.removeItem('geekzpay_qris_name');
     
-    DOM.qrisPreviewContainer.style.display = 'none';
-    DOM.qrisShowBtn.style.display = 'none';
-    DOM.qrisModalImage.src = '';
-    DOM.qrisDropZone.style.display = 'block'; // Tampilkan upload box
+    document.getElementById('qrisPreviewContainer').style.display = 'none';
+    document.getElementById('qrisShowBtn').style.display = 'none';
+    document.getElementById('qrisModalImage').src = '';
+    document.getElementById('qrisDropZone').style.display = 'block';
     
     showToast('QRIS dihapus');
 }
@@ -241,8 +225,8 @@ function openQRISWidget() {
         return;
     }
     
-    DOM.qrisModalImage.src = QRIS_STATE.imageData;
-    DOM.qrisOverlay.classList.add('active');
+    document.getElementById('qrisModalImage').src = QRIS_STATE.imageData;
+    document.getElementById('qrisOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 window.openQRISWidget = openQRISWidget;
@@ -251,10 +235,160 @@ function closeQRISWidget(event) {
     if (event && event.target !== event.currentTarget) {
         return;
     }
-    DOM.qrisOverlay.classList.remove('active');
+    document.getElementById('qrisOverlay').classList.remove('active');
     document.body.style.overflow = '';
 }
 window.closeQRISWidget = closeQRISWidget;
+
+// ============================================
+// SOUND UPLOAD CUSTOM
+// ============================================
+function initSoundUpload() {
+    const dropZone = document.getElementById('soundDropZone');
+    const fileInput = document.getElementById('soundFileInput');
+    const previewContainer = document.getElementById('soundPreviewContainer');
+    const fileName = document.getElementById('soundFileName');
+    
+    if (state.customSound) {
+        previewContainer.style.display = 'inline-flex';
+        fileName.textContent = state.customSoundName || 'custom.mp3';
+        dropZone.style.display = 'none';
+    }
+    
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleSoundFile(e.target.files[0]);
+        }
+        fileInput.value = '';
+    });
+    
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            handleSoundFile(e.dataTransfer.files[0]);
+        }
+    });
+}
+
+function handleSoundFile(file) {
+    if (!file.type.startsWith('audio/')) {
+        showToast('File harus audio!');
+        return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+        showToast('Maksimal 2MB!');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const audioData = e.target.result;
+        state.customSound = audioData;
+        state.customSoundName = file.name;
+        
+        localStorage.setItem('geekzpay_custom_sound', audioData);
+        localStorage.setItem('geekzpay_custom_sound_name', file.name);
+        
+        document.getElementById('soundFileName').textContent = file.name;
+        document.getElementById('soundPreviewContainer').style.display = 'inline-flex';
+        document.getElementById('soundDropZone').style.display = 'none';
+        
+        showToast(`Suara "${file.name}" berhasil diupload!`);
+    };
+    reader.readAsDataURL(file);
+}
+
+function playCustomSound() {
+    if (state.customSound) {
+        try {
+            const audio = new Audio(state.customSound);
+            audio.volume = state.soundVolume;
+            audio.play().catch(() => {});
+        } catch (e) {
+            showToast('Gagal memutar suara');
+        }
+    }
+}
+window.playCustomSound = playCustomSound;
+
+function removeCustomSound() {
+    state.customSound = null;
+    state.customSoundName = null;
+    
+    localStorage.removeItem('geekzpay_custom_sound');
+    localStorage.removeItem('geekzpay_custom_sound_name');
+    
+    document.getElementById('soundPreviewContainer').style.display = 'none';
+    document.getElementById('soundDropZone').style.display = 'block';
+    
+    showToast('Suara custom dihapus');
+}
+window.removeCustomSound = removeCustomSound;
+
+// ============================================
+// DOM REFS
+// ============================================
+const DOM = {
+    tokenInput: document.getElementById('tokenInput'),
+    statusText: document.getElementById('statusText'),
+    statusDot: document.getElementById('statusDot'),
+    totalCount: document.getElementById('totalCount'),
+    totalAmount: document.getElementById('totalAmount'),
+    newCount: document.getElementById('newCount'),
+    todayCount: document.getElementById('todayCount'),
+    todayAmount: document.getElementById('todayAmount'),
+    monthCount: document.getElementById('monthCount'),
+    monthAmount: document.getElementById('monthAmount'),
+    allCount: document.getElementById('allCount'),
+    allAmount: document.getElementById('allAmount'),
+    chartContainer: document.getElementById('chartContainer'),
+    transactionList: document.getElementById('transactionList'),
+    toast: document.getElementById('toast'),
+    toastMessage: document.getElementById('toastMessage'),
+    toggleSoundBtn: document.getElementById('toggleSoundBtn'),
+    toggleTtsBtn: document.getElementById('toggleTtsBtn'),
+    sound: document.getElementById('notificationSound'),
+    permissionBanner: document.getElementById('permissionBanner'),
+    historyCount: document.getElementById('historyCount'),
+    themeIcon: document.querySelector('.theme-icon'),
+};
+
+// ============================================
+// THEME FUNCTIONS
+// ============================================
+function toggleTheme() {
+    const newTheme = state.theme === 'light' ? 'dark' : 'light';
+    state.theme = newTheme;
+    localStorage.setItem('geekzpay_theme', newTheme);
+    applyTheme(newTheme);
+}
+window.toggleTheme = toggleTheme;
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (DOM.themeIcon) DOM.themeIcon.innerHTML = '<i class="fas fa-sun"></i>';
+        document.getElementById('darkToggle').checked = true;
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        if (DOM.themeIcon) DOM.themeIcon.innerHTML = '<i class="fas fa-moon"></i>';
+        document.getElementById('darkToggle').checked = false;
+    }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+        meta.content = theme === 'dark' ? '#0f1420' : '#f0f4f8';
+    }
+}
 
 // ============================================
 // SAVE STATE
@@ -370,8 +504,10 @@ function renderChart() {
 function init() {
     applyTheme(state.theme);
     
-    // QRIS Upload
     initQRISUpload();
+    initSoundUpload();
+    
+    document.getElementById('darkToggle').checked = state.theme === 'dark';
     
     if (state.token) {
         DOM.tokenInput.value = state.token;
@@ -437,15 +573,6 @@ function startPolling() {
     
     pollData();
     state.pollingInterval = setInterval(pollData, CONFIG.POLLING_INTERVAL);
-}
-
-function stopPolling() {
-    if (state.pollingInterval) {
-        clearInterval(state.pollingInterval);
-        state.pollingInterval = null;
-        state.isPolling = false;
-        console.log('Polling stopped');
-    }
 }
 
 // ============================================
@@ -561,56 +688,42 @@ function clearHistory() {
 }
 window.clearHistory = clearHistory;
 
-// ============================================
-// NOTIFICATION SOUND
-// ============================================
-function playNotificationSound() {
-    if (!state.soundEnabled) return;
-    try {
-        if (!state.audioContext) {
-            state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        const ctx = state.audioContext;
-        const config = SOUNDS[state.soundType] || SOUNDS.dana;
-        const volume = state.soundVolume;
-        
-        config.beeps.forEach((beep, i) => {
-            setTimeout(() => {
-                try {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.frequency.value = beep.freq;
-                    osc.type = 'sine';
-                    const now = ctx.currentTime;
-                    gain.gain.setValueAtTime(0.01, now);
-                    gain.gain.exponentialRampToValueAtTime(volume * 0.4, now + 0.01);
-                    gain.gain.exponentialRampToValueAtTime(volume * 0.01, now + beep.duration);
-                    osc.start(now);
-                    osc.stop(now + beep.duration);
-                    
-                    if (state.soundType === 'dana') {
-                        const bufSize = ctx.sampleRate * 0.015;
-                        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-                        const data = buf.getChannelData(0);
-                        for (let j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1) * 0.04;
-                        const noise = ctx.createBufferSource();
-                        noise.buffer = buf;
-                        const ng = ctx.createGain();
-                        ng.gain.value = volume * 0.1;
-                        noise.connect(ng);
-                        ng.connect(ctx.destination);
-                        noise.start(now);
-                        noise.stop(now + beep.duration);
-                    }
-                } catch (e) {}
-            }, beep.delay * 1000);
-        });
-    } catch (e) {
-        try { DOM.sound.currentTime = 0; DOM.sound.volume = state.soundVolume; DOM.sound.play(); } catch (err) {}
-    }
+function clearAllData() {
+    if (!confirm('Hapus SEMUA data (history, QRIS, suara custom)?')) return;
+    
+    state.history = [];
+    state.lastIds = new Set();
+    state.newCount = 0;
+    state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
+    
+    QRIS_STATE.imageData = null;
+    QRIS_STATE.fileName = null;
+    localStorage.removeItem('geekzpay_qris');
+    localStorage.removeItem('geekzpay_qris_name');
+    document.getElementById('qrisPreviewContainer').style.display = 'none';
+    document.getElementById('qrisShowBtn').style.display = 'none';
+    document.getElementById('qrisModalImage').src = '';
+    document.getElementById('qrisDropZone').style.display = 'block';
+    
+    state.customSound = null;
+    state.customSoundName = null;
+    localStorage.removeItem('geekzpay_custom_sound');
+    localStorage.removeItem('geekzpay_custom_sound_name');
+    document.getElementById('soundPreviewContainer').style.display = 'none';
+    document.getElementById('soundDropZone').style.display = 'block';
+    
+    saveState();
+    
+    renderTransactions();
+    updateStatsUI();
+    renderStats();
+    renderChart();
+    updateBadge();
+    if (navigator.clearAppBadge) navigator.clearAppBadge();
+    
+    showToast('Semua data dibersihkan');
 }
+window.clearAllData = clearAllData;
 
 // ============================================
 // TEXT-TO-SPEECH
@@ -637,6 +750,7 @@ function speakPayment(amount) {
 function toggleSound() {
     state.soundEnabled = !state.soundEnabled;
     localStorage.setItem('geekzpay_sound', String(state.soundEnabled));
+    document.getElementById('soundToggle').checked = state.soundEnabled;
     updateSoundUI();
     showToast(state.soundEnabled ? 'Suara ON' : 'Suara OFF');
 }
@@ -645,45 +759,35 @@ window.toggleSound = toggleSound;
 function toggleTts() {
     state.ttsEnabled = !state.ttsEnabled;
     localStorage.setItem('geekzpay_tts', String(state.ttsEnabled));
+    document.getElementById('ttsToggle').checked = state.ttsEnabled;
     updateSoundUI();
     showToast(state.ttsEnabled ? 'Voice ON' : 'Voice OFF');
     if (state.ttsEnabled) speakPayment(10000);
 }
 window.toggleTts = toggleTts;
 
-function changeSoundType(type) {
-    if (SOUNDS[type]) {
-        state.soundType = type;
-        localStorage.setItem('geekzpay_sound_type', type);
-        updateSoundUI();
-        playNotificationSound();
-        setTimeout(() => speakPayment(8500), 500);
-        showToast(`Suara: ${SOUNDS[type].label}`);
-    }
-}
-window.changeSoundType = changeSoundType;
-
 function changeSoundVolume(value) {
     state.soundVolume = parseFloat(value);
     localStorage.setItem('geekzpay_sound_volume', String(state.soundVolume));
-    updateSoundUI();
+    document.getElementById('soundVolumeLabel').textContent = `${Math.round(state.soundVolume * 100)}%`;
 }
 window.changeSoundVolume = changeSoundVolume;
 
 function updateSoundUI() {
-    DOM.toggleSoundBtn.innerHTML = state.soundEnabled ? '<i class="fas fa-volume-up"></i> Suara' : '<i class="fas fa-volume-mute"></i> Mute';
-    DOM.toggleSoundBtn.className = state.soundEnabled ? 'btn btn-soft active' : 'btn btn-soft';
+    const soundBtn = DOM.toggleSoundBtn;
+    soundBtn.innerHTML = state.soundEnabled ? '<i class="fas fa-volume-up"></i> Suara' : '<i class="fas fa-volume-mute"></i> Mute';
+    soundBtn.className = state.soundEnabled ? 'btn btn-soft active' : 'btn btn-soft';
     
-    DOM.toggleTtsBtn.innerHTML = state.ttsEnabled ? '<i class="fas fa-microphone"></i> Voice' : '<i class="fas fa-microphone-slash"></i> Mute';
-    DOM.toggleTtsBtn.className = state.ttsEnabled ? 'btn btn-soft active' : 'btn btn-soft';
-    
-    document.querySelectorAll('.sound-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.sound === state.soundType);
-    });
+    const ttsBtn = DOM.toggleTtsBtn;
+    ttsBtn.innerHTML = state.ttsEnabled ? '<i class="fas fa-microphone"></i> Voice' : '<i class="fas fa-microphone-slash"></i> Mute';
+    ttsBtn.className = state.ttsEnabled ? 'btn btn-soft active' : 'btn btn-soft';
     
     const slider = document.getElementById('soundVolume');
     if (slider) slider.value = state.soundVolume;
     document.getElementById('soundVolumeLabel').textContent = `${Math.round(state.soundVolume * 100)}%`;
+    
+    document.getElementById('soundToggle').checked = state.soundEnabled;
+    document.getElementById('ttsToggle').checked = state.ttsEnabled;
 }
 
 // ============================================
@@ -708,8 +812,9 @@ function sendPushNotification(entry) {
 // RENDER FUNCTIONS
 // ============================================
 function renderTransactions() {
+    const list = DOM.transactionList;
     if (state.history.length === 0) {
-        DOM.transactionList.innerHTML = `
+        list.innerHTML = `
             <div class="empty-state">
                 <div class="empty-icon"><i class="fas fa-inbox"></i></div>
                 <p>Belum ada transaksi</p>
@@ -719,7 +824,7 @@ function renderTransactions() {
         return;
     }
     
-    DOM.transactionList.innerHTML = state.history.map((item, index) => {
+    list.innerHTML = state.history.map((item, index) => {
         const isNew = index < state.newCount && index < 5;
         return `
             <div class="transaction-item ${isNew ? 'new' : ''}">
