@@ -66,9 +66,28 @@
     </nav>
 
     <!-- ============================================
-    PAGE: DASHBOARD (BERSIH)
+    PAGE: DASHBOARD
     ============================================ -->
     <div id="page-dashboard" class="page-content active">
+
+        <!-- QRIS WIDGET - TAMPILKAN DI DASHBOARD -->
+        <section class="qris-dashboard">
+            <div class="qris-dashboard-header">
+                <span><i class="fas fa-qrcode"></i> QRIS</span>
+                <button class="btn-qris-small" onclick="openQRISWidget()" id="qrisShowBtnDashboard" style="display:none;">
+                    <i class="fas fa-expand"></i> Tampilkan
+                </button>
+            </div>
+            <div id="qrisPreviewDashboard" style="display:none; text-align:center; padding:8px;">
+                <img id="qrisPreviewDashboardImg" class="qris-preview-image" alt="QRIS">
+                <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">Klik Tampilkan untuk memperbesar</p>
+            </div>
+            <div id="qrisEmptyDashboard" class="qris-empty">
+                <i class="fas fa-qrcode"></i>
+                <p>Belum ada QRIS</p>
+                <span>Upload di Pengaturan</span>
+            </div>
+        </section>
 
         <!-- STATS RINGKAS -->
         <section class="stats-grid">
@@ -115,11 +134,10 @@
     </div>
 
     <!-- ============================================
-    PAGE: RIWAYAT (LENGKAP + STATISTIK)
+    PAGE: RIWAYAT
     ============================================ -->
     <div id="page-history" class="page-content">
 
-        <!-- STATISTIK LENGKAP -->
         <section class="stats-detail-grid">
             <div class="stat-detail-card">
                 <div class="stat-detail-label"><i class="fas fa-calendar-day"></i> Hari Ini</div>
@@ -138,7 +156,6 @@
             </div>
         </section>
 
-        <!-- SEMUA TRANSAKSI -->
         <section class="transaction-section">
             <div class="transaction-header">
                 <span class="transaction-title"><i class="fas fa-history"></i> Semua Transaksi</span>
@@ -155,7 +172,7 @@
     </div>
 
     <!-- ============================================
-    PAGE: PENGATURAN (SEMUA KONTROL + QRIS)
+    PAGE: PENGATURAN
     ============================================ -->
     <div id="page-settings" class="page-content">
         <section class="settings-section">
@@ -164,11 +181,11 @@
             <!-- QRIS UPLOAD -->
             <div class="settings-card">
                 <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:8px;">
-                    <span><i class="fas fa-qrcode"></i> QRIS</span>
+                    <span><i class="fas fa-qrcode"></i> Upload QRIS</span>
                     <div class="qris-upload-box" id="qrisDropZone">
                         <i class="fas fa-cloud-upload-alt qris-upload-icon"></i>
-                        <p class="qris-upload-text">Tarik file ke sini atau klik tombol</p>
-                        <button class="qris-upload-btn" onclick="document.getElementById('qrisFileInput').click()">
+                        <p class="qris-upload-text">Tarik atau klik untuk upload</p>
+                        <button class="qris-upload-btn" id="qrisUploadBtn">
                             <i class="fas fa-folder-open"></i> Pilih File
                         </button>
                         <small class="qris-upload-hint">PNG, JPG, JPEG (Maks. 2MB)</small>
@@ -189,9 +206,12 @@
                 <div class="settings-item">
                     <span><i class="fas fa-key"></i> Token</span>
                     <div class="settings-input-group">
-                        <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay" class="settings-input">
-                        <button class="btn btn-primary btn-sm" onclick="saveToken()"><i class="fas fa-save"></i> Simpan</button>
+                        <input type="text" id="tokenInput" placeholder="Masukkan Token" class="settings-input">
+                        <button class="btn btn-primary btn-sm" id="saveTokenBtn"><i class="fas fa-save"></i> Simpan</button>
                     </div>
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+                    <i class="fas fa-info-circle"></i> Token tersimpan otomatis
                 </div>
             </div>
 
@@ -207,14 +227,14 @@
                 <div class="settings-item">
                     <span><i class="fas fa-volume-up"></i> Suara</span>
                     <label class="toggle-switch">
-                        <input type="checkbox" id="soundToggle" checked onchange="toggleSound()">
+                        <input type="checkbox" id="soundToggle" checked>
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
                 <div class="settings-item">
                     <span><i class="fas fa-microphone"></i> Voice (TTS)</span>
                     <label class="toggle-switch">
-                        <input type="checkbox" id="ttsToggle" checked onchange="toggleTts()">
+                        <input type="checkbox" id="ttsToggle" checked>
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -223,14 +243,14 @@
             <!-- SOUND CUSTOM -->
             <div class="settings-card">
                 <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:8px;">
-                    <span><i class="fas fa-music"></i> Suara Notifikasi</span>
+                    <span><i class="fas fa-music"></i> Suara Custom</span>
                     <div class="sound-upload-box" id="soundDropZone">
                         <i class="fas fa-music sound-upload-icon"></i>
-                        <p class="sound-upload-text">Upload suara custom (MP3, WAV)</p>
-                        <button class="sound-upload-btn" onclick="document.getElementById('soundFileInput').click()">
+                        <p class="sound-upload-text">Tarik atau klik untuk upload</p>
+                        <button class="sound-upload-btn" id="soundUploadBtn">
                             <i class="fas fa-folder-open"></i> Pilih File
                         </button>
-                        <small class="sound-upload-hint">Maks. 2MB</small>
+                        <small class="sound-upload-hint">MP3, WAV (Maks. 2MB)</small>
                         <input type="file" id="soundFileInput" accept="audio/*" style="display:none;">
                     </div>
                     <div id="soundPreviewContainer" style="display:none;" class="sound-preview-container">
@@ -249,7 +269,7 @@
                 </div>
             </div>
 
-            <!-- RESET & CLEAR -->
+            <!-- RESET -->
             <div class="settings-card">
                 <button class="btn btn-danger" onclick="clearHistory()" style="width:100%;margin-bottom:8px;">
                     <i class="fas fa-trash"></i> Hapus Riwayat

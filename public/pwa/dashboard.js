@@ -1,6 +1,6 @@
 /**
- * GeekzPay PWA Monitor
- * Fix: QRIS Upload, Token tetap saat refresh
+ * GeekzPay PWA Monitor - FIX SEMUA
+ * QRIS Upload muncul, Token tetap, Suara custom jalan
  */
 
 // ============================================
@@ -14,7 +14,7 @@ const CONFIG = {
 };
 
 // ============================================
-// STATE
+// STATE - Semua dari localStorage
 // ============================================
 const state = {
     token: localStorage.getItem('geekzpay_token') || '',
@@ -30,19 +30,13 @@ const state = {
     isPolling: false,
     isProcessing: false,
     customSound: localStorage.getItem('geekzpay_custom_sound') || null,
-    customSoundName: localStorage.getItem('geekzpay_custom_sound_name') || null
+    customSoundName: localStorage.getItem('geekzpay_custom_sound_name') || null,
+    qrisImage: localStorage.getItem('geekzpay_qris') || null,
+    qrisName: localStorage.getItem('geekzpay_qris_name') || null
 };
 
 // ============================================
-// QRIS STATE
-// ============================================
-const QRIS_STATE = {
-    imageData: localStorage.getItem('geekzpay_qris') || null,
-    fileName: localStorage.getItem('geekzpay_qris_name') || null
-};
-
-// ============================================
-// PLAY NOTIFICATION SOUND - SUARA KOIN JATUH
+// PLAY NOTIFICATION SOUND
 // ============================================
 function playNotificationSound() {
     if (!state.soundEnabled) return;
@@ -115,7 +109,6 @@ function playNotificationSound() {
 function navigateTo(page) {
     document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
-    
     document.querySelectorAll('.page-nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelector(`.page-nav-btn[data-page="${page}"]`).classList.add('active');
 }
@@ -127,35 +120,70 @@ document.querySelectorAll('.page-nav-btn').forEach(btn => {
 });
 
 // ============================================
-// QRIS UPLOAD FUNCTIONS - FIX
+// QRIS - UPDATE DASHBOARD
+// ============================================
+function updateQRISDashboard() {
+    const previewDashboard = document.getElementById('qrisPreviewDashboard');
+    const previewImg = document.getElementById('qrisPreviewDashboardImg');
+    const showBtn = document.getElementById('qrisShowBtnDashboard');
+    const empty = document.getElementById('qrisEmptyDashboard');
+    
+    if (state.qrisImage) {
+        previewImg.src = state.qrisImage;
+        previewDashboard.style.display = 'block';
+        showBtn.style.display = 'inline-flex';
+        empty.style.display = 'none';
+    } else {
+        previewDashboard.style.display = 'none';
+        showBtn.style.display = 'none';
+        empty.style.display = 'block';
+    }
+}
+
+// ============================================
+// QRIS UPLOAD FUNCTIONS
 // ============================================
 function initQRISUpload() {
     const dropZone = document.getElementById('qrisDropZone');
     const fileInput = document.getElementById('qrisFileInput');
+    const uploadBtn = document.getElementById('qrisUploadBtn');
     const previewContainer = document.getElementById('qrisPreviewContainer');
     const previewImage = document.getElementById('qrisPreview');
     const showBtn = document.getElementById('qrisShowBtn');
     const modalImage = document.getElementById('qrisModalImage');
     
-    // Jika ada QRIS tersimpan
-    if (QRIS_STATE.imageData) {
-        previewImage.src = QRIS_STATE.imageData;
+    // Load existing QRIS
+    if (state.qrisImage) {
+        previewImage.src = state.qrisImage;
         previewContainer.style.display = 'inline-block';
         showBtn.style.display = 'flex';
-        modalImage.src = QRIS_STATE.imageData;
+        modalImage.src = state.qrisImage;
         dropZone.style.display = 'none';
+        updateQRISDashboard();
     }
     
-    // ===== FIX: Event listener untuk file input =====
+    // Upload via button
+    uploadBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        fileInput.click();
+    });
+    
+    // Drop zone click
+    dropZone.addEventListener('click', function(e) {
+        if (e.target === this || e.target.closest('.qris-upload-btn') === null) {
+            fileInput.click();
+        }
+    });
+    
+    // File input change
     fileInput.addEventListener('change', function(e) {
-        if (e.target.files.length) {
+        if (e.target.files && e.target.files.length > 0) {
             handleQRISFile(e.target.files[0]);
         }
-        // Reset agar bisa upload file yang sama lagi
         this.value = '';
     });
     
-    // ===== FIX: Drag & Drop =====
+    // Drag & Drop
     dropZone.addEventListener('dragover', function(e) {
         e.preventDefault();
         this.classList.add('dragover');
@@ -169,15 +197,9 @@ function initQRISUpload() {
     dropZone.addEventListener('drop', function(e) {
         e.preventDefault();
         this.classList.remove('dragover');
-        if (e.dataTransfer.files.length) {
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             handleQRISFile(e.dataTransfer.files[0]);
         }
-    });
-    
-    // ===== FIX: Klik tombol upload =====
-    document.querySelector('.qris-upload-btn')?.addEventListener('click', function(e) {
-        e.stopPropagation();
-        document.getElementById('qrisFileInput').click();
     });
 }
 
@@ -194,17 +216,21 @@ function handleQRISFile(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
         const imageData = e.target.result;
-        QRIS_STATE.imageData = imageData;
-        QRIS_STATE.fileName = file.name;
+        state.qrisImage = imageData;
+        state.qrisName = file.name;
         
         localStorage.setItem('geekzpay_qris', imageData);
         localStorage.setItem('geekzpay_qris_name', file.name);
         
+        // Update settings
         document.getElementById('qrisPreview').src = imageData;
         document.getElementById('qrisPreviewContainer').style.display = 'inline-block';
         document.getElementById('qrisShowBtn').style.display = 'flex';
         document.getElementById('qrisModalImage').src = imageData;
         document.getElementById('qrisDropZone').style.display = 'none';
+        
+        // Update dashboard
+        updateQRISDashboard();
         
         showToast(`QRIS "${file.name}" berhasil diupload!`);
     };
@@ -212,8 +238,8 @@ function handleQRISFile(file) {
 }
 
 function removeQRIS() {
-    QRIS_STATE.imageData = null;
-    QRIS_STATE.fileName = null;
+    state.qrisImage = null;
+    state.qrisName = null;
     
     localStorage.removeItem('geekzpay_qris');
     localStorage.removeItem('geekzpay_qris_name');
@@ -223,26 +249,25 @@ function removeQRIS() {
     document.getElementById('qrisModalImage').src = '';
     document.getElementById('qrisDropZone').style.display = 'block';
     
+    updateQRISDashboard();
+    
     showToast('QRIS dihapus');
 }
 window.removeQRIS = removeQRIS;
 
 function openQRISWidget() {
-    if (!QRIS_STATE.imageData) {
+    if (!state.qrisImage) {
         showToast('Upload QRIS terlebih dahulu!');
         return;
     }
-    
-    document.getElementById('qrisModalImage').src = QRIS_STATE.imageData;
+    document.getElementById('qrisModalImage').src = state.qrisImage;
     document.getElementById('qrisOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 window.openQRISWidget = openQRISWidget;
 
 function closeQRISWidget(event) {
-    if (event && event.target !== event.currentTarget) {
-        return;
-    }
+    if (event && event.target !== event.currentTarget) return;
     document.getElementById('qrisOverlay').classList.remove('active');
     document.body.style.overflow = '';
 }
@@ -254,6 +279,7 @@ window.closeQRISWidget = closeQRISWidget;
 function initSoundUpload() {
     const dropZone = document.getElementById('soundDropZone');
     const fileInput = document.getElementById('soundFileInput');
+    const uploadBtn = document.getElementById('soundUploadBtn');
     const previewContainer = document.getElementById('soundPreviewContainer');
     const fileName = document.getElementById('soundFileName');
     
@@ -263,8 +289,19 @@ function initSoundUpload() {
         dropZone.style.display = 'none';
     }
     
+    uploadBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        fileInput.click();
+    });
+    
+    dropZone.addEventListener('click', function(e) {
+        if (e.target === this || e.target.closest('.sound-upload-btn') === null) {
+            fileInput.click();
+        }
+    });
+    
     fileInput.addEventListener('change', function(e) {
-        if (e.target.files.length) {
+        if (e.target.files && e.target.files.length > 0) {
             handleSoundFile(e.target.files[0]);
         }
         this.value = '';
@@ -283,7 +320,7 @@ function initSoundUpload() {
     dropZone.addEventListener('drop', function(e) {
         e.preventDefault();
         this.classList.remove('dragover');
-        if (e.dataTransfer.files.length) {
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             handleSoundFile(e.dataTransfer.files[0]);
         }
     });
@@ -372,7 +409,8 @@ const DOM = {
     soundVolume: document.getElementById('soundVolume'),
     soundVolumeLabel: document.getElementById('soundVolumeLabel'),
     soundToggle: document.getElementById('soundToggle'),
-    ttsToggle: document.getElementById('ttsToggle')
+    ttsToggle: document.getElementById('ttsToggle'),
+    saveTokenBtn: document.getElementById('saveTokenBtn')
 };
 
 // ============================================
@@ -600,7 +638,7 @@ function showToast(msg) {
 }
 
 // ============================================
-// SAVE TOKEN - FIX: Simpan & Tampilkan di input
+// SAVE TOKEN - FIX: Simpan & Tampilkan
 // ============================================
 function saveToken() {
     const newToken = DOM.tokenInput.value.trim();
@@ -614,7 +652,7 @@ function saveToken() {
     
     showToast('Token tersimpan');
     
-    // Reset state untuk token baru
+    // Reset data untuk token baru
     state.lastIds = new Set();
     state.history = [];
     state.newCount = 0;
@@ -628,7 +666,6 @@ function saveToken() {
     
     startPolling();
 }
-window.saveToken = saveToken;
 
 // ============================================
 // POLLING
@@ -738,28 +775,36 @@ function clearHistory() {
 window.clearHistory = clearHistory;
 
 function clearAllData() {
-    if (!confirm('Hapus SEMUA data (history, QRIS, suara custom)?')) return;
+    if (!confirm('Hapus SEMUA data (history, QRIS, suara custom, token)?')) return;
     
     state.history = [];
     state.lastIds = new Set();
     state.newCount = 0;
     state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
     
-    QRIS_STATE.imageData = null;
-    QRIS_STATE.fileName = null;
+    // QRIS
+    state.qrisImage = null;
+    state.qrisName = null;
     localStorage.removeItem('geekzpay_qris');
     localStorage.removeItem('geekzpay_qris_name');
     document.getElementById('qrisPreviewContainer').style.display = 'none';
     document.getElementById('qrisShowBtn').style.display = 'none';
     document.getElementById('qrisModalImage').src = '';
     document.getElementById('qrisDropZone').style.display = 'block';
+    updateQRISDashboard();
     
+    // Sound
     state.customSound = null;
     state.customSoundName = null;
     localStorage.removeItem('geekzpay_custom_sound');
     localStorage.removeItem('geekzpay_custom_sound_name');
     document.getElementById('soundPreviewContainer').style.display = 'none';
     document.getElementById('soundDropZone').style.display = 'block';
+    
+    // Token
+    state.token = '';
+    localStorage.removeItem('geekzpay_token');
+    DOM.tokenInput.value = '';
     
     saveState();
     
@@ -871,23 +916,28 @@ function requestNotificationPermission() {
 window.requestNotificationPermission = requestNotificationPermission;
 
 // ============================================
-// INIT - FIX: Token tetap diinput
+// INIT - FIX SEMUA
 // ============================================
 function init() {
     applyTheme(state.theme);
     
+    // QRIS Upload
     initQRISUpload();
+    updateQRISDashboard();
+    
+    // Sound Upload
     initSoundUpload();
     
+    // Settings
     document.getElementById('darkToggle').checked = state.theme === 'dark';
     DOM.soundToggle.checked = state.soundEnabled;
     DOM.ttsToggle.checked = state.ttsEnabled;
     DOM.soundVolume.value = state.soundVolume;
     DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
     
-    // ===== FIX: Token tetap terisi di input =====
+    // ===== FIX: Token tetap di input =====
     if (state.token) {
-        DOM.tokenInput.value = state.token; // Tampilkan token di input
+        DOM.tokenInput.value = state.token;
         startPolling();
     } else {
         DOM.tokenInput.value = '';
@@ -895,6 +945,17 @@ function init() {
         DOM.statusDot.style.background = '#f5a623';
         showToast('Masukkan token di Pengaturan');
     }
+    
+    // ===== FIX: Save token button =====
+    if (DOM.saveTokenBtn) {
+        DOM.saveTokenBtn.addEventListener('click', saveToken);
+    }
+    // Enter key di token input
+    DOM.tokenInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            saveToken();
+        }
+    });
     
     calculateStatsFromHistory();
     renderTransactions();
@@ -906,6 +967,8 @@ function init() {
     
     console.log('GeekzPay Monitor loaded');
     console.log('Token:', state.token ? '✅ Tersimpan' : '❌ Kosong');
+    console.log('QRIS:', state.qrisImage ? '✅ Ada' : '❌ Kosong');
+    console.log('Sound:', state.customSound ? '✅ Ada' : '❌ Kosong');
 }
 
 // ============================================
