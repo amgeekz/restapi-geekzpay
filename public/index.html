@@ -5,23 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeekzPay API Docs</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- CSS Eksternal -->
-    <link rel="stylesheet" href="/style.css">
-    
-    <!-- PWA Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
     <meta name="theme-color" content="#f0f4f8">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Highlight.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -30,450 +24,366 @@
     ============================================ -->
     <header class="header">
         <div class="header-inner">
-            <div class="header-left">
-                <div class="logo-icon">⚡</div>
-                <div>
-                    <h1>GeekzPay</h1>
-                    <span class="header-sub">API Documentation</span>
-                </div>
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">GeekzPay</span>
+                <span class="logo-badge">v2.0</span>
             </div>
-            <div class="header-right">
-                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                    <span class="theme-icon">🌙</span>
-                </button>
-                <button id="openMenu" class="menu-toggle">☰</button>
-                <div class="status-badge">
-                    <span class="status-dot"></span>
-                    <span>v2.0</span>
-                </div>
+            <div class="header-actions">
+                <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+                <button class="menu-btn" onclick="toggleMenu()">☰</button>
             </div>
         </div>
     </header>
 
     <!-- ============================================
-    MOBILE DRAWER
+    MOBILE MENU
     ============================================ -->
-    <div id="drawer" class="drawer">
-        <div class="drawer-overlay" id="drawerOverlay"></div>
-        <div class="drawer-content">
-            <div class="drawer-header">
-                <span class="drawer-title">Menu</span>
-                <button id="closeMenu" class="drawer-close">✕</button>
+    <div id="mobileMenu" class="mobile-menu">
+        <div class="mobile-menu-inner">
+            <div class="mobile-menu-header">
+                <span>Menu</span>
+                <button onclick="toggleMenu()">✕</button>
             </div>
-            <nav class="drawer-nav">
-                <div class="nav-link active" data-page="docs">Dokumentasi</div>
-                <div class="nav-link" data-page="history">Cek Riwayat</div>
-                <div class="nav-link" data-page="forwarder">Forwarder v2.0</div>
-                <div class="nav-link" data-page="donate">Donasi</div>
-                <div class="nav-link" data-page="pwa">PWA Monitor</div>
+            <nav>
+                <a href="#" class="active" data-page="docs">Dokumentasi</a>
+                <a href="#" data-page="history">Cek Riwayat</a>
+                <a href="#" data-page="forwarder">Forwarder</a>
+                <a href="#" data-page="donate">Donasi</a>
+                <a href="#" data-page="pwa">PWA Monitor</a>
                 <hr>
-                <a href="#hero" data-close>Cara Kerja Sistem</a>
-                <a href="#quickstart" data-close>Alamat Server</a>
-                <a href="#qris" data-close>Buat QRIS Dinamis</a>
-                <a href="#qr-converter" data-close>Scan Gambar QR</a>
-                <a href="#webhook" data-close>Tes Kirim Webhook</a>
-                <a href="#history-doc" data-close>URL Riwayat</a>
-                <a href="#examples" data-close>Contoh cURL</a>
-                <a href="#status-code" data-close>Kode Error HTTP</a>
+                <a href="#hero">Cara Kerja</a>
+                <a href="#qris">Buat QRIS</a>
+                <a href="#webhook">Webhook</a>
+                <a href="#examples">cURL</a>
             </nav>
         </div>
     </div>
 
     <!-- ============================================
-    MAIN CONTENT
+    MAIN
     ============================================ -->
     <main class="main">
         <div class="container">
 
-            <!-- NAVIGATION TABS -->
-            <nav class="tabs">
+            <!-- TABS -->
+            <div class="tabs">
                 <button class="tab active" data-page="docs">Dokumentasi</button>
                 <button class="tab" data-page="history">Cek Riwayat</button>
                 <button class="tab" data-page="forwarder">Forwarder</button>
                 <button class="tab" data-page="donate">Donasi</button>
                 <button class="tab" data-page="pwa">PWA Monitor</button>
-            </nav>
+            </div>
 
-            <div class="content-wrapper">
-                <!-- SIDEBAR -->
-                <aside class="sidebar">
-                    <div class="sidebar-card">
-                        <div class="sidebar-title">Navigasi</div>
-                        <a href="#hero" class="sidebar-link">Cara Kerja Sistem</a>
-                        <a href="#quickstart" class="sidebar-link">Alamat Server</a>
-                        <a href="#qris" class="sidebar-link">Buat QRIS Dinamis</a>
-                        <a href="#qr-converter" class="sidebar-link">Scan Gambar QR</a>
-                        <a href="#webhook" class="sidebar-link">Tes Kirim Webhook</a>
-                        <a href="#history-doc" class="sidebar-link">URL Riwayat</a>
-                        <a href="#examples" class="sidebar-link">Contoh cURL</a>
-                        <a href="#status-code" class="sidebar-link">Kode Error HTTP</a>
-                        <div class="sidebar-footer">⚡ GeekzPay v2.0</div>
+            <!-- ==========================================
+            PAGE: DOKUMENTASI
+            ========================================== -->
+            <div id="page-docs" class="page active">
+
+                <!-- HERO -->
+                <section class="card">
+                    <span class="badge-red">PENTING</span>
+                    <h1>Panduan Sistem GeekzPay REST API</h1>
+                    <p>Sistem ini berfungsi untuk mengecek dan mencatat pembayaran QRIS secara otomatis hanya dengan membaca notifikasi handphone Anda sendiri secara langsung.</p>
+                    
+                    <div class="box">
+                        <strong>// LALU BAGAIMANA ALUR KERJA OTOMATISNYA?</strong>
+                        <ol>
+                            <li>Website Anda membuat QRIS Dinamis dengan <span class="tag">Kode Unik</span> (contoh: Rp 10.338).</li>
+                            <li>Pembeli scan QRIS dan membayar sesuai nominal.</li>
+                            <li>HP Anda menerima notifikasi dana masuk dari bank/e-wallet.</li>
+                            <li>Aplikasi <span class="tag">Geekz Forwarder</span> membaca notifikasi dan mengirim ke server.</li>
+                            <li>Server mencocokkan nominal dan mengubah status menjadi <span class="tag">LUNAS</span>.</li>
+                        </ol>
                     </div>
-                </aside>
+                </section>
 
-                <!-- CONTENT -->
-                <div class="content">
+                <!-- BASE URL -->
+                <section class="card warning">
+                    <h3>⚠️ Konfigurasi Alamat API Utama</h3>
+                    <p>Alamat URL server terdeteksi otomatis sesuai lokasi aplikasi.</p>
+                    <input id="baseUrl" type="text" class="input-disabled" disabled>
+                </section>
 
-                    <!-- ==========================================
-                    DOCS PAGE
-                    ========================================== -->
-                    <div id="docs-page" class="page-section active">
+                <!-- QRIS DYNAMIC -->
+                <section class="card" id="qris">
+                    <h2>1. BUAT QRIS DINAMIS</h2>
+                    <p>Membuat kode bayar dengan nominal acak.</p>
 
-                        <!-- HERO -->
-                        <section id="hero" class="card hero">
-                            <span class="hero-badge">PENTING</span>
-                            <h1 class="hero-title">Panduan Sistem GeekzPay REST API</h1>
-                            <p class="hero-desc">Sistem ini berfungsi untuk mengecek dan mencatat pembayaran QRIS secara otomatis hanya dengan membaca notifikasi handphone Anda sendiri secara langsung.</p>
-                            <div class="hero-box">
-                                <div class="hero-box-title">// LALU BAGAIMANA ALUR KERJA OTOMATISNYA?</div>
-                                <ol class="hero-list">
-                                    <li>Website atau aplikasi Anda membuat kode QRIS Dinamis lengkap dengan <span class="tag">Kode Unik</span> di belakangnya (contoh: Rp 10.338).</li>
-                                    <li>Pembeli melakukan scan kode QRIS dan membayar pas sesuai angka tersebut.</li>
-                                    <li>HP Anda menerima notifikasi SMS atau pop-up dana masuk dari aplikasi bank/e-wallet Anda.</li>
-                                    <li>Aplikasi <span class="tag">Geekz Forwarder</span> di HP otomatis membaca isi notifikasi teks tersebut, lalu mengirimkannya ke server Anda dalam hitungan detik.</li>
-                                    <li>Server website Anda menerima data itu, mencocokkan nominalnya, dan langsung merubah status pembelian menjadi <span class="tag">LUNAS</span>.</li>
-                                </ol>
-                            </div>
-                        </section>
+                    <div class="form-row">
+                        <div>
+                            <label>Harga Dasar (IDR) <span class="required">*</span></label>
+                            <input id="tiBase" type="number" class="input" placeholder="10000">
+                        </div>
+                        <div>
+                            <label>Kode Unik (1-999)</label>
+                            <input id="tiUnique" type="number" class="input" placeholder="338">
+                        </div>
+                    </div>
 
-                        <!-- QUICKSTART -->
-                        <section id="quickstart" class="card warning">
-                            <div class="warning-icon">⚠️</div>
-                            <h3 class="warning-title">Konfigurasi Alamat API Utama</h3>
-                            <p class="warning-desc">Alamat URL server di bawah ini terdeteksi otomatis sesuai lokasi berjalannya aplikasi.</p>
-                            <div class="divider"></div>
+                    <div class="form-row">
+                        <div style="grid-column: span 2;">
+                            <label class="checkbox">
+                                <input id="tiAutoUnique" type="checkbox"> Acak Kode Unik Otomatis
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div style="grid-column: span 2;">
+                            <label>Atau Masukkan Total Nominal Mutlak</label>
+                            <input id="tiAmount" type="number" class="input" placeholder="10338">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div style="grid-column: span 2;">
+                            <label>Isi Payload QRIS Statis</label>
+                            <textarea id="tiPayload" rows="2" class="input" placeholder="00020101021126..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button id="btnDynamic" class="btn btn-primary">⚡ Proses QRIS</button>
+                        <button id="btnDynamicReset" class="btn btn-secondary">Bersihkan</button>
+                    </div>
+
+                    <div id="outDynamic" class="result hidden">
+                        <div class="result-header">✅ HASIL</div>
+                        <div id="metaDynamic" class="result-meta"></div>
+                        <div class="result-grid">
+                            <pre class="code-block"><code id="jsonDynamic" class="language-json"></code></pre>
                             <div>
-                                <span class="label-small">// Alamat Base URL Server Anda</span>
-                                <input id="baseUrl" type="text" disabled class="input-disabled">
+                                <img id="imgQR" class="qr-img" src="" alt="QRIS">
                             </div>
-                        </section>
+                        </div>
+                    </div>
+                </section>
 
-                        <!-- QRIS DYNAMIC -->
-                        <section id="qris" class="card">
-                            <h2 class="section-title">1. MENU BUAT QRIS DINAMIS</h2>
-                            <p class="section-desc">Membuat kode bayar yang memiliki nominal acak di belakangnya agar sistem tahu siapa pembelinya.</p>
+                <!-- QR CONVERTER -->
+                <section class="card" id="qr-converter">
+                    <h2>2. SCAN GAMBAR QRIS</h2>
+                    <p>Upload file gambar QRIS untuk diubah menjadi teks payload.</p>
 
-                            <div class="form-grid">
-                                <div>
-                                    <label class="label">Harga Dasar (IDR) <span class="required">*</span></label>
-                                    <input id="tiBase" type="number" class="input" placeholder="10000">
-                                </div>
-                                <div>
-                                    <label class="label">Kode Unik (1-999)</label>
-                                    <input id="tiUnique" type="number" class="input" placeholder="338">
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="checkbox">
-                                        <input id="tiAutoUnique" type="checkbox">
-                                        <span>Biar Sistem Acak Kode Unik Otomatis</span>
-                                    </label>
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="label">Atau Masukkan Total Nominal Mutlak</label>
-                                    <input id="tiAmount" type="number" class="input" placeholder="10338">
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="label">Isi Payload QRIS Statis Anda</label>
-                                    <textarea id="tiPayload" rows="2" class="input textarea" placeholder="00020101021126...6304XXXX"></textarea>
-                                </div>
-                            </div>
+                    <div id="dropZone" class="drop-zone">
+                        <div>⊞</div>
+                        <p>Tarik file ke sini atau klik untuk pilih</p>
+                        <small>PNG, JPG, JPEG (Maks. 2MB)</small>
+                        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+                    </div>
 
-                            <div class="form-actions">
-                                <button id="btnDynamic" class="btn btn-primary">⚡ Proses & Buat QRIS</button>
-                                <button id="btnDynamicReset" class="btn btn-secondary">Bersihkan</button>
-                            </div>
+                    <div id="previewSection" style="display:none; margin-top:10px;">
+                        <img id="imagePreview" class="preview-img">
+                    </div>
 
-                            <div id="outDynamic" class="result-box hidden">
-                                <div class="result-header">
-                                    <span class="badge">HASIL</span>
-                                    <span>Data dari Server</span>
-                                </div>
-                                <div class="result-meta" id="metaDynamic"></div>
-                                <div class="result-grid">
-                                    <div class="result-json">
-                                        <div class="result-label">// Output JSON</div>
-                                        <pre><code id="jsonDynamic" class="language-json"></code></pre>
-                                    </div>
-                                    <div class="result-qr">
-                                        <div class="result-label">// Gambar QRIS</div>
-                                        <div class="qr-container">
-                                            <img id="imgQR" class="qr-image" src="" alt="QRIS">
-                                        </div>
-                                        <p class="qr-hint">Scan dan bayar sesuai nominal</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+                    <div class="btn-group">
+                        <button id="btnConvert" class="btn btn-primary" disabled>Baca Gambar</button>
+                        <button id="btnResetConverter" class="btn btn-secondary">Hapus</button>
+                    </div>
 
-                        <!-- QR CONVERTER -->
-                        <section id="qr-converter" class="card">
-                            <h2 class="section-title">2. SCAN GAMBAR QRIS (QR CONVERTER)</h2>
-                            <p class="section-desc">Upload file gambar QRIS untuk diubah menjadi teks payload.</p>
+                    <div id="outConverter" class="result hidden">
+                        <div class="result-header">📋 HASIL BACA</div>
+                        <div id="metaConverter" class="result-meta"></div>
+                        <pre class="code-block"><code id="jsonConverter" class="language-json"></code></pre>
+                        <button id="btnCopyPayload" class="btn btn-copy">📋 Salin</button>
+                    </div>
+                </section>
 
-                            <div id="dropZone" class="drop-zone">
-                                <div class="drop-icon">⊞</div>
-                                <p class="drop-text">Tarik file ke sini, atau klik untuk pilih file</p>
-                                <p class="drop-hint">PNG, JPG, JPEG (Maks. 2MB)</p>
-                                <input type="file" id="fileInput" class="hidden" accept="image/png,image/jpeg,image/jpg">
-                            </div>
+                <!-- WEBHOOK -->
+                <section class="card" id="webhook">
+                    <h2>3. SIMULATOR WEBHOOK</h2>
+                    <p>Uji coba kirim notifikasi pembayaran ke server.</p>
 
-                            <div id="previewSection" class="preview-box hidden">
-                                <div class="preview-label">// Pratinjau</div>
-                                <img id="imagePreview" class="preview-image" src="" alt="Preview">
-                            </div>
+                    <div class="form-row">
+                        <div>
+                            <label>Token</label>
+                            <input id="tiToken" class="input" placeholder="USER123">
+                        </div>
+                        <div>
+                            <label>Format</label>
+                            <select id="tiMode" class="input">
+                                <option value="json">JSON</option>
+                                <option value="form">Form</option>
+                                <option value="text">Text</option>
+                            </select>
+                        </div>
+                    </div>
 
-                            <div class="form-actions">
-                                <button id="btnConvert" class="btn btn-primary" disabled>Baca Gambar</button>
-                                <button id="btnResetConverter" class="btn btn-secondary">Hapus File</button>
-                            </div>
+                    <div class="form-row">
+                        <div style="grid-column: span 2;">
+                            <label>Pesan</label>
+                            <textarea id="tiBody" rows="2" class="input">{"message": "Pembayaran Rp 10.338"}</textarea>
+                        </div>
+                    </div>
 
-                            <div id="outConverter" class="result-box hidden">
-                                <div class="result-header">
-                                    <span class="badge">OUTPUT</span>
-                                    <span>Teks Payload</span>
-                                </div>
-                                <div class="result-meta" id="metaConverter"></div>
-                                <div class="result-json">
-                                    <pre><code id="jsonConverter" class="language-json"></code></pre>
-                                </div>
-                                <button id="btnCopyPayload" class="btn btn-copy">📋 Salin</button>
-                            </div>
-                        </section>
+                    <div class="btn-group">
+                        <button id="btnWebhook" class="btn btn-danger">🚀 Kirim</button>
+                        <button id="btnWebhookReset" class="btn btn-secondary">Reset</button>
+                    </div>
 
-                        <!-- WEBHOOK -->
-                        <section id="webhook" class="card">
-                            <h2 class="section-title">3. SIMULATOR KIRIM WEBHOOK</h2>
-                            <p class="section-desc">Uji coba kirim notifikasi pembayaran ke server.</p>
+                    <div id="outWebhook" class="result hidden">
+                        <div class="result-header">📡 RESPON SERVER</div>
+                        <div id="metaWebhook" class="result-meta"></div>
+                        <pre class="code-block"><code id="jsonWebhook" class="language-json"></code></pre>
+                    </div>
+                </section>
 
-                            <div class="form-grid">
-                                <div>
-                                    <label class="label">Token</label>
-                                    <input id="tiToken" class="input" placeholder="USER123">
-                                </div>
-                                <div>
-                                    <label class="label">Format</label>
-                                    <select id="tiMode" class="input">
-                                        <option value="json">JSON</option>
-                                        <option value="form">Form</option>
-                                        <option value="text">Text</option>
-                                    </select>
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="label">Pesan</label>
-                                    <textarea id="tiBody" rows="2" class="input textarea">{ "message": "Pembayaran Rp 10.338" }</textarea>
-                                </div>
-                            </div>
+                <!-- ENDPOINT -->
+                <section class="card">
+                    <h2>4. CEK RIWAYAT PEMBAYARAN</h2>
+                    <div class="endpoint-box">
+                        <span class="method">GET</span>
+                        <span>/webhook/status?token=USER123&limit=5</span>
+                    </div>
+                </section>
 
-                            <div class="form-actions">
-                                <button id="btnWebhook" class="btn btn-danger">🚀 Kirim</button>
-                                <button id="btnWebhookReset" class="btn btn-secondary">Reset</button>
-                            </div>
+                <!-- EXAMPLES -->
+                <section class="card" id="examples">
+                    <h2>📚 Contoh cURL</h2>
 
-                            <div id="outWebhook" class="result-box hidden">
-                                <div class="result-header">
-                                    <span class="badge pink">RESPON</span>
-                                    <span>Dari Server</span>
-                                </div>
-                                <div class="result-meta" id="metaWebhook"></div>
-                                <div class="result-json">
-                                    <pre><code id="jsonWebhook" class="language-json"></code></pre>
-                                </div>
-                            </div>
-                        </section>
-
-                        <!-- HISTORY DOC -->
-                        <section id="history-doc" class="card">
-                            <h2 class="section-title">4. CEK RIWAYAT PEMBAYARAN</h2>
-                            <p class="section-desc">GET /webhook/status?token=USER123&limit=5</p>
-                            <div class="endpoint-box">
-                                <span class="method">GET</span>
-                                <span class="endpoint">/webhook/status?token=USER123&limit=5</span>
-                            </div>
-                        </section>
-
-                        <!-- EXAMPLES -->
-                        <section id="examples" class="card">
-                            <h2 class="section-title">📚 Contoh cURL</h2>
-
-                            <div class="example-group">
-                                <div class="example-label">// A. QRIS Dinamis</div>
-                                <div class="code-block">
-                                    <pre><code class="language-bash">curl -X POST https://restapi.amgeekz.my.id/qris/dynamic \
+                    <div>
+                        <div class="label-small">// A. QRIS Dinamis</div>
+                        <pre class="code-block"><code class="language-bash">curl -X POST https://restapi.amgeekz.my.id/qris/dynamic \
   -d base_amount=20000 \
   -d unique_code=777 \
-  -d payload_static='000201...' \
-  -d qr=png</code></pre>
-                                </div>
-                            </div>
+  -d payload_static='000201...'</code></pre>
+                    </div>
 
-                            <div class="example-group">
-                                <div class="example-label">// B. Webhook Payment</div>
-                                <div class="code-block">
-                                    <pre><code class="language-bash">curl -X POST 'https://restapi.amgeekz.my.id/webhook/payment?token=USER123' \
+                    <div>
+                        <div class="label-small">// B. Webhook Payment</div>
+                        <pre class="code-block"><code class="language-bash">curl -X POST 'https://restapi.amgeekz.my.id/webhook/payment?token=USER123' \
   -H 'Content-Type: application/json' \
-  -d '{ "message": "Pembayaran Rp 15.250" }'</code></pre>
-                                </div>
-                            </div>
-
-                            <div class="example-group">
-                                <div class="example-label">// C. Riwayat Summary</div>
-                                <div class="code-block">
-                                    <pre><code class="language-bash">curl -X GET 'https://restapi.amgeekz.my.id/webhook/summary?token=USER123&limit=3'</code></pre>
-                                </div>
-                            </div>
-                        </section>
-
-                        <!-- STATUS CODE -->
-                        <section id="status-code" class="card">
-                            <h3 class="section-title">// KODE STATUS HTTP</h3>
-                            <div class="table-wrapper">
-                                <table class="status-table">
-                                    <thead>
-                                        <tr><th>Kode</th><th>Nama</th><th>Keterangan</th></tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr><td class="code-success">200</td><td>Sukses</td><td>Permintaan berhasil</td></tr>
-                                        <tr><td class="code-warning">400</td><td>Data Salah</td><td>Input tidak valid</td></tr>
-                                        <tr><td class="code-danger">401</td><td>Akses Ditolak</td><td>Token salah</td></tr>
-                                        <tr><td class="code-danger">404</td><td>Tidak Ditemukan</td><td>Endpoint salah</td></tr>
-                                        <tr><td class="code-danger">500</td><td>Server Error</td><td>Cek backend</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </section>
+  -d '{"message": "Pembayaran Rp 15.250"}'</code></pre>
                     </div>
 
-                    <!-- ==========================================
-                    HISTORY PAGE
-                    ========================================== -->
-                    <div id="history-page" class="page-section">
-                        <div class="card">
-                            <h1 class="page-title">🔍 Cek Riwayat</h1>
-                            <p class="page-desc">Masukkan token untuk melihat transaksi terakhir</p>
-                            <div class="divider"></div>
-                            <div class="history-form">
-                                <div class="history-field">
-                                    <label class="label">Token</label>
-                                    <input id="historyToken" type="text" class="input" placeholder="USER123">
-                                </div>
-                                <div class="history-field small">
-                                    <label class="label">Limit</label>
-                                    <input id="historyLimit" type="number" class="input" value="10">
-                                </div>
-                                <button id="btnFetchHistory" class="btn btn-danger">🔍 Cari</button>
-                            </div>
-                        </div>
-
-                        <div id="desktopHistoryContainer" class="card hidden opacity-40">
-                            <div class="table-scroll">
-                                <table class="history-table">
-                                    <thead>
-                                        <tr><th>ID</th><th>Waktu</th><th>Jumlah</th><th>Pesan</th><th>IP</th></tr>
-                                    </thead>
-                                    <tbody id="desktopHistoryBody">
-                                        <tr><td colspan="5" class="empty">Masukkan token dan cari</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div id="mobileHistoryContainer" class="mobile-history"></div>
+                    <div>
+                        <div class="label-small">// C. Riwayat Summary</div>
+                        <pre class="code-block"><code class="language-bash">curl -X GET 'https://restapi.amgeekz.my.id/webhook/summary?token=USER123&limit=3'</code></pre>
                     </div>
+                </section>
 
-                    <!-- ==========================================
-                    FORWARDER PAGE
-                    ========================================== -->
-                    <div id="forwarder-page" class="page-section">
-                        <div class="card pink">
-                            <h1 class="page-title">📱 PANDUAN FORWARDER v2.0</h1>
-                            <p class="page-desc">3 langkah setting aplikasi Geekz Forwarder di HP</p>
-                            <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="btn btn-danger">📥 UNDUH APK</a>
-                        </div>
-
-                        <div class="card">
-                            <div class="step-list">
-                                <div class="step">
-                                    <div class="step-number">1</div>
-                                    <div>
-                                        <h4 class="step-title">HIDUPKAN SERVICE STATE</h4>
-                                        <p class="step-desc">Aktifkan izin <span class="tag">Akses Notifikasi</span> dan nyalakan tombol utama.</p>
-                                    </div>
-                                </div>
-                                <div class="step">
-                                    <div class="step-number">2</div>
-                                    <div>
-                                        <h4 class="step-title">PILIH APP TARGET</h4>
-                                        <p class="step-desc">Centang aplikasi bank/e-wallet di menu <span class="tag">APP REGISTRY</span>.</p>
-                                    </div>
-                                </div>
-                                <div class="step">
-                                    <div class="step-number">3</div>
-                                    <div>
-                                        <h4 class="step-title">SET WEBHOOK URL</h4>
-                                        <p class="step-desc">Isi URL di menu <span class="tag">DATA PIPELINE</span>:</p>
-                                        <div class="webhook-box">
-                                            <span class="label-small">URL Tujuan:</span>
-                                            <div class="endpoint-box">https://restapi.amgeekz.my.id/webhook/payment?token=USER123</div>
-                                            <span class="warning-text">⚠️ Ganti USER123 dengan token Anda</span>
-                                            <span class="label-small">Method: <span class="tag">JSON</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card yellow">
-                            <h3 class="section-title">// SETTINGAN TERBAIK</h3>
-                            <div class="setting-table">
-                                <div class="setting-row"><span>Service State</span><span class="check">✓ HARUS ON</span></div>
-                                <div class="setting-row"><span>App Registry</span><span class="check">✓ TERPILIH</span></div>
-                                <div class="setting-row"><span>Format Sink</span><span class="check">APPLICATION/JSON</span></div>
-                            </div>
-                        </div>
+                <!-- STATUS CODE -->
+                <section class="card">
+                    <h3>// KODE STATUS HTTP</h3>
+                    <div style="overflow-x:auto;">
+                        <table class="status-table">
+                            <thead><tr><th>Kode</th><th>Nama</th><th>Keterangan</th></tr></thead>
+                            <tbody>
+                                <tr><td class="green">200</td><td>Sukses</td><td>Permintaan berhasil</td></tr>
+                                <tr><td class="yellow">400</td><td>Data Salah</td><td>Input tidak valid</td></tr>
+                                <tr><td class="red">401</td><td>Akses Ditolak</td><td>Token salah</td></tr>
+                                <tr><td class="red">404</td><td>Tidak Ditemukan</td><td>Endpoint salah</td></tr>
+                                <tr><td class="red">500</td><td>Server Error</td><td>Cek backend</td></tr>
+                            </tbody>
+                        </table>
                     </div>
+                </section>
+            </div>
 
-                    <!-- ==========================================
-                    DONATE PAGE
-                    ========================================== -->
-                    <div id="donate-page" class="page-section">
-                        <div class="card text-center">
-                            <h1 class="page-title">■ Donasi</h1>
-                            <p class="page-desc">Bantu kami menyewa server</p>
+            <!-- ==========================================
+            PAGE: HISTORY
+            ========================================== -->
+            <div id="page-history" class="page">
+                <div class="card">
+                    <h2>🔍 Cek Riwayat</h2>
+                    <p>Masukkan token untuk melihat transaksi terakhir</p>
+                    <div class="history-form">
+                        <div>
+                            <label>Token</label>
+                            <input id="historyToken" class="input" placeholder="USER123">
                         </div>
-                        <div class="card yellow donate-card">
-                            <h2 class="donate-title">Scan QRIS Berikut</h2>
-                            <div class="qr-donate">
-                                <img src="/qris.jpg" alt="QRIS Donasi" class="qr-donate-image">
-                            </div>
-                            <p class="donate-desc">QRIS Interoperabilitas Nasional</p>
-                            <p class="donate-footer">Terima kasih! ❤️</p>
+                        <div>
+                            <label>Limit</label>
+                            <input id="historyLimit" class="input" value="10">
                         </div>
+                        <button id="btnFetchHistory" class="btn btn-danger">🔍 Cari</button>
                     </div>
+                </div>
 
-                    <!-- ==========================================
-                    PWA PAGE
-                    ========================================== -->
-                    <div id="pwa-page" class="page-section">
-                        <div class="card text-center">
-                            <h1 class="page-title">📱 PWA Monitor</h1>
-                            <p class="page-desc">Pantau pembayaran real-time dari HP</p>
-                            <div class="divider"></div>
-                            <a href="/pwa/dashboard.html" target="_blank" class="btn btn-primary btn-lg">🚀 Buka Monitor</a>
-                            <p class="pwa-hint">💡 Install ke home screen untuk pengalaman native</p>
-                        </div>
-                    </div>
-
+                <div id="historyContainer" class="card">
+                    <div id="historyBody" class="empty">Masukkan token dan klik cari</div>
                 </div>
             </div>
+
+            <!-- ==========================================
+            PAGE: FORWARDER
+            ========================================== -->
+            <div id="page-forwarder" class="page">
+                <div class="card pink">
+                    <h2>📱 PANDUAN FORWARDER v2.0</h2>
+                    <p>3 langkah setting aplikasi Geekz Forwarder di HP</p>
+                    <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="btn btn-danger">📥 UNDUH APK</a>
+                </div>
+
+                <div class="card">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div>
+                            <h4>HIDUPKAN SERVICE STATE</h4>
+                            <p>Aktifkan izin <span class="tag">Akses Notifikasi</span> dan nyalakan tombol utama.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div>
+                            <h4>PILIH APP TARGET</h4>
+                            <p>Centang aplikasi bank/e-wallet di menu <span class="tag">APP REGISTRY</span>.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div>
+                            <h4>SET WEBHOOK URL</h4>
+                            <p>Isi URL di menu <span class="tag">DATA PIPELINE</span>:</p>
+                            <div class="endpoint-box">https://restapi.amgeekz.my.id/webhook/payment?token=USER123</div>
+                            <p class="warning-text">⚠️ Ganti USER123 dengan token Anda</p>
+                            <p>Method: <span class="tag">JSON</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card yellow">
+                    <h4>// SETTINGAN TERBAIK</h4>
+                    <div class="setting-row"><span>Service State</span> <span class="check">✓ HARUS ON</span></div>
+                    <div class="setting-row"><span>App Registry</span> <span class="check">✓ TERPILIH</span></div>
+                    <div class="setting-row"><span>Format Sink</span> <span class="check">APPLICATION/JSON</span></div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+            PAGE: DONATE
+            ========================================== -->
+            <div id="page-donate" class="page">
+                <div class="card text-center">
+                    <h2>■ Donasi</h2>
+                    <p>Bantu kami menyewa server</p>
+                </div>
+                <div class="card donate-card">
+                    <h3>Scan QRIS Berikut</h3>
+                    <img src="/qris.jpg" alt="QRIS Donasi" class="donate-qr">
+                    <p>QRIS Interoperabilitas Nasional</p>
+                    <p style="color:var(--text-muted);font-size:12px;">Terima kasih! ❤️</p>
+                </div>
+            </div>
+
+            <!-- ==========================================
+            PAGE: PWA
+            ========================================== -->
+            <div id="page-pwa" class="page">
+                <div class="card text-center">
+                    <h2>📱 PWA Monitor</h2>
+                    <p>Pantau pembayaran real-time dari HP</p>
+                    <a href="/pwa/dashboard.html" target="_blank" class="btn btn-primary">🚀 Buka Monitor</a>
+                    <p style="font-size:11px;color:var(--text-muted);margin-top:10px;">Install ke home screen untuk pengalaman native</p>
+                </div>
+            </div>
+
         </div>
     </main>
-
-    <!-- BACK TO TOP -->
-    <button id="toTop" class="to-top">↑</button>
 
     <!-- TOAST -->
     <div id="toast" class="toast"></div>
 
-    <script src="/main.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
