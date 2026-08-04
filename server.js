@@ -351,17 +351,117 @@ app.get('/webhook/status', async (req, res) => {
   }
 });
 
+// ============================================
+// [BARU] ROUTE WEBHOOK SUMMARY
+// ============================================
+app.get('/webhook/summary', async (req, res) => {
+  try {
+    const token = String(extractToken(req));
+    if (!token) return res.status(401).json({ error: 'Token required' });
+
+    const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '3', 10)));
+    const key = `ev:${token}`;
+
+    const rowsRaw = await redisLRangeJSON(key, 0, limit - 1);
+
+    const rows = [];
+    for (let i = 0; i < rowsRaw.length; i++) {
+      const item = rowsRaw[i];
+      const parsed = safeParseMaybeString(item);
+      if (parsed && typeof parsed === 'object') {
+        rows.push(parsed);
+      }
+    }
+
+    // Ambil data terbaru
+    const latest = rows.length > 0 ? rows[0] : null;
+    
+    if (latest) {
+      return res.json({
+        ok: true,
+        token: token,
+        event_id: latest.event_id || 'unknown',
+        received_at: latest.received_at || new Date().toISOString(),
+        amount: latest.amount || 0,
+        method: latest.method || 'UNKNOWN',
+        ip: latest.ip || '0.0.0.0',
+        body: latest.body || {}
+      });
+    } else {
+      return res.json({
+        ok: true,
+        token: token,
+        message: 'Belum ada data untuk token ini'
+      });
+    }
+
+  } catch (err) {
+    res.status(500).json({ error: 'Internal error', detail: String(err.message || err) });
+  }
+});
+
+// ============================================
+// [UPDATE] SERVE STATIC FILES DENGAN ROUTE CSS/JS
+// ============================================
+// Serve static files dari public
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1h',
   setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=3600')
 }));
 
+// Route khusus untuk CSS
+app.get('/css/*', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'css', req.params[0]);
+  res.sendFile(filePath);
+});
+
+// Route khusus untuk JS
+app.get('/js/*', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'js', req.params[0]);
+  res.sendFile(filePath);
+});
+
+// ============================================
+// [BARU] ROUTE UNTUK PWA
+// ============================================
+// Serve PWA dashboard
+app.get('/pwa/dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'pwa', 'dashboard.html'));
+});
+
+// Serve PWA assets (CSS, JS, dll)
+app.get('/pwa/*', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'pwa', req.params[0]);
+  res.sendFile(filePath);
+});
+
+// Serve manifest.json
+app.get('/pwa/manifest.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'pwa', 'manifest.json'));
+});
+
+// Serve service worker (dengan header khusus)
+app.get('/pwa/sw.js', (req, res) => {
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'public', 'pwa', 'sw.js'));
+});
+
+// ============================================
+// ROUTE UTAMA
+// ============================================
 app.get(['/', '/docs'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ============================================
+// 404 HANDLER
+// ============================================
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
+// ============================================
+// START SERVER
+// ============================================
 if (require.main === module) {
   const PORT = Number(process.env.PORT || 3000);
   const HOST = '0.0.0.0';
