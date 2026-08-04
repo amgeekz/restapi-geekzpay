@@ -1,43 +1,62 @@
+/**
+ * GeekzPay API Docs - Main JavaScript
+ * Elegant & Professional Version with Dark Mode
+ */
+
 // ============================================
 // HIGHLIGHT.JS INIT
 // ============================================
 hljs.highlightAll();
 
 // ============================================
+// THEME
+// ============================================
+let currentTheme = localStorage.getItem('geekzpay_theme') || 'light';
+
+function applyTheme(theme) {
+    currentTheme = theme;
+    localStorage.setItem('geekzpay_theme', theme);
+    
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.querySelector('.theme-icon').textContent = '☀️';
+        document.querySelector('meta[name="theme-color"]').content = '#0f1420';
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.querySelector('.theme-icon').textContent = '🌙';
+        document.querySelector('meta[name="theme-color"]').content = '#f0f4f8';
+    }
+}
+
+function toggleTheme() {
+    applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+}
+window.toggleTheme = toggleTheme;
+
+// ============================================
 // PAGE NAVIGATION
 // ============================================
 function showPage(pageId) {
-    document.querySelectorAll('.page-section').forEach(page => {
-        page.classList.remove('active');
+    document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(pageId + '-page');
+    if (target) target.classList.add('active');
+    
+    document.querySelectorAll('.tab, .nav-link').forEach(el => {
+        el.classList.remove('active');
+        if (el.dataset.page === pageId) el.classList.add('active');
     });
-    
-    const targetPage = document.getElementById(pageId + '-page');
-    if (targetPage) {
-        targetPage.classList.add('active');
-    }
-    
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    const targetLinks = document.querySelectorAll(`.nav-link[data-page="${pageId}"]`);
-    targetLinks.forEach(link => link.classList.add('active'));
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+window.showPage = showPage;
 
 // ============================================
-// NAVIGATION EVENTS
+// TAB NAVIGATION
 // ============================================
-document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', function() {
-        const page = this.getAttribute('data-page');
-        showPage(page);
-        
-        // Tutup drawer di mobile
-        if (window.innerWidth < 768) {
-            document.getElementById('drawer').classList.add('hidden');
-        }
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        showPage(this.dataset.page);
+        closeDrawer();
     });
 });
 
@@ -45,27 +64,38 @@ document.querySelectorAll('.nav-link').forEach(link => {
 // MOBILE DRAWER
 // ============================================
 const drawer = document.getElementById('drawer');
-document.getElementById('openMenu').onclick = () => drawer.classList.remove('hidden');
-document.getElementById('closeMenu').onclick = () => drawer.classList.add('hidden');
+const drawerOverlay = document.getElementById('drawerOverlay');
 
-drawer.onclick = (e) => {
-    if (e.target === drawer.firstElementChild) {
-        drawer.classList.add('hidden');
-    }
-};
+function openDrawer() {
+    drawer.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
 
-drawer.querySelectorAll('[data-close]').forEach(a => {
-    a.onclick = () => drawer.classList.add('hidden');
+function closeDrawer() {
+    drawer.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('openMenu').addEventListener('click', openDrawer);
+document.getElementById('closeMenu').addEventListener('click', closeDrawer);
+drawerOverlay.addEventListener('click', closeDrawer);
+
+document.querySelectorAll('.drawer-nav .nav-link, .drawer-nav a[data-close]').forEach(el => {
+    el.addEventListener('click', closeDrawer);
 });
 
 // ============================================
 // BACK TO TOP
 // ============================================
 const toTop = document.getElementById('toTop');
-window.onscroll = () => {
-    toTop.classList.toggle('hidden', window.scrollY < 400);
-};
-toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+window.addEventListener('scroll', () => {
+    toTop.classList.toggle('visible', window.scrollY > 400);
+});
+
+toTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 // ============================================
 // BASE URL
@@ -78,6 +108,23 @@ function getBase() {
 
 if (baseInput) {
     baseInput.value = getBase();
+}
+
+// ============================================
+// TOAST
+// ============================================
+function showToast(message) {
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 // ============================================
@@ -105,7 +152,7 @@ if (btnFetchHistory) {
         const mobileContainer = document.getElementById('mobileHistoryContainer');
 
         if (!token) {
-            alert('Masukkan token terlebih dahulu!');
+            showToast('Masukkan token terlebih dahulu!');
             return;
         }
 
@@ -125,11 +172,8 @@ if (btnFetchHistory) {
             let mCards = '';
 
             if (!resData.data || resData.data.length === 0) {
-                const empty = `
-                    <div class="bg-white border-3 border-black rounded-xl p-6 text-center text-neutral-500 font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#111111]">
-                        Belum ada data pembayaran masuk untuk token ini.
-                    </div>`;
-                tRows = `<tr><td colspan="5" class="p-8 text-center text-neutral-500 uppercase tracking-wider font-bold text-xs">Belum ada data pembayaran masuk untuk token ini.</td></tr>`;
+                const empty = `<div class="empty-card">Belum ada data pembayaran masuk untuk token ini.</div>`;
+                tRows = `<tr><td colspan="5" class="empty">Belum ada data pembayaran masuk untuk token ini.</td></tr>`;
                 mCards = empty;
             } else {
                 resData.data.forEach(ev => {
@@ -139,23 +183,23 @@ if (btnFetchHistory) {
                     const rupiahStr = Number(ev.amount).toLocaleString('id-ID');
 
                     tRows += `
-                        <tr class="bg-white border-b-3 border-black hover:bg-[#fffef5]">
-                            <td class="p-4 border-r-2 border-black font-mono text-neutral-600 break-all">${ev.event_id || 'unknown'}</td>
-                            <td class="p-4 border-r-2 border-black text-neutral-800 whitespace-nowrap">${dateStr}</td>
-                            <td class="p-4 border-r-2 border-black font-mono text-sm text-emerald-600 font-black whitespace-nowrap">Rp ${rupiahStr}</td>
-                            <td class="p-4 border-r-2 border-black text-neutral-700 break-words font-semibold">${msgStr}</td>
-                            <td class="p-4 font-mono text-neutral-400 whitespace-nowrap">${ev.ip || '0.0.0.0'}</td>
+                        <tr>
+                            <td>${ev.event_id || 'unknown'}</td>
+                            <td>${dateStr}</td>
+                            <td><strong>Rp ${rupiahStr}</strong></td>
+                            <td>${msgStr}</td>
+                            <td>${ev.ip || '0.0.0.0'}</td>
                         </tr>`;
 
                     mCards += `
-                        <div class="bg-white border-3 border-black rounded-xl p-4 shadow-[5px_5px_0px_#111111] flex flex-col gap-2 font-bold">
-                            <div class="flex items-center justify-between border-b-2 border-dashed border-black/20 pb-2">
-                                <span class="font-mono text-[10px] text-neutral-500">${ev.event_id || 'unknown'}</span>
-                                <span class="text-[10px] text-neutral-600">${dateStr}</span>
+                        <div class="card" style="margin-bottom:8px;">
+                            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);">
+                                <span>${ev.event_id || 'unknown'}</span>
+                                <span>${dateStr}</span>
                             </div>
-                            <div class="text-base font-mono font-black text-emerald-600">Rp ${rupiahStr}</div>
-                            <div class="text-xs text-neutral-700 bg-[#fffef5] p-3 border-2 border-black rounded-lg font-semibold break-words">${msgStr}</div>
-                            <div class="text-[10px] text-neutral-400 font-mono text-right">IP: ${ev.ip || '0.0.0.0'}</div>
+                            <div style="font-size:16px;font-weight:700;color:var(--success);">Rp ${rupiahStr}</div>
+                            <div style="font-size:12px;color:var(--text-secondary);">${msgStr}</div>
+                            <div style="font-size:10px;color:var(--text-muted);text-align:right;">IP: ${ev.ip || '0.0.0.0'}</div>
                         </div>`;
                 });
             }
@@ -164,16 +208,13 @@ if (btnFetchHistory) {
             mobileContainer.innerHTML = mCards;
 
         } catch (err) {
-            alert(`Gagal mengambil data: ${err.message}`);
-            const errBlock = `
-                <div class="bg-red-50 text-red-600 border-3 border-black rounded-xl p-4 font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#111111]">
-                    Gagal tersambung ke server. Periksa koneksi internet Anda.
-                </div>`;
-            desktopBody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-600 font-bold">${errBlock}</td></tr>`;
+            showToast(`Gagal mengambil data: ${err.message}`);
+            const errBlock = `<div class="empty-card" style="color:var(--danger);">Gagal tersambung ke server. Periksa koneksi internet Anda.</div>`;
+            desktopBody.innerHTML = `<tr><td colspan="5" class="empty" style="color:var(--danger);">${err.message}</td></tr>`;
             mobileContainer.innerHTML = errBlock;
         } finally {
             btnFetchHistory.disabled = false;
-            btnFetchHistory.textContent = 'Cari & Refresh Data ↻';
+            btnFetchHistory.textContent = '🔍 Cari & Refresh Data';
         }
     };
 }
@@ -202,10 +243,10 @@ if (btnDynamic) {
         if (amount) {
             form.append('amount', amount);
         } else {
-            if (!base) { alert('Isi nominal terlebih dahulu!'); return; }
+            if (!base) { showToast('Isi nominal terlebih dahulu!'); return; }
             form.append('base_amount', base);
             const uniq = auto ? Math.floor(Math.random() * 999) + 1 : (uniqIn || '');
-            if (!uniq) { alert('Kode unik wajib diisi!'); return; }
+            if (!uniq) { showToast('Kode unik wajib diisi!'); return; }
             form.append('unique_code', uniq);
         }
 
@@ -241,7 +282,7 @@ if (btnDynamic) {
             outDynamic.classList.remove('hidden');
         } finally {
             btnDynamic.disabled = false;
-            btnDynamic.textContent = 'PROSES & BUAT GAMBAR QRIS';
+            btnDynamic.textContent = '⚡ Proses & Buat Gambar QRIS';
         }
     };
 
@@ -295,11 +336,11 @@ if (dropZone) {
 
     function handleFile(file) {
         if (!file.type.startsWith('image/')) {
-            alert('File wajib berformat gambar!');
+            showToast('File wajib berformat gambar!');
             return;
         }
         if (file.size > 2 * 1024 * 1024) {
-            alert('Ukuran file maksimal hanya boleh 2MB!');
+            showToast('Ukuran file maksimal hanya boleh 2MB!');
             return;
         }
         currentFile = file;
@@ -349,7 +390,7 @@ if (dropZone) {
         btnCopyPayload.onclick = () => {
             const payloadText = jsonConverter.textContent;
             navigator.clipboard.writeText(payloadText).then(() => {
-                alert('Teks berhasil disalin!');
+                showToast('Teks berhasil disalin!');
             });
         };
     }
@@ -379,7 +420,7 @@ if (btnWebhook) {
         const token = document.getElementById('tiToken').value;
         const mode = document.getElementById('tiMode').value;
         const body = document.getElementById('tiBody').value;
-        if (!token) { alert('Kolom token wajib diisi!'); return; }
+        if (!token) { showToast('Kolom token wajib diisi!'); return; }
         const url = `${getBase()}/webhook/payment?token=${encodeURIComponent(token)}`;
         let headers = {};
         let payload;
@@ -418,7 +459,7 @@ if (btnWebhook) {
             outWebhook.classList.remove('hidden');
         } finally {
             btnWebhook.disabled = false;
-            btnWebhook.textContent = 'KIRIM SIMULASI SEKARANG';
+            btnWebhook.textContent = '🚀 Kirim Simulasi Sekarang';
         }
     };
 
@@ -438,10 +479,28 @@ if (btnWebhook) {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/pwa/sw.js')
-            .then(reg => console.log('✅ Service Worker registered:', reg))
-            .catch(err => console.warn('❌ Service Worker registration failed:', err));
+            .then(() => console.log('✅ Service Worker registered'))
+            .catch(() => console.warn('❌ Service Worker registration failed'));
     });
 }
 
+// ============================================
+// KEYBOARD SHORTCUTS
+// ============================================
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+        e.preventDefault();
+        toggleTheme();
+    }
+    if (e.key === 'Escape') {
+        closeDrawer();
+    }
+});
+
+// ============================================
+// INIT
+// ============================================
+applyTheme(currentTheme);
 console.log('⚡ GeekzPay API Docs loaded!');
 console.log('📌 Version: v2.0');
+console.log('🌓 Press Ctrl+L to toggle theme');
