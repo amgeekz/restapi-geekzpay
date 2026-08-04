@@ -20,6 +20,29 @@ app.set('json spaces', 2);
 const EVENT_TTL_SEC = Math.max(1, parseInt(process.env.EVENT_TTL_SEC || '300', 10));
 const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '10', 10));
 
+// ============================================
+// SSE CLIENTS
+// ============================================
+const sseClients = new Map();
+
+function sendSSENotification(token, eventData) {
+    const clients = sseClients.get(token);
+    if (!clients || clients.size === 0) return;
+
+    const message = `event: payment\ndata: ${JSON.stringify(eventData)}\n\n`;
+    
+    clients.forEach(client => {
+        try {
+            client.write(message);
+        } catch (e) {
+            clients.delete(client);
+        }
+    });
+}
+
+// ============================================
+// EXTRACT FUNCTIONS
+// ============================================
 function extractToken(req) {
   return (
     req.headers['x-webhook-token'] ||
@@ -51,6 +74,9 @@ async function postToZXing(buf, filename, mime) {
   return { status: r.status, text };
 }
 
+// ============================================
+// MIDDLEWARE
+// ============================================
 app.use(fileUpload({
   limits: { fileSize: 8 * 1024 * 1024 },
   useTempFiles: false
@@ -109,6 +135,9 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
 
+// ============================================
+// DIAG
+// ============================================
 app.all('/diag', (req, res) => {
   res.json({
     ok: true,
@@ -118,6 +147,9 @@ app.all('/diag', (req, res) => {
   });
 });
 
+// ============================================
+// QRIS DYNAMIC
+// ============================================
 app.post('/qris/dynamic', async (req, res) => {
   try {
     const payloadStatic = (req.body.payload_static || process.env.QRIS_STATIC || '').trim();
@@ -156,6 +188,9 @@ app.post('/qris/dynamic', async (req, res) => {
   }
 });
 
+// ============================================
+// QR DECODE
+// ============================================
 app.post('/qris/decode', async (req, res) => {
   try {
     if (!req.files || !req.files.image) {
@@ -209,6 +244,9 @@ app.post('/qris/decode', async (req, res) => {
   }
 });
 
+// ============================================
+// TO COMPACT
+// ============================================
 function toCompact(ev, debug = false) {
   if (!ev || typeof ev !== 'object') {
     return { ok: true };
@@ -262,6 +300,9 @@ function safeParseMaybeString(v) {
   return null;
 }
 
+// ============================================
+// WEBHOOK PAYMENT - DENGAN SSE
+// ============================================
 app.all('/webhook/payment', async (req, res) => {
   try {
     const expected = String(process.env.WEBHOOK_TOKEN || '').trim();
@@ -311,6 +352,16 @@ app.all('/webhook/payment', async (req, res) => {
       fs.appendFileSync(p, JSON.stringify(eventPayload) + '\n');
     } catch {}
 
+    // ===== KIRIM SSE NOTIFICATION =====
+    const sseData = {
+      event_id: eventId,
+      amount: amount,
+      received_at: new Date().toISOString(),
+      message: body.message || body.text || 'Pembayaran masuk',
+      body: body
+    };
+    sendSSENotification(tokenForBucket, sseData);
+
     const debug = String(req.query.debug || '0') === '1';
     return res.json(toCompact(eventPayload, debug));
   } catch (err) {
@@ -318,6 +369,9 @@ app.all('/webhook/payment', async (req, res) => {
   }
 });
 
+// ============================================
+// WEBHOOK STATUS
+// ============================================
 app.get('/webhook/status', async (req, res) => {
   try {
     const token = String(extractToken(req));
@@ -352,7 +406,7 @@ app.get('/webhook/status', async (req, res) => {
 });
 
 // ============================================
-// [BARU] ROUTE WEBHOOK SUMMARY
+// WEBHOOK SUMMARY
 // ============================================
 app.get('/webhook/summary', async (req, res) => {
   try {
@@ -373,7 +427,6 @@ app.get('/webhook/summary', async (req, res) => {
       }
     }
 
-    // Ambil data terbaru
     const latest = rows.length > 0 ? rows[0] : null;
     
     if (latest) {
@@ -401,24 +454,56 @@ app.get('/webhook/summary', async (req, res) => {
 });
 
 // ============================================
-// [UPDATE] SERVE STATIC FILES DENGAN ROUTE CSS/JS
+// SSE ENDPOINT
 // ============================================
-// Serve static files dari public
+app.get('/pwa/events', (req, res) => {
+    const token = req.query.token;
+    if (!token) {
+        return res.status(401).json({ error: 'Token required' });
+    }
+
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+    });
+
+    const heartbeat = setInterval(() => {
+        res.write(`: heartbeat\n\n`);
+    }, 30000);
+
+    if (!sseClients.has(token)) {
+        sseClients.set(token, new Set());
+    }
+    sseClients.get(token).add(res);
+
+    req.on('close', () => {
+        clearInterval(heartbeat);
+        const clients = sseClients.get(token);
+        if (clients) {
+            clients.delete(res);
+            if (clients.size === 0) {
+                sseClients.delete(token);
+            }
+        }
+    });
+});
+
+// ============================================
+// SERVE STATIC FILES
+// ============================================
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1h',
   setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=3600')
 }));
 
-// Route khusus untuk CSS
 app.get('/css/*', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'css', req.params[0]);
-  res.sendFile(filePath);
+  res.sendFile(path.join(__dirname, 'public', 'css', req.params[0]));
 });
 
-// Route khusus untuk JS
 app.get('/js/*', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'js', req.params[0]);
-  res.sendFile(filePath);
+  res.sendFile(path.join(__dirname, 'public', 'js', req.params[0]));
 });
 
 // ============================================
@@ -471,12 +556,12 @@ app.get(['/', '/docs'], (req, res) => {
 });
 
 // ============================================
-// 404 HANDLER
+// 404
 // ============================================
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
 // ============================================
-// START SERVER
+// START
 // ============================================
 if (require.main === module) {
   const PORT = Number(process.env.PORT || 3000);
