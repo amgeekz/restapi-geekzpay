@@ -1,7 +1,7 @@
 /**
  * GeekzPay PWA Monitor
- * SSE + Fallback Polling
- * Auto-reconnect dengan exponential backoff
+ * SSE Real-time dengan Auto Reconnect + Fallback Polling
+ * Versi Lengkap - 2026
  */
 
 // ============================================
@@ -10,10 +10,10 @@
 const CONFIG = {
     API_BASE: 'https://restapi.amgeekz.my.id',
     MAX_HISTORY: 200,
-    SSE_RECONNECT_DELAY: 2000,
-    SSE_MAX_RETRIES: 30,
-    POLLING_INTERVAL: 5000, // Fallback: polling 5 detik
-    HEARTBEAT_TIMEOUT: 15000 // 15 detik tanpa heartbeat = mati
+    SSE_RECONNECT_DELAY: 3000,
+    SSE_MAX_RETRIES: 20,
+    POLLING_INTERVAL: 5000,
+    HEARTBEAT_TIMEOUT: 20000
 };
 
 // ============================================
@@ -30,7 +30,7 @@ const state = {
     newCount: parseInt(localStorage.getItem('geekzpay_new_count')) || 0,
     stats: JSON.parse(localStorage.getItem('geekzpay_stats') || '{"daily":{},"monthly":{},"total":0,"totalAmount":0}'),
     
-    // SSE State
+    // SSE
     eventSource: null,
     isConnected: false,
     reconnectAttempts: 0,
@@ -123,15 +123,24 @@ function saveState() {
 // ============================================
 // STATISTIK
 // ============================================
-function getTodayKey() { return new Date().toISOString().slice(0, 10); }
-function getMonthKey() { return new Date().toISOString().slice(0, 7); }
+function getTodayKey() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function getMonthKey() {
+    return new Date().toISOString().slice(0, 7);
+}
 
 function updateStats(amount) {
     const today = getTodayKey();
     const month = getMonthKey();
     
-    if (!state.stats.daily[today]) state.stats.daily[today] = { count: 0, amount: 0 };
-    if (!state.stats.monthly[month]) state.stats.monthly[month] = { count: 0, amount: 0 };
+    if (!state.stats.daily[today]) {
+        state.stats.daily[today] = { count: 0, amount: 0 };
+    }
+    if (!state.stats.monthly[month]) {
+        state.stats.monthly[month] = { count: 0, amount: 0 };
+    }
     
     state.stats.daily[today].count += 1;
     state.stats.daily[today].amount += amount;
@@ -155,8 +164,12 @@ function calculateStatsFromHistory() {
         const monthKey = date.toISOString().slice(0, 7);
         const amount = item.amount || 0;
         
-        if (!state.stats.daily[dayKey]) state.stats.daily[dayKey] = { count: 0, amount: 0 };
-        if (!state.stats.monthly[monthKey]) state.stats.monthly[monthKey] = { count: 0, amount: 0 };
+        if (!state.stats.daily[dayKey]) {
+            state.stats.daily[dayKey] = { count: 0, amount: 0 };
+        }
+        if (!state.stats.monthly[monthKey]) {
+            state.stats.monthly[monthKey] = { count: 0, amount: 0 };
+        }
         
         state.stats.daily[dayKey].count += 1;
         state.stats.daily[dayKey].amount += amount;
@@ -241,8 +254,30 @@ function init() {
     registerServiceWorker();
     checkNotificationPermission();
     
-    console.log('◆ GeekzPay Monitor loaded (SSE + Fallback Polling)');
+    console.log('◆ GeekzPay Monitor loaded');
+    console.log('◆ Mode: SSE + Fallback Polling');
 }
+
+// ============================================
+// NOTIFICATION PERMISSION
+// ============================================
+function checkNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        DOM.permissionBanner.style.display = 'flex';
+    }
+}
+
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(p => {
+            if (p === 'granted') {
+                DOM.permissionBanner.style.display = 'none';
+                showToast('◆ Notifikasi diizinkan');
+            }
+        });
+    }
+}
+window.requestNotificationPermission = requestNotificationPermission;
 
 // ============================================
 // SSE - START
@@ -271,6 +306,7 @@ function startSSE() {
     try {
         state.eventSource = new EventSource(url);
         
+        // ===== ON OPEN =====
         state.eventSource.onopen = () => {
             console.log('◆ SSE Connected');
             setStatus('online', 'Live');
@@ -288,7 +324,7 @@ function startSSE() {
             state.heartbeatTimer = setInterval(() => {
                 const elapsed = Date.now() - state.lastHeartbeat;
                 if (elapsed > CONFIG.HEARTBEAT_TIMEOUT && state.isConnected) {
-                    console.warn('⊘ Heartbeat timeout, reconnect...');
+                    console.warn('⊘ Heartbeat timeout, reconnecting...');
                     state.isConnected = false;
                     if (state.eventSource) {
                         state.eventSource.close();
@@ -299,7 +335,7 @@ function startSSE() {
             }, 5000);
         };
 
-        // Event: connected
+        // ===== EVENT: CONNECTED =====
         state.eventSource.addEventListener('connected', (event) => {
             try {
                 const data = JSON.parse(event.data);
@@ -308,24 +344,43 @@ function startSSE() {
             } catch (e) {}
         });
 
-        // Event: ping (heartbeat dari server)
+        // ===== EVENT: PING (heartbeat) =====
         state.eventSource.addEventListener('ping', (event) => {
             state.lastHeartbeat = Date.now();
         });
 
-        // Event: payment
+        // ===== EVENT: PAYMENT =====
         state.eventSource.addEventListener('payment', (event) => {
             try {
                 const data = JSON.parse(event.data);
                 state.lastHeartbeat = Date.now();
+                console.log('◆ Payment received via SSE:', data);
+                
                 const eventId = data.event_id || data.id;
-                if (eventId && !state.processedEvents.has(eventId) && !state.lastIds.has(eventId)) {
-                    state.processedEvents.add(eventId);
-                    processPayment(data);
+                if (!eventId) {
+                    console.warn('⊘ No event_id in payment data');
+                    return;
                 }
-            } catch (e) { console.error(e); }
+                
+                // Cek duplikat
+                if (state.processedEvents.has(eventId)) {
+                    console.log('⊘ Event already processed:', eventId);
+                    return;
+                }
+                if (state.lastIds.has(eventId)) {
+                    console.log('⊘ Event already in history:', eventId);
+                    return;
+                }
+                
+                state.processedEvents.add(eventId);
+                processPayment(data);
+                
+            } catch (e) {
+                console.error('Error parsing payment data:', e);
+            }
         });
 
+        // ===== ON ERROR =====
         state.eventSource.onerror = (error) => {
             console.warn('⊘ SSE Error:', error);
             state.isConnected = false;
@@ -337,14 +392,13 @@ function startSSE() {
             setStatus('error', 'Disconnected');
             DOM.statusDot.style.background = '#ff1744';
             
-            // Coba reconnect
+            // Auto reconnect
             reconnectSSE();
         };
 
     } catch (error) {
         console.error('⊘ SSE Failed:', error);
         setStatus('error', 'Connection Failed');
-        // Fallback ke polling
         startPollingFallback();
     }
 }
@@ -505,8 +559,13 @@ function processPayment(data) {
         renderChart();
         updateBadge();
         
-    } catch (e) { console.error(e); }
-    finally { state.isProcessing = false; }
+        console.log(`◆ Payment processed: ${id} - Rp ${formatRupiah(amount)}`);
+        
+    } catch (e) {
+        console.error('Process payment error:', e);
+    } finally {
+        state.isProcessing = false;
+    }
 }
 
 // ============================================
@@ -568,7 +627,7 @@ function saveToken() {
     localStorage.setItem('geekzpay_token', state.token);
     showToast('◆ Token tersimpan');
     
-    // Reset state
+    // Reset state untuk token baru
     state.lastIds = new Set();
     state.processedEvents = new Set();
     state.history = [];
@@ -612,7 +671,7 @@ function clearHistory() {
 window.clearHistory = clearHistory;
 
 // ============================================
-// NOTIFICATION SOUND
+// NOTIFICATION SOUND - DANA STYLE
 // ============================================
 function playNotificationSound() {
     if (!state.soundEnabled) return;
@@ -644,7 +703,9 @@ function playNotificationSound() {
                         const bufSize = ctx.sampleRate * 0.015;
                         const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
                         const data = buf.getChannelData(0);
-                        for (let j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1) * 0.04;
+                        for (let j = 0; j < bufSize; j++) {
+                            data[j] = (Math.random() * 2 - 1) * 0.04;
+                        }
                         const noise = ctx.createBufferSource();
                         noise.buffer = buf;
                         const ng = ctx.createGain();
@@ -658,7 +719,11 @@ function playNotificationSound() {
             }, beep.delay * 1000);
         });
     } catch (e) {
-        try { DOM.sound.currentTime = 0; DOM.sound.volume = state.soundVolume; DOM.sound.play(); } catch (err) {}
+        try {
+            DOM.sound.currentTime = 0;
+            DOM.sound.volume = state.soundVolume;
+            DOM.sound.play();
+        } catch (err) {}
     }
 }
 
@@ -768,7 +833,7 @@ function renderTransactions() {
             <div class="empty-state neo-card">
                 <div class="empty-icon">⊘</div>
                 <p>Belum ada transaksi</p>
-                <small>Masukkan token dan tunggu notifikasi</small>
+                <small>Masukkan token dan tunggu notifikasi real-time</small>
             </div>`;
         return;
     }
@@ -795,7 +860,9 @@ function updateStatsUI() {
 }
 
 function updateBadge() {
-    if (navigator.setAppBadge) navigator.setAppBadge(state.newCount);
+    if (navigator.setAppBadge) {
+        navigator.setAppBadge(state.newCount);
+    }
 }
 
 // ============================================
@@ -803,11 +870,11 @@ function updateBadge() {
 // ============================================
 function setStatus(type, text) {
     DOM.statusText.textContent = text;
-    const colors = { 
-        online: '#00c853', 
-        loading: '#ffa502', 
-        error: '#ff1744', 
-        paused: '#ffa502' 
+    const colors = {
+        online: '#00c853',
+        loading: '#ffa502',
+        error: '#ff1744',
+        paused: '#ffa502'
     };
     DOM.statusDot.style.background = colors[type] || '#888';
 }
@@ -815,16 +882,29 @@ function setStatus(type, text) {
 // ============================================
 // HELPERS
 // ============================================
-function formatRupiah(v) { return new Intl.NumberFormat('id-ID').format(v || 0); }
-function formatTime(iso) {
-    try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); } 
-    catch { return iso || ''; }
+function formatRupiah(v) {
+    return new Intl.NumberFormat('id-ID').format(v || 0);
 }
+
+function formatTime(iso) {
+    try {
+        return new Date(iso).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    } catch {
+        return iso || '';
+    }
+}
+
 function showToast(msg) {
     DOM.toastMessage.textContent = msg;
     DOM.toast.classList.add('show');
     clearTimeout(DOM.toast._timeout);
-    DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 3000);
+    DOM.toast._timeout = setTimeout(() => {
+        DOM.toast.classList.remove('show');
+    }, 3000);
 }
 
 // ============================================
@@ -844,7 +924,9 @@ function registerServiceWorker() {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'm' || e.key === 'M') toggleSound();
     if (e.key === 't' || e.key === 'T') toggleTts();
-    if (e.key === 'Enter' && document.activeElement === DOM.tokenInput) saveToken();
+    if (e.key === 'Enter' && document.activeElement === DOM.tokenInput) {
+        saveToken();
+    }
 });
 
 // ============================================
