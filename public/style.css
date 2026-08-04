@@ -782,6 +782,7 @@ textarea.input {
     background: #fff;
     display: inline-block;
     margin-bottom: 10px;
+    object-fit: contain;
 }
 
 .donate-card p {
@@ -888,6 +889,11 @@ textarea.input {
         font-size: 11px;
         padding: 4px 10px;
     }
+    
+    .donate-qr {
+        width: 140px;
+        height: 140px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -915,8 +921,8 @@ textarea.input {
     }
     
     .donate-qr {
-        width: 140px;
-        height: 140px;
+        width: 120px;
+        height: 120px;
     }
     
     .status-table {

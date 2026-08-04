@@ -12,11 +12,11 @@ function applyTheme(theme) {
     localStorage.setItem('theme', theme);
     if (theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.querySelector('.theme-btn').textContent = '☀️';
+        document.querySelector('.theme-btn').textContent = '☀';
         document.querySelector('meta[name="theme-color"]').content = '#0f1420';
     } else {
         document.documentElement.removeAttribute('data-theme');
-        document.querySelector('.theme-btn').textContent = '🌙';
+        document.querySelector('.theme-btn').textContent = '☾';
         document.querySelector('meta[name="theme-color"]').content = '#f0f4f8';
     }
 }
@@ -34,7 +34,6 @@ function toggleMenu() {
 }
 window.toggleMenu = toggleMenu;
 
-// Tutup menu saat klik link
 document.querySelectorAll('.mobile-menu nav a').forEach(el => {
     el.addEventListener('click', () => {
         document.getElementById('mobileMenu').classList.remove('open');
@@ -63,7 +62,6 @@ document.querySelectorAll('.tab').forEach(tab => {
     });
 });
 
-// Mobile menu links
 document.querySelectorAll('.mobile-menu nav a[data-page]').forEach(el => {
     el.addEventListener('click', function(e) {
         e.preventDefault();
@@ -124,10 +122,9 @@ document.getElementById('btnFetchHistory')?.addEventListener('click', async func
         const data = await res.json();
         
         if (!data.data || data.data.length === 0) {
-            body.innerHTML = `<div class="empty">Belum ada data</div>`;
+            body.innerHTML = '<div class="empty">Belum ada data</div>';
         } else {
-            let html = `<div style="overflow-x:auto;"><table class="status-table">
-                <thead><tr><th>ID</th><th>Waktu</th><th>Jumlah</th><th>Pesan</th></tr></thead><tbody>`;
+            let html = '<div style="overflow-x:auto;"><table class="status-table"><thead><tr><th>ID</th><th>Waktu</th><th>Jumlah</th><th>Pesan</th></tr></thead><tbody>';
             data.data.forEach(ev => {
                 const msg = ev.body?.message || ev.body?.text || '-';
                 html += `<tr>
@@ -319,7 +316,7 @@ document.getElementById('btnWebhook')?.addEventListener('click', async function(
     }
     
     this.disabled = false;
-    this.textContent = '🚀 Kirim';
+    this.textContent = '▶ Kirim';
 });
 
 document.getElementById('btnWebhookReset')?.addEventListener('click', function() {
@@ -338,4 +335,4 @@ hljs.highlightAll();
 // INIT
 // ============================================
 applyTheme(currentTheme);
-console.log('⚡ GeekzPay API Docs loaded');
+console.log('GeekzPay API Docs loaded');

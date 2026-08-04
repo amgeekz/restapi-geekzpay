@@ -25,13 +25,13 @@
     <header class="header">
         <div class="header-inner">
             <div class="logo">
-                <span class="logo-icon">⚡</span>
+                <span class="logo-icon">&raquo;</span>
                 <span class="logo-text">GeekzPay</span>
                 <span class="logo-badge">v2.0</span>
             </div>
             <div class="header-actions">
-                <button class="theme-btn" onclick="toggleTheme()">🌙</button>
-                <button class="menu-btn" onclick="toggleMenu()">☰</button>
+                <button class="theme-btn" onclick="toggleTheme()">&bull;</button>
+                <button class="menu-btn" onclick="toggleMenu()">&equiv;</button>
             </div>
         </div>
     </header>
@@ -43,7 +43,7 @@
         <div class="mobile-menu-inner">
             <div class="mobile-menu-header">
                 <span>Menu</span>
-                <button onclick="toggleMenu()">✕</button>
+                <button onclick="toggleMenu()">&times;</button>
             </div>
             <nav>
                 <a href="#" class="active" data-page="docs">Dokumentasi</a>
@@ -100,7 +100,7 @@
 
                 <!-- BASE URL -->
                 <section class="card warning">
-                    <h3>⚠️ Konfigurasi Alamat API Utama</h3>
+                    <h3>&#9888; Konfigurasi Alamat API Utama</h3>
                     <p>Alamat URL server terdeteksi otomatis sesuai lokasi aplikasi.</p>
                     <input id="baseUrl" type="text" class="input-disabled" disabled>
                 </section>
@@ -144,12 +144,12 @@
                     </div>
 
                     <div class="btn-group">
-                        <button id="btnDynamic" class="btn btn-primary">⚡ Proses QRIS</button>
+                        <button id="btnDynamic" class="btn btn-primary">&raquo; Proses QRIS</button>
                         <button id="btnDynamicReset" class="btn btn-secondary">Bersihkan</button>
                     </div>
 
                     <div id="outDynamic" class="result hidden">
-                        <div class="result-header">✅ HASIL</div>
+                        <div class="result-header">&sect; HASIL</div>
                         <div id="metaDynamic" class="result-meta"></div>
                         <div class="result-grid">
                             <pre class="code-block"><code id="jsonDynamic" class="language-json"></code></pre>
@@ -166,7 +166,7 @@
                     <p>Upload file gambar QRIS untuk diubah menjadi teks payload.</p>
 
                     <div id="dropZone" class="drop-zone">
-                        <div>⊞</div>
+                        <div>&#9744;</div>
                         <p>Tarik file ke sini atau klik untuk pilih</p>
                         <small>PNG, JPG, JPEG (Maks. 2MB)</small>
                         <input type="file" id="fileInput" accept="image/*" style="display:none;">
@@ -182,10 +182,10 @@
                     </div>
 
                     <div id="outConverter" class="result hidden">
-                        <div class="result-header">📋 HASIL BACA</div>
+                        <div class="result-header">&sect; HASIL BACA</div>
                         <div id="metaConverter" class="result-meta"></div>
                         <pre class="code-block"><code id="jsonConverter" class="language-json"></code></pre>
-                        <button id="btnCopyPayload" class="btn btn-copy">📋 Salin</button>
+                        <button id="btnCopyPayload" class="btn btn-copy">&#128203; Salin</button>
                     </div>
                 </section>
 
@@ -217,12 +217,12 @@
                     </div>
 
                     <div class="btn-group">
-                        <button id="btnWebhook" class="btn btn-danger">🚀 Kirim</button>
+                        <button id="btnWebhook" class="btn btn-danger">&blacktriangleright; Kirim</button>
                         <button id="btnWebhookReset" class="btn btn-secondary">Reset</button>
                     </div>
 
                     <div id="outWebhook" class="result hidden">
-                        <div class="result-header">📡 RESPON SERVER</div>
+                        <div class="result-header">&sect; RESPON SERVER</div>
                         <div id="metaWebhook" class="result-meta"></div>
                         <pre class="code-block"><code id="jsonWebhook" class="language-json"></code></pre>
                     </div>
@@ -239,7 +239,7 @@
 
                 <!-- EXAMPLES -->
                 <section class="card" id="examples">
-                    <h2>📚 Contoh cURL</h2>
+                    <h2>&sect; Contoh cURL</h2>
 
                     <div>
                         <div class="label-small">// A. QRIS Dinamis</div>
@@ -285,7 +285,7 @@
             ========================================== -->
             <div id="page-history" class="page">
                 <div class="card">
-                    <h2>🔍 Cek Riwayat</h2>
+                    <h2>&sect; Cek Riwayat</h2>
                     <p>Masukkan token untuk melihat transaksi terakhir</p>
                     <div class="history-form">
                         <div>
@@ -296,7 +296,7 @@
                             <label>Limit</label>
                             <input id="historyLimit" class="input" value="10">
                         </div>
-                        <button id="btnFetchHistory" class="btn btn-danger">🔍 Cari</button>
+                        <button id="btnFetchHistory" class="btn btn-danger">&#128269; Cari</button>
                     </div>
                 </div>
 
@@ -310,9 +310,9 @@
             ========================================== -->
             <div id="page-forwarder" class="page">
                 <div class="card pink">
-                    <h2>📱 PANDUAN FORWARDER v2.0</h2>
+                    <h2>&sect; PANDUAN FORWARDER v2.0</h2>
                     <p>3 langkah setting aplikasi Geekz Forwarder di HP</p>
-                    <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="btn btn-danger">📥 UNDUH APK</a>
+                    <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="btn btn-danger">&#11015; UNDUH APK</a>
                 </div>
 
                 <div class="card">
@@ -336,7 +336,7 @@
                             <h4>SET WEBHOOK URL</h4>
                             <p>Isi URL di menu <span class="tag">DATA PIPELINE</span>:</p>
                             <div class="endpoint-box">https://restapi.amgeekz.my.id/webhook/payment?token=USER123</div>
-                            <p class="warning-text">⚠️ Ganti USER123 dengan token Anda</p>
+                            <p class="warning-text">&#9888; Ganti USER123 dengan token Anda</p>
                             <p>Method: <span class="tag">JSON</span></p>
                         </div>
                     </div>
@@ -344,8 +344,8 @@
 
                 <div class="card yellow">
                     <h4>// SETTINGAN TERBAIK</h4>
-                    <div class="setting-row"><span>Service State</span> <span class="check">✓ HARUS ON</span></div>
-                    <div class="setting-row"><span>App Registry</span> <span class="check">✓ TERPILIH</span></div>
+                    <div class="setting-row"><span>Service State</span> <span class="check">&#10003; HARUS ON</span></div>
+                    <div class="setting-row"><span>App Registry</span> <span class="check">&#10003; TERPILIH</span></div>
                     <div class="setting-row"><span>Format Sink</span> <span class="check">APPLICATION/JSON</span></div>
                 </div>
             </div>
@@ -355,14 +355,14 @@
             ========================================== -->
             <div id="page-donate" class="page">
                 <div class="card text-center">
-                    <h2>■ Donasi</h2>
+                    <h2>&sect; Donasi</h2>
                     <p>Bantu kami menyewa server</p>
                 </div>
                 <div class="card donate-card">
                     <h3>Scan QRIS Berikut</h3>
                     <img src="/qris.jpg" alt="QRIS Donasi" class="donate-qr">
                     <p>QRIS Interoperabilitas Nasional</p>
-                    <p style="color:var(--text-muted);font-size:12px;">Terima kasih! ❤️</p>
+                    <p style="color:var(--text-muted);font-size:12px;">Terima kasih</p>
                 </div>
             </div>
 
@@ -371,9 +371,9 @@
             ========================================== -->
             <div id="page-pwa" class="page">
                 <div class="card text-center">
-                    <h2>📱 PWA Monitor</h2>
+                    <h2>&sect; PWA Monitor</h2>
                     <p>Pantau pembayaran real-time dari HP</p>
-                    <a href="/pwa/dashboard.html" target="_blank" class="btn btn-primary">🚀 Buka Monitor</a>
+                    <a href="/pwa/dashboard.html" target="_blank" class="btn btn-primary">&blacktriangleright; Buka Monitor</a>
                     <p style="font-size:11px;color:var(--text-muted);margin-top:10px;">Install ke home screen untuk pengalaman native</p>
                 </div>
             </div>
