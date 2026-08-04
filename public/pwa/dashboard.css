@@ -669,3 +669,178 @@ body {
         align-self: flex-end;
     }
 }
+
+/* ============================================
+   QRIS WIDGET BUTTON
+   ============================================ */
+.qris-widget-section {
+    margin-bottom: 12px;
+}
+
+.neo-btn-qris {
+    background: #7c3aed;
+    color: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 14px 20px;
+    box-shadow: 6px 6px 0px #111111;
+    transition: all 0.12s ease;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.neo-btn-qris:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0px #111111;
+}
+.neo-btn-qris:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 9px 9px 0px #111111;
+}
+
+.qris-icon {
+    font-size: 20px;
+    font-weight: 900;
+}
+
+/* ============================================
+   QRIS OVERLAY / MODAL
+   ============================================ */
+.qris-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.qris-overlay.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.qris-modal {
+    background: #ffffff;
+    border: 4px solid #111111;
+    border-radius: 24px;
+    box-shadow: 12px 12px 0px #111111;
+    max-width: 400px;
+    width: 100%;
+    padding: 24px;
+    animation: slideUp 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.qris-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    border-bottom: 3px solid #111111;
+    padding-bottom: 12px;
+}
+
+.qris-modal-title {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #111111;
+}
+
+.qris-close-btn {
+    background: #ff4088;
+    color: #ffffff;
+    border: 3px solid #111111;
+    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px #111111;
+    transition: all 0.12s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.qris-close-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #111111;
+}
+.qris-close-btn:hover {
+    background: #e6006e;
+}
+
+.qris-modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.qris-image {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    border: 4px solid #111111;
+    border-radius: 16px;
+    box-shadow: 6px 6px 0px #111111;
+    background: #ffffff;
+    padding: 8px;
+}
+
+.qris-hint {
+    font-size: 12px;
+    font-weight: 700;
+    color: #666;
+    text-align: center;
+    margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+    .qris-modal {
+        padding: 16px;
+        margin: 10px;
+    }
+    
+    .qris-image {
+        max-width: 200px;
+    }
+    
+    .qris-modal-title {
+        font-size: 14px;
+    }
+    
+    .neo-btn-qris {
+        font-size: 12px;
+        padding: 12px 16px;
+    }
+}

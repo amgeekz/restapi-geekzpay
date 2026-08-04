@@ -638,3 +638,40 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
+
+// ============================================
+// QRIS WIDGET FUNCTIONS - SEDERHANA
+// ============================================
+
+/** Buka QRIS Widget */
+function openQRISWidget() {
+    const overlay = document.getElementById('qrisOverlay');
+    if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+window.openQRISWidget = openQRISWidget;
+
+/** Tutup QRIS Widget */
+function closeQRISWidget(event) {
+    // Jika event dan target adalah overlay (klik di luar modal)
+    if (event && event.target !== event.currentTarget) {
+        return;
+    }
+    const overlay = document.getElementById('qrisOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+window.closeQRISWidget = closeQRISWidget;
+
+// ============================================
+// TUTUP QRIS DENGAN TOMBOL ESC
+// ============================================
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeQRISWidget();
+    }
+});

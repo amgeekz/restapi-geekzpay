@@ -40,6 +40,13 @@
         </button>
     </div>
 
+    <!-- QRIS WIDGET BUTTON -->
+    <section class="qris-widget-section">
+        <button class="neo-btn neo-btn-qris" onclick="openQRISWidget()">
+            <span class="qris-icon">⊞</span> TAMPILKAN QRIS
+        </button>
+    </section>
+
     <!-- STATS UTAMA -->
     <section class="stats-grid">
         <div class="stat-card">
@@ -92,7 +99,7 @@
         </div>
     </section>
 
-    <!-- CONTROLS - HANYA 4 TOMBOL -->
+    <!-- CONTROLS -->
     <section class="controls">
         <button class="neo-btn neo-btn-success" id="toggleSoundBtn" onclick="toggleSound()">♫ Suara</button>
         <button class="neo-btn neo-btn-success" id="toggleTtsBtn" onclick="toggleTts()">🔊 Voice</button>
@@ -125,10 +132,27 @@
             <div class="empty-state neo-card">
                 <div class="empty-icon">⊘</div>
                 <p>Belum ada transaksi</p>
-                <small>Masukkan token dan tunggu notifikasi real-time</small>
+                <small>Masukkan token dan tunggu notifikasi</small>
             </div>
         </div>
     </section>
+
+    <!-- ============================================
+    QRIS WIDGET OVERLAY - TANPA DOWNLOAD
+    ============================================ -->
+    <div id="qrisOverlay" class="qris-overlay" onclick="closeQRISWidget(event)">
+        <div class="qris-modal neo-card" onclick="event.stopPropagation()">
+            <div class="qris-modal-header">
+                <span class="sticker-badge sticker-badge-pink">⊞</span>
+                <span class="qris-modal-title">QRIS</span>
+                <button class="qris-close-btn" onclick="closeQRISWidget()">✕</button>
+            </div>
+            <div class="qris-modal-body">
+                <img id="qrisImage" src="/qris.jpg" alt="QRIS" class="qris-image">
+                <p class="qris-hint">Scan menggunakan aplikasi bank atau e-wallet</p>
+            </div>
+        </div>
+    </div>
 
     <!-- TOAST -->
     <div id="toast" class="toast neo-card">
