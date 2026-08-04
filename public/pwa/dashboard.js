@@ -2,7 +2,7 @@
  * GeekzPay PWA Monitor
  * Elegant & Professional Version with Dark Mode
  * Polling Mode - Simple & Stabil
- * Menggunakan Font Awesome
+ * Dengan QRIS Upload
  */
 
 // ============================================
@@ -31,6 +31,14 @@ const state = {
     pollingInterval: null,
     isPolling: false,
     isProcessing: false
+};
+
+// ============================================
+// QRIS STATE
+// ============================================
+const QRIS_STATE = {
+    imageData: localStorage.getItem('geekzpay_qris') || null,
+    fileName: localStorage.getItem('geekzpay_qris_name') || null
 };
 
 // ============================================
@@ -97,7 +105,15 @@ const DOM = {
     permissionBanner: document.getElementById('permissionBanner'),
     historyCount: document.getElementById('historyCount'),
     themeToggle: document.getElementById('themeToggle'),
-    themeIcon: document.querySelector('.theme-icon')
+    themeIcon: document.querySelector('.theme-icon'),
+    // QRIS
+    qrisDropZone: document.getElementById('qrisDropZone'),
+    qrisFileInput: document.getElementById('qrisFileInput'),
+    qrisPreviewContainer: document.getElementById('qrisPreviewContainer'),
+    qrisPreview: document.getElementById('qrisPreview'),
+    qrisShowBtn: document.getElementById('qrisShowBtn'),
+    qrisModalImage: document.getElementById('qrisModalImage'),
+    qrisOverlay: document.getElementById('qrisOverlay')
 };
 
 // ============================================
@@ -124,6 +140,120 @@ function applyTheme(theme) {
         meta.content = theme === 'dark' ? '#0f1420' : '#f0f4f8';
     }
 }
+
+// ============================================
+// QRIS UPLOAD FUNCTIONS
+// ============================================
+
+function initQRISUpload() {
+    const dropZone = DOM.qrisDropZone;
+    const fileInput = DOM.qrisFileInput;
+    const previewContainer = DOM.qrisPreviewContainer;
+    const previewImage = DOM.qrisPreview;
+    const showBtn = DOM.qrisShowBtn;
+    const modalImage = DOM.qrisModalImage;
+    
+    // Jika ada QRIS tersimpan, tampilkan
+    if (QRIS_STATE.imageData) {
+        previewImage.src = QRIS_STATE.imageData;
+        previewContainer.style.display = 'inline-block';
+        showBtn.style.display = 'flex';
+        modalImage.src = QRIS_STATE.imageData;
+    }
+    
+    // Click untuk upload
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    // Drag & Drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            handleQRISFile(e.dataTransfer.files[0]);
+        }
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleQRISFile(e.target.files[0]);
+        }
+    });
+}
+
+function handleQRISFile(file) {
+    if (!file.type.startsWith('image/')) {
+        showToast('File harus gambar!');
+        return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+        showToast('Maksimal 2MB!');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const imageData = e.target.result;
+        QRIS_STATE.imageData = imageData;
+        QRIS_STATE.fileName = file.name;
+        
+        localStorage.setItem('geekzpay_qris', imageData);
+        localStorage.setItem('geekzpay_qris_name', file.name);
+        
+        DOM.qrisPreview.src = imageData;
+        DOM.qrisPreviewContainer.style.display = 'inline-block';
+        DOM.qrisShowBtn.style.display = 'flex';
+        DOM.qrisModalImage.src = imageData;
+        
+        showToast(`QRIS "${file.name}" berhasil diupload!`);
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeQRIS() {
+    QRIS_STATE.imageData = null;
+    QRIS_STATE.fileName = null;
+    
+    localStorage.removeItem('geekzpay_qris');
+    localStorage.removeItem('geekzpay_qris_name');
+    
+    DOM.qrisPreviewContainer.style.display = 'none';
+    DOM.qrisShowBtn.style.display = 'none';
+    DOM.qrisModalImage.src = '';
+    
+    showToast('QRIS dihapus');
+}
+window.removeQRIS = removeQRIS;
+
+function openQRISWidget() {
+    if (!QRIS_STATE.imageData) {
+        showToast('Upload QRIS terlebih dahulu!');
+        return;
+    }
+    
+    DOM.qrisModalImage.src = QRIS_STATE.imageData;
+    DOM.qrisOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+window.openQRISWidget = openQRISWidget;
+
+function closeQRISWidget(event) {
+    if (event && event.target !== event.currentTarget) {
+        return;
+    }
+    DOM.qrisOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+window.closeQRISWidget = closeQRISWidget;
 
 // ============================================
 // SAVE STATE
@@ -238,6 +368,9 @@ function renderChart() {
 // ============================================
 function init() {
     applyTheme(state.theme);
+    
+    // QRIS Upload
+    initQRISUpload();
     
     if (state.token) {
         DOM.tokenInput.value = state.token;
@@ -551,30 +684,6 @@ function updateSoundUI() {
     if (slider) slider.value = state.soundVolume;
     document.getElementById('soundVolumeLabel').textContent = `${Math.round(state.soundVolume * 100)}%`;
 }
-
-// ============================================
-// QRIS WIDGET
-// ============================================
-function openQRISWidget() {
-    const overlay = document.getElementById('qrisOverlay');
-    if (overlay) {
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-}
-window.openQRISWidget = openQRISWidget;
-
-function closeQRISWidget(event) {
-    if (event && event.target !== event.currentTarget) {
-        return;
-    }
-    const overlay = document.getElementById('qrisOverlay');
-    if (overlay) {
-        overlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-}
-window.closeQRISWidget = closeQRISWidget;
 
 // ============================================
 // PUSH NOTIFICATION

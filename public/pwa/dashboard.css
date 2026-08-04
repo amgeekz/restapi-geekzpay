@@ -931,6 +931,137 @@ body {
 }
 
 /* ============================================
+   QRIS UPLOAD SECTION
+   ============================================ */
+.qris-section {
+    margin-bottom: 16px;
+}
+
+.qris-upload-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.qris-upload-box {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg);
+}
+
+.qris-upload-box:hover {
+    border-color: var(--primary);
+    background: rgba(79, 110, 247, 0.05);
+}
+
+.qris-upload-box.dragover {
+    border-color: var(--primary);
+    background: rgba(79, 110, 247, 0.10);
+}
+
+.qris-upload-icon {
+    font-size: 32px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.qris-upload-text {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.qris-upload-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.qris-preview-container {
+    position: relative;
+    display: inline-block;
+    margin: 0 auto;
+    padding: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.qris-preview-image {
+    max-width: 140px;
+    max-height: 140px;
+    display: block;
+    border-radius: 4px;
+}
+
+.qris-remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: var(--danger);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qris-remove-btn:hover {
+    transform: scale(1.1);
+}
+
+.qris-preview-container {
+    text-align: center;
+}
+
+/* ============================================
+   QRIS BUTTON
+   ============================================ */
+.btn-qris {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-qris:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(79, 110, 247, 0.30);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+    .qris-preview-image {
+        max-width: 100px;
+        max-height: 100px;
+    }
+    
+    .qris-upload-box {
+        padding: 16px;
+    }
+}
+
+/* ============================================
    SCROLLBAR
    ============================================ */
 ::-webkit-scrollbar {
