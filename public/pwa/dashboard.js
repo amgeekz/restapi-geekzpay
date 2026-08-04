@@ -1,7 +1,8 @@
 /**
  * GeekzPay PWA Monitor
- * Page Terpisah (Dashboard, Riwayat, Pengaturan)
- * Suara: Koin (default) + Upload Custom
+ * Dashboard: QRIS + Statistik Ringkas + Transaksi Terbaru + Grafik
+ * Riwayat: Semua Transaksi + Statistik Lengkap
+ * Pengaturan: Token, Suara, Voice, Reset
  */
 
 // ============================================
@@ -10,7 +11,8 @@
 const CONFIG = {
     API_BASE: 'https://restapi.amgeekz.my.id',
     MAX_HISTORY: 200,
-    POLLING_INTERVAL: 3000
+    POLLING_INTERVAL: 3000,
+    DASHBOARD_LIMIT: 10
 };
 
 // ============================================
@@ -48,7 +50,6 @@ const QRIS_STATE = {
 function playNotificationSound() {
     if (!state.soundEnabled) return;
     
-    // Jika ada custom sound, mainkan
     if (state.customSound) {
         try {
             const audio = new Audio(state.customSound);
@@ -58,7 +59,6 @@ function playNotificationSound() {
         } catch (e) {}
     }
     
-    // Default: Suara koin jatuh
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const volume = state.soundVolume;
@@ -80,7 +80,6 @@ function playNotificationSound() {
                     osc.start(now);
                     osc.stop(now + 0.08);
                     
-                    // Noise efek koin
                     const bufSize = ctx.sampleRate * 0.02;
                     const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
                     const data = buf.getChannelData(0);
@@ -99,7 +98,6 @@ function playNotificationSound() {
             }, i * 100);
         });
     } catch (e) {
-        // Fallback
         try {
             const audio = document.getElementById('notificationSound');
             if (audio) {
@@ -131,7 +129,6 @@ document.querySelectorAll('.page-nav-btn').forEach(btn => {
 // ============================================
 // QRIS UPLOAD FUNCTIONS
 // ============================================
-
 function initQRISUpload() {
     const dropZone = document.getElementById('qrisDropZone');
     const fileInput = document.getElementById('qrisFileInput');
@@ -352,15 +349,18 @@ const DOM = {
     allCount: document.getElementById('allCount'),
     allAmount: document.getElementById('allAmount'),
     chartContainer: document.getElementById('chartContainer'),
+    dashTransactionList: document.getElementById('dashTransactionList'),
     transactionList: document.getElementById('transactionList'),
     toast: document.getElementById('toast'),
     toastMessage: document.getElementById('toastMessage'),
-    toggleSoundBtn: document.getElementById('toggleSoundBtn'),
-    toggleTtsBtn: document.getElementById('toggleTtsBtn'),
-    sound: document.getElementById('notificationSound'),
     permissionBanner: document.getElementById('permissionBanner'),
+    dashHistoryCount: document.getElementById('dashHistoryCount'),
     historyCount: document.getElementById('historyCount'),
     themeIcon: document.querySelector('.theme-icon'),
+    soundVolume: document.getElementById('soundVolume'),
+    soundVolumeLabel: document.getElementById('soundVolumeLabel'),
+    soundToggle: document.getElementById('soundToggle'),
+    ttsToggle: document.getElementById('ttsToggle')
 };
 
 // ============================================
@@ -499,6 +499,60 @@ function renderChart() {
 }
 
 // ============================================
+// RENDER TRANSACTIONS (Dashboard & Riwayat)
+// ============================================
+function renderTransactions() {
+    // Dashboard - 10 transaksi terbaru
+    const dashItems = state.history.slice(0, CONFIG.DASHBOARD_LIMIT);
+    if (dashItems.length === 0) {
+        DOM.dashTransactionList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                <p>Belum ada transaksi</p>
+                <span>Masukkan token di Pengaturan</span>
+            </div>`;
+        DOM.dashHistoryCount.textContent = '0';
+    } else {
+        DOM.dashTransactionList.innerHTML = dashItems.map((item, index) => {
+            const isNew = index < state.newCount && index < 5;
+            return `
+                <div class="transaction-item ${isNew ? 'new' : ''}">
+                    <div>
+                        <div class="amount">Rp ${formatRupiah(item.amount)}</div>
+                        <div class="info">${item.message}</div>
+                    </div>
+                    <div class="time">${formatTime(item.time)}</div>
+                </div>`;
+        }).join('');
+        DOM.dashHistoryCount.textContent = state.history.length;
+    }
+    
+    // Riwayat - semua transaksi
+    if (state.history.length === 0) {
+        DOM.transactionList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                <p>Belum ada transaksi</p>
+                <span>Masukkan token di Pengaturan</span>
+            </div>`;
+        DOM.historyCount.textContent = '0';
+    } else {
+        DOM.transactionList.innerHTML = state.history.map((item, index) => {
+            const isNew = index < state.newCount && index < 5;
+            return `
+                <div class="transaction-item ${isNew ? 'new' : ''}">
+                    <div>
+                        <div class="amount">Rp ${formatRupiah(item.amount)}</div>
+                        <div class="info">${item.message}</div>
+                    </div>
+                    <div class="time">${formatTime(item.time)}</div>
+                </div>`;
+        }).join('');
+        DOM.historyCount.textContent = state.history.length;
+    }
+}
+
+// ============================================
 // INIT
 // ============================================
 function init() {
@@ -508,6 +562,10 @@ function init() {
     initSoundUpload();
     
     document.getElementById('darkToggle').checked = state.theme === 'dark';
+    DOM.soundToggle.checked = state.soundEnabled;
+    DOM.ttsToggle.checked = state.ttsEnabled;
+    DOM.soundVolume.value = state.soundVolume;
+    DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
     
     if (state.token) {
         DOM.tokenInput.value = state.token;
@@ -516,11 +574,10 @@ function init() {
         DOM.tokenInput.value = '';
         setStatus('paused', 'Waiting Token');
         DOM.statusDot.style.background = '#f5a623';
-        showToast('Masukkan token terlebih dahulu');
+        showToast('Masukkan token di Pengaturan');
     }
     
     calculateStatsFromHistory();
-    updateSoundUI();
     renderTransactions();
     updateStatsUI();
     renderStats();
@@ -562,7 +619,7 @@ function startPolling() {
     }
     
     if (!state.token) {
-        showToast('Masukkan token terlebih dahulu');
+        showToast('Masukkan token di Pengaturan');
         return;
     }
 
@@ -750,8 +807,7 @@ function speakPayment(amount) {
 function toggleSound() {
     state.soundEnabled = !state.soundEnabled;
     localStorage.setItem('geekzpay_sound', String(state.soundEnabled));
-    document.getElementById('soundToggle').checked = state.soundEnabled;
-    updateSoundUI();
+    DOM.soundToggle.checked = state.soundEnabled;
     showToast(state.soundEnabled ? 'Suara ON' : 'Suara OFF');
 }
 window.toggleSound = toggleSound;
@@ -759,8 +815,7 @@ window.toggleSound = toggleSound;
 function toggleTts() {
     state.ttsEnabled = !state.ttsEnabled;
     localStorage.setItem('geekzpay_tts', String(state.ttsEnabled));
-    document.getElementById('ttsToggle').checked = state.ttsEnabled;
-    updateSoundUI();
+    DOM.ttsToggle.checked = state.ttsEnabled;
     showToast(state.ttsEnabled ? 'Voice ON' : 'Voice OFF');
     if (state.ttsEnabled) speakPayment(10000);
 }
@@ -769,26 +824,9 @@ window.toggleTts = toggleTts;
 function changeSoundVolume(value) {
     state.soundVolume = parseFloat(value);
     localStorage.setItem('geekzpay_sound_volume', String(state.soundVolume));
-    document.getElementById('soundVolumeLabel').textContent = `${Math.round(state.soundVolume * 100)}%`;
+    DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
 }
 window.changeSoundVolume = changeSoundVolume;
-
-function updateSoundUI() {
-    const soundBtn = DOM.toggleSoundBtn;
-    soundBtn.innerHTML = state.soundEnabled ? '<i class="fas fa-volume-up"></i> Suara' : '<i class="fas fa-volume-mute"></i> Mute';
-    soundBtn.className = state.soundEnabled ? 'btn btn-soft active' : 'btn btn-soft';
-    
-    const ttsBtn = DOM.toggleTtsBtn;
-    ttsBtn.innerHTML = state.ttsEnabled ? '<i class="fas fa-microphone"></i> Voice' : '<i class="fas fa-microphone-slash"></i> Mute';
-    ttsBtn.className = state.ttsEnabled ? 'btn btn-soft active' : 'btn btn-soft';
-    
-    const slider = document.getElementById('soundVolume');
-    if (slider) slider.value = state.soundVolume;
-    document.getElementById('soundVolumeLabel').textContent = `${Math.round(state.soundVolume * 100)}%`;
-    
-    document.getElementById('soundToggle').checked = state.soundEnabled;
-    document.getElementById('ttsToggle').checked = state.ttsEnabled;
-}
 
 // ============================================
 // PUSH NOTIFICATION
@@ -809,36 +847,8 @@ function sendPushNotification(entry) {
 }
 
 // ============================================
-// RENDER FUNCTIONS
+// UPDATE STATS UI
 // ============================================
-function renderTransactions() {
-    const list = DOM.transactionList;
-    if (state.history.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
-                <p>Belum ada transaksi</p>
-                <span>Masukkan token dan tunggu notifikasi</span>
-            </div>`;
-        DOM.historyCount.textContent = '0';
-        return;
-    }
-    
-    list.innerHTML = state.history.map((item, index) => {
-        const isNew = index < state.newCount && index < 5;
-        return `
-            <div class="transaction-item ${isNew ? 'new' : ''}">
-                <div>
-                    <div class="amount">Rp ${formatRupiah(item.amount)}</div>
-                    <div class="info">${item.message}</div>
-                </div>
-                <div class="time">${formatTime(item.time)}</div>
-            </div>`;
-    }).join('');
-    
-    DOM.historyCount.textContent = state.history.length;
-}
-
 function updateStatsUI() {
     const total = state.history.length;
     const totalAmt = state.history.reduce((s, i) => s + (i.amount || 0), 0);
@@ -888,10 +898,7 @@ function registerServiceWorker() {
 // KEYBOARD SHORTCUTS
 // ============================================
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'm' || e.key === 'M') toggleSound();
-    if (e.key === 't' || e.key === 'T') toggleTts();
     if (e.key === 'Escape') closeQRISWidget();
-    if (e.key === 'Enter' && document.activeElement === DOM.tokenInput) saveToken();
     if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
         e.preventDefault();
         toggleTheme();

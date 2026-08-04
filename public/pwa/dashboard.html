@@ -66,11 +66,11 @@
     </nav>
 
     <!-- ============================================
-    PAGE: DASHBOARD
+    PAGE: DASHBOARD (BERSIH)
     ============================================ -->
     <div id="page-dashboard" class="page-content active">
 
-        <!-- QRIS UPLOAD SECTION -->
+        <!-- QRIS UPLOAD -->
         <section class="qris-section">
             <div class="qris-upload-area">
                 <div class="qris-upload-box" id="qrisDropZone">
@@ -82,19 +82,17 @@
                     <small class="qris-upload-hint">PNG, JPG, JPEG (Maks. 2MB)</small>
                     <input type="file" id="qrisFileInput" accept="image/*" style="display:none;">
                 </div>
-                
                 <div id="qrisPreviewContainer" style="display:none;" class="qris-preview-container">
                     <img id="qrisPreview" class="qris-preview-image" alt="QRIS">
                     <button class="qris-remove-btn" onclick="removeQRIS()"><i class="fas fa-times"></i></button>
                 </div>
-                
                 <button class="btn-qris" onclick="openQRISWidget()" id="qrisShowBtn" style="display:none;">
                     <i class="fas fa-qrcode"></i> Tampilkan QRIS
                 </button>
             </div>
         </section>
 
-        <!-- STATS UTAMA -->
+        <!-- STATS RINGKAS -->
         <section class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value" id="totalCount">0</div>
@@ -110,7 +108,40 @@
             </div>
         </section>
 
-        <!-- STATISTIK DETAIL -->
+        <!-- DASHBOARD: TRANSAKSI TERBARU -->
+        <section class="transaction-section dashboard-transactions">
+            <div class="transaction-header">
+                <span class="transaction-title"><i class="fas fa-clock"></i> Transaksi Terbaru</span>
+                <span class="transaction-count" id="dashHistoryCount">0</span>
+            </div>
+            <div id="dashTransactionList" class="transaction-list">
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                    <p>Belum ada transaksi</p>
+                    <span>Masukkan token di Pengaturan</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRAFIK 7 HARI -->
+        <section class="chart-section">
+            <div class="chart-header">
+                <span class="chart-icon"><i class="fas fa-chart-bar"></i></span>
+                <span class="chart-title">7 Hari Terakhir</span>
+            </div>
+            <div class="chart-container" id="chartContainer">
+                <div class="chart-empty">Belum ada data</div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ============================================
+    PAGE: RIWAYAT (LENGKAP + STATISTIK)
+    ============================================ -->
+    <div id="page-history" class="page-content">
+
+        <!-- STATISTIK LENGKAP -->
         <section class="stats-detail-grid">
             <div class="stat-detail-card">
                 <div class="stat-detail-label"><i class="fas fa-calendar-day"></i> Hari Ini</div>
@@ -129,97 +160,41 @@
             </div>
         </section>
 
-        <!-- GRAFIK -->
-        <section class="chart-section">
-            <div class="chart-header">
-                <span class="chart-icon"><i class="fas fa-chart-bar"></i></span>
-                <span class="chart-title">7 Hari Terakhir</span>
-            </div>
-            <div class="chart-container" id="chartContainer">
-                <div class="chart-empty">Belum ada data</div>
-            </div>
-        </section>
-
-        <!-- TOKEN INPUT -->
-        <section class="token-section">
-            <div class="token-input-group">
-                <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay">
-                <button class="btn btn-primary" onclick="saveToken()"><i class="fas fa-save"></i> Simpan</button>
-            </div>
-        </section>
-
-        <!-- CONTROLS -->
-        <section class="controls">
-            <button class="btn btn-soft" id="toggleSoundBtn" onclick="toggleSound()"><i class="fas fa-volume-up"></i> Suara</button>
-            <button class="btn btn-soft" id="toggleTtsBtn" onclick="toggleTts()"><i class="fas fa-microphone"></i> Voice</button>
-            <button class="btn btn-danger" onclick="clearHistory()"><i class="fas fa-trash"></i> Reset</button>
-        </section>
-
-        <!-- SOUND SETTINGS -->
-        <section class="sound-section">
-            <div class="sound-header">
-                <span class="sound-icon"><i class="fas fa-music"></i></span>
-                <span class="sound-title">Suara Notifikasi</span>
-            </div>
-            
-            <!-- Upload Suara Custom -->
-            <div class="sound-upload-area">
-                <div class="sound-upload-box" id="soundDropZone">
-                    <i class="fas fa-music sound-upload-icon"></i>
-                    <p class="sound-upload-text">Upload suara custom (MP3, WAV)</p>
-                    <button class="sound-upload-btn" onclick="document.getElementById('soundFileInput').click()">
-                        <i class="fas fa-folder-open"></i> Pilih File
-                    </button>
-                    <small class="sound-upload-hint">Maks. 2MB</small>
-                    <input type="file" id="soundFileInput" accept="audio/*" style="display:none;">
-                </div>
-                <div id="soundPreviewContainer" style="display:none;" class="sound-preview-container">
-                    <span id="soundFileName" class="sound-file-name"></span>
-                    <button class="sound-play-btn" onclick="playCustomSound()"><i class="fas fa-play"></i> Test</button>
-                    <button class="sound-remove-btn" onclick="removeCustomSound()"><i class="fas fa-times"></i></button>
-                </div>
-            </div>
-            
-            <div class="volume-control">
-                <span class="volume-label"><i class="fas fa-volume-up"></i> Volume</span>
-                <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.8" oninput="changeSoundVolume(this.value)">
-                <span class="volume-value" id="soundVolumeLabel">80%</span>
-            </div>
-            
-            <div class="sound-info">
-                <span><i class="fas fa-info-circle"></i> Suara default: Koin jatuh</span>
-                <span><i class="fas fa-upload"></i> Upload custom untuk ganti suara</span>
-            </div>
-        </section>
-
-    </div>
-
-    <!-- ============================================
-    PAGE: RIWAYAT
-    ============================================ -->
-    <div id="page-history" class="page-content">
+        <!-- SEMUA TRANSAKSI -->
         <section class="transaction-section">
             <div class="transaction-header">
-                <span class="transaction-title"><i class="fas fa-history"></i> Riwayat Transaksi</span>
+                <span class="transaction-title"><i class="fas fa-history"></i> Semua Transaksi</span>
                 <span class="transaction-count" id="historyCount">0</span>
             </div>
             <div id="transactionList" class="transaction-list">
                 <div class="empty-state">
                     <div class="empty-icon"><i class="fas fa-inbox"></i></div>
                     <p>Belum ada transaksi</p>
-                    <span>Masukkan token dan tunggu notifikasi</span>
+                    <span>Masukkan token di Pengaturan</span>
                 </div>
             </div>
         </section>
     </div>
 
     <!-- ============================================
-    PAGE: PENGATURAN
+    PAGE: PENGATURAN (SEMUA KONTROL DI SINI)
     ============================================ -->
     <div id="page-settings" class="page-content">
         <section class="settings-section">
             <h2 class="settings-title"><i class="fas fa-cog"></i> Pengaturan</h2>
             
+            <!-- TOKEN INPUT -->
+            <div class="settings-card">
+                <div class="settings-item">
+                    <span><i class="fas fa-key"></i> Token</span>
+                    <div class="settings-input-group">
+                        <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay" class="settings-input">
+                        <button class="btn btn-primary btn-sm" onclick="saveToken()"><i class="fas fa-save"></i> Simpan</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOGGLE -->
             <div class="settings-card">
                 <div class="settings-item">
                     <span><i class="fas fa-bell"></i> Notifikasi</span>
@@ -231,27 +206,53 @@
                 <div class="settings-item">
                     <span><i class="fas fa-volume-up"></i> Suara</span>
                     <label class="toggle-switch">
-                        <input type="checkbox" id="soundToggle" checked>
+                        <input type="checkbox" id="soundToggle" checked onchange="toggleSound()">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
                 <div class="settings-item">
                     <span><i class="fas fa-microphone"></i> Voice (TTS)</span>
                     <label class="toggle-switch">
-                        <input type="checkbox" id="ttsToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="settings-item">
-                    <span><i class="fas fa-moon"></i> Dark Mode</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="darkToggle" onchange="toggleTheme()">
+                        <input type="checkbox" id="ttsToggle" checked onchange="toggleTts()">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
             </div>
-            
+
+            <!-- SOUND CUSTOM -->
             <div class="settings-card">
+                <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                    <span><i class="fas fa-music"></i> Suara Notifikasi</span>
+                    <div class="sound-upload-box" id="soundDropZone" style="width:100%;padding:12px;">
+                        <i class="fas fa-music sound-upload-icon"></i>
+                        <p class="sound-upload-text">Upload suara custom (MP3, WAV)</p>
+                        <button class="sound-upload-btn" onclick="document.getElementById('soundFileInput').click()">
+                            <i class="fas fa-folder-open"></i> Pilih File
+                        </button>
+                        <small class="sound-upload-hint">Maks. 2MB</small>
+                        <input type="file" id="soundFileInput" accept="audio/*" style="display:none;">
+                    </div>
+                    <div id="soundPreviewContainer" style="display:none;" class="sound-preview-container">
+                        <span id="soundFileName" class="sound-file-name"></span>
+                        <button class="sound-play-btn" onclick="playCustomSound()"><i class="fas fa-play"></i> Test</button>
+                        <button class="sound-remove-btn" onclick="removeCustomSound()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="volume-control" style="width:100%;">
+                        <span class="volume-label"><i class="fas fa-volume-up"></i> Volume</span>
+                        <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.8" oninput="changeSoundVolume(this.value)">
+                        <span class="volume-value" id="soundVolumeLabel">80%</span>
+                    </div>
+                    <div class="sound-info">
+                        <span><i class="fas fa-info-circle"></i> Default: Koin jatuh</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESET & CLEAR -->
+            <div class="settings-card">
+                <button class="btn btn-danger" onclick="clearHistory()" style="width:100%;margin-bottom:8px;">
+                    <i class="fas fa-trash"></i> Hapus Riwayat
+                </button>
                 <button class="btn btn-danger" onclick="clearAllData()" style="width:100%;">
                     <i class="fas fa-trash"></i> Hapus Semua Data
                 </button>
