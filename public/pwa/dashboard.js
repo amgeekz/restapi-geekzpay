@@ -1,7 +1,6 @@
 /**
  * GeekzPay PWA Monitor
  * Dashboard untuk monitoring pembayaran real-time
- * Versi Profesional - Simbol Semua
  */
 
 // ============================================
@@ -10,15 +9,14 @@
 const CONFIG = {
     API_BASE: 'https://restapi.amgeekz.my.id',
     POLLING_INTERVAL: 2000,
-    MAX_HISTORY: 100,
-    DEFAULT_TOKEN: '727e391bee5756aebc03084e04e0c9f229666b58542e169b49f419ad0904a297'
+    MAX_HISTORY: 100
 };
 
 // ============================================
 // STATE
 // ============================================
 const state = {
-    token: localStorage.getItem('geekzpay_token') || CONFIG.DEFAULT_TOKEN,
+    token: localStorage.getItem('geekzpay_token') || '',
     soundEnabled: localStorage.getItem('geekzpay_sound') !== 'false',
     soundType: localStorage.getItem('geekzpay_sound_type') || 'dana',
     soundVolume: parseFloat(localStorage.getItem('geekzpay_sound_volume')) || 0.7,
@@ -90,13 +88,28 @@ const DOM = {
 // INIT
 // ============================================
 function init() {
-    DOM.tokenInput.value = state.token;
+    if (state.token) {
+        DOM.tokenInput.value = state.token;
+    } else {
+        DOM.tokenInput.value = '';
+        DOM.tokenInput.placeholder = 'Masukkan Token GeekzPay...';
+        showToast('◆ Masukkan token terlebih dahulu');
+    }
+    
     updateSoundUI();
     renderTransactions();
     updateStats();
-    startPolling();
+    
+    if (state.token) {
+        startPolling();
+    } else {
+        setStatus('paused', 'Waiting Token');
+        DOM.statusDot.style.background = '#ffa502';
+    }
+    
     registerServiceWorker();
     checkNotificationPermission();
+    
     console.log('◆ GeekzPay Monitor PWA loaded');
     console.log('⌘ Shortcuts: R = Refresh, M = Toggle Sound');
 }
@@ -136,18 +149,26 @@ function saveToken() {
     const newToken = DOM.tokenInput.value.trim();
     if (!newToken) {
         showToast('⊘ Token tidak boleh kosong');
+        DOM.tokenInput.focus();
         return;
     }
+    
     state.token = newToken;
     localStorage.setItem('geekzpay_token', state.token);
     showToast('◆ Token berhasil disimpan');
-    fetchData();
+    
+    if (!state.pollingInterval) {
+        startPolling();
+    } else {
+        fetchData();
+    }
 }
 window.saveToken = saveToken;
 
 async function fetchData() {
     if (!state.token) {
         showToast('⊘ Masukkan token terlebih dahulu');
+        DOM.tokenInput.focus();
         return;
     }
 
@@ -158,6 +179,12 @@ async function fetchData() {
         const response = await fetch(url);
         
         if (!response.ok) {
+            if (response.status === 401) {
+                showToast('⊘ Token tidak valid, periksa kembali');
+                setStatus('error', 'Invalid Token');
+                DOM.tokenInput.focus();
+                return;
+            }
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
@@ -207,7 +234,6 @@ function processNewData(items) {
             }
             showToast(`◆ Pembayaran Rp ${formatRupiah(entry.amount)} masuk`);
             
-            // Kirim notifikasi push
             sendPushNotification(entry);
         }
     });
@@ -280,7 +306,6 @@ function playNotificationSound() {
                     osc.start(now);
                     osc.stop(now + beep.duration);
                     
-                    // Efek tambahan untuk suara DANA
                     if (state.soundType === 'dana') {
                         const bufferSize = ctx.sampleRate * 0.015;
                         const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -302,7 +327,6 @@ function playNotificationSound() {
         });
 
     } catch (e) {
-        // Fallback
         try {
             DOM.sound.currentTime = 0;
             DOM.sound.volume = state.soundVolume;
@@ -345,19 +369,16 @@ function changeSoundVolume(value) {
 window.changeSoundVolume = changeSoundVolume;
 
 function updateSoundUI() {
-    // Update button
     if (DOM.toggleSoundBtn) {
         DOM.toggleSoundBtn.textContent = state.soundEnabled ? '♫ Suara ON' : '♫ Suara OFF';
         DOM.toggleSoundBtn.className = state.soundEnabled ? 'neo-btn neo-btn-success' : 'neo-btn neo-btn-warning';
     }
     
-    // Update sound type buttons
     document.querySelectorAll('.sound-type-btn').forEach(btn => {
         const type = btn.dataset.sound;
         btn.classList.toggle('active', type === state.soundType);
     });
     
-    // Update volume slider
     const slider = document.getElementById('soundVolume');
     if (slider) {
         slider.value = state.soundVolume;
@@ -377,7 +398,7 @@ function sendPushNotification(entry) {
             new Notification('◆ Pembayaran Masuk', {
                 body: `Rp ${formatRupiah(entry.amount)} - ${entry.message}`,
                 icon: '/icon128.png',
-                badge: '/icon128.png',
+                badge: '/icon48.png',
                 vibrate: [200, 100, 200],
                 requireInteraction: true,
                 tag: 'payment-' + entry.id
@@ -438,7 +459,17 @@ function updateBadge() {
 // ============================================
 
 function startPolling() {
-    if (state.pollingInterval) clearInterval(state.pollingInterval);
+    if (state.pollingInterval) {
+        clearInterval(state.pollingInterval);
+        state.pollingInterval = null;
+    }
+    
+    if (!state.token) {
+        setStatus('paused', 'Waiting Token');
+        DOM.statusDot.style.background = '#ffa502';
+        return;
+    }
+    
     fetchData();
     state.pollingInterval = setInterval(fetchData, CONFIG.POLLING_INTERVAL);
     state.isPolling = true;
@@ -533,6 +564,12 @@ function registerServiceWorker() {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'r' || e.key === 'R') fetchData();
     if (e.key === 'm' || e.key === 'M') toggleSound();
+    if (e.key === 'Enter') {
+        const active = document.activeElement;
+        if (active === DOM.tokenInput) {
+            saveToken();
+        }
+    }
 });
 
 // ============================================

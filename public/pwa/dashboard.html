@@ -8,10 +8,14 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/pwa/manifest.json">
     <meta name="theme-color" content="#fcf7e8">
+    
+    <!-- iOS Support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="GeekzPay">
-    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/icon128.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="/icon128.png">
+    <link rel="apple-touch-icon" sizes="48x48" href="/icon48.png">
     
     <!-- CSS -->
     <link rel="stylesheet" href="/pwa/dashboard.css">
@@ -67,8 +71,7 @@
     ============================================ -->
     <section class="neo-card token-section">
         <div class="token-input-group">
-            <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay..." 
-                   value="727e391bee5756aebc03084e04e0c9f229666b58542e169b49f419ad0904a297">
+            <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay...">
             <button class="neo-btn neo-btn-primary" onclick="saveToken()">Simpan</button>
         </div>
     </section>
@@ -79,7 +82,7 @@
     <section class="controls">
         <button class="neo-btn neo-btn-success" id="toggleSoundBtn" onclick="toggleSound()">♫ Suara ON</button>
         <button class="neo-btn neo-btn-primary" onclick="testSound()">♫ Test</button>
-        <button class="neo-btn neo-btn-primary" onclick="fetchData()">⟳ Refresh</button>
+        <button class="neo-btn neo-btn-go" onclick="fetchData()">⟳ Refresh</button>
         <button class="neo-btn neo-btn-danger" onclick="clearHistory()">✕ Clear</button>
     </section>
 

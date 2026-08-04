@@ -4,9 +4,9 @@
   "description": "Monitor pembayaran QRIS GeekzPay real-time",
   "start_url": "/pwa/dashboard.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#fcf7e8",
   "theme_color": "#fcf7e8",
-  "orientation": "portrait",
   "categories": ["finance", "business"],
   "icons": [
     {
@@ -20,6 +20,23 @@
       "sizes": "128x128",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Buka dashboard monitor",
+      "url": "/pwa/dashboard.html",
+      "icons": [
+        {
+          "src": "/icon48.png",
+          "sizes": "48x48"
+        }
+      ]
     }
   ]
 }

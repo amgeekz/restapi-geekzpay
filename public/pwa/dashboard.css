@@ -1,5 +1,5 @@
 /* ============================================
-   NEOBRUTALISM THEME - SAMA SEPERTI WEBSITE
+   NEOBRUTALISM THEME
    ============================================ */
 :root {
     --bg: #fcf7e8;
@@ -50,15 +50,6 @@ body {
     border: 3px solid #111111;
     border-radius: 20px;
     box-shadow: 6px 6px 0px #ffe600;
-    padding: 16px;
-    margin-bottom: 12px;
-}
-
-.neo-card-accent-pink {
-    background: #ffffff;
-    border: 3px solid #111111;
-    border-radius: 20px;
-    box-shadow: 6px 6px 0px #ff4088;
     padding: 16px;
     margin-bottom: 12px;
 }
@@ -230,7 +221,7 @@ body {
     border-radius: 14px;
     font-weight: 800;
     font-size: 12px;
-    padding: 8px 14px;
+    padding: 10px 16px;
     box-shadow: 4px 4px 0px #111111;
     transition: all 0.12s ease;
     cursor: pointer;
@@ -239,6 +230,10 @@ body {
     flex: 1;
     min-width: 60px;
     text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 .neo-btn:active {
     transform: translate(3px, 3px);
@@ -279,6 +274,16 @@ body {
 }
 .neo-btn-warning:hover {
     background: #ffbe33;
+}
+
+.neo-btn-go {
+    background: #00c853;
+    color: #111111;
+    border-color: #111111;
+}
+.neo-btn-go:hover {
+    background: #00e676;
+    box-shadow: 6px 6px 0px #111111;
 }
 
 /* ============================================
@@ -511,7 +516,7 @@ body {
     
     .neo-btn {
         font-size: 10px;
-        padding: 6px 10px;
+        padding: 8px 10px;
     }
     
     .header-left h1 {

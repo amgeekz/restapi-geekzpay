@@ -1,8 +1,9 @@
 /**
  * GeekzPay PWA - Service Worker
+ * Version: 2.0.0
  */
 
-const CACHE_NAME = 'geekzpay-pwa-v1';
+const CACHE_NAME = 'geekzpay-pwa-v2';
 const ASSETS = [
     '/pwa/dashboard.html',
     '/pwa/dashboard.css',
@@ -12,14 +13,23 @@ const ASSETS = [
     '/icon128.png'
 ];
 
+// ============================================
+// INSTALL
+// ============================================
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(ASSETS))
+            .then(cache => {
+                console.log('📦 Caching assets...');
+                return cache.addAll(ASSETS);
+            })
             .then(() => self.skipWaiting())
     );
 });
 
+// ============================================
+// ACTIVATE
+// ============================================
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then(keys => {
@@ -28,11 +38,15 @@ self.addEventListener('activate', (event) => {
                     .map(key => caches.delete(key))
             );
         })
+        .then(() => self.clients.claim())
     );
-    return self.clients.claim();
 });
 
+// ============================================
+// FETCH
+// ============================================
 self.addEventListener('fetch', (event) => {
+    // Skip API calls
     if (event.request.url.includes('/webhook/') || 
         event.request.url.includes('/qris/') ||
         event.request.url.includes('/diag')) {
@@ -64,12 +78,15 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
+// ============================================
+// PUSH NOTIFICATION
+// ============================================
 self.addEventListener('push', (event) => {
     let data = {
         title: '◆ Pembayaran Masuk',
         body: 'Ada transaksi baru',
-        icon: '/icon-192.png',
-        badge: '/icon-192.png',
+        icon: '/icon128.png',
+        badge: '/icon48.png',
         vibrate: [200, 100, 200, 100, 300],
         requireInteraction: true,
         tag: 'payment-notification'
@@ -97,6 +114,9 @@ self.addEventListener('push', (event) => {
     );
 });
 
+// ============================================
+// NOTIFICATION CLICK
+// ============================================
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(
