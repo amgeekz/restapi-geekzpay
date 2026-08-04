@@ -1,8 +1,6 @@
 /**
  * GeekzPay PWA Monitor
- * Dashboard: QRIS + Statistik Ringkas + Transaksi Terbaru + Grafik
- * Riwayat: Semua Transaksi + Statistik Lengkap
- * Pengaturan: Token, Suara, Voice, Reset
+ * Fix: Token tersimpan di localStorage dan tetap ada saat refresh
  */
 
 // ============================================
@@ -21,7 +19,6 @@ const CONFIG = {
 const state = {
     token: localStorage.getItem('geekzpay_token') || '',
     soundEnabled: localStorage.getItem('geekzpay_sound') !== 'false',
-    soundType: localStorage.getItem('geekzpay_sound_type') || 'coin',
     soundVolume: parseFloat(localStorage.getItem('geekzpay_sound_volume')) || 0.8,
     ttsEnabled: localStorage.getItem('geekzpay_tts') !== 'false',
     theme: localStorage.getItem('geekzpay_theme') || 'light',
@@ -45,7 +42,7 @@ const QRIS_STATE = {
 };
 
 // ============================================
-// PLAY NOTIFICATION SOUND
+// PLAY NOTIFICATION SOUND - SUARA KOIN JATUH
 // ============================================
 function playNotificationSound() {
     if (!state.soundEnabled) return;
@@ -59,10 +56,13 @@ function playNotificationSound() {
         } catch (e) {}
     }
     
+    // SUARA KOIN JATUH (default)
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const volume = state.soundVolume;
-        const freqs = [1800, 1400, 1000, 700];
+        const freqs = [2000, 1600, 1200, 800, 500];
+        const durations = [0.06, 0.06, 0.08, 0.10, 0.15];
+        const delays = [0, 80, 160, 250, 350];
         
         freqs.forEach((freq, i) => {
             setTimeout(() => {
@@ -74,28 +74,29 @@ function playNotificationSound() {
                     osc.frequency.value = freq;
                     osc.type = 'sine';
                     const now = ctx.currentTime;
+                    const vol = volume * (1 - i * 0.12);
                     gain.gain.setValueAtTime(0.01, now);
-                    gain.gain.exponentialRampToValueAtTime(volume * 0.25, now + 0.01);
-                    gain.gain.exponentialRampToValueAtTime(volume * 0.01, now + 0.08);
+                    gain.gain.exponentialRampToValueAtTime(Math.max(vol * 0.3, 0.05), now + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + durations[i]);
                     osc.start(now);
-                    osc.stop(now + 0.08);
+                    osc.stop(now + durations[i]);
                     
-                    const bufSize = ctx.sampleRate * 0.02;
+                    const bufSize = ctx.sampleRate * 0.025;
                     const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
                     const data = buf.getChannelData(0);
                     for (let j = 0; j < bufSize; j++) {
-                        data[j] = (Math.random() * 2 - 1) * 0.03;
+                        data[j] = (Math.random() * 2 - 1) * 0.04 * volume;
                     }
                     const noise = ctx.createBufferSource();
                     noise.buffer = buf;
                     const ng = ctx.createGain();
-                    ng.gain.value = volume * 0.08;
+                    ng.gain.value = volume * 0.06 * (1 - i * 0.1);
                     noise.connect(ng);
                     ng.connect(ctx.destination);
                     noise.start(now);
-                    noise.stop(now + 0.08);
+                    noise.stop(now + durations[i]);
                 } catch (e) {}
-            }, i * 100);
+            }, delays[i]);
         });
     } catch (e) {
         try {
@@ -553,61 +554,74 @@ function renderTransactions() {
 }
 
 // ============================================
-// INIT
+// UPDATE STATS UI
 // ============================================
-function init() {
-    applyTheme(state.theme);
-    
-    initQRISUpload();
-    initSoundUpload();
-    
-    document.getElementById('darkToggle').checked = state.theme === 'dark';
-    DOM.soundToggle.checked = state.soundEnabled;
-    DOM.ttsToggle.checked = state.ttsEnabled;
-    DOM.soundVolume.value = state.soundVolume;
-    DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
-    
-    if (state.token) {
-        DOM.tokenInput.value = state.token;
-        startPolling();
-    } else {
-        DOM.tokenInput.value = '';
-        setStatus('paused', 'Waiting Token');
-        DOM.statusDot.style.background = '#f5a623';
-        showToast('Masukkan token di Pengaturan');
+function updateStatsUI() {
+    const total = state.history.length;
+    const totalAmt = state.history.reduce((s, i) => s + (i.amount || 0), 0);
+    DOM.totalCount.textContent = total;
+    DOM.totalAmount.textContent = `Rp ${formatRupiah(totalAmt)}`;
+    DOM.newCount.textContent = state.newCount;
+}
+
+function updateBadge() {
+    if (navigator.setAppBadge) navigator.setAppBadge(state.newCount);
+}
+
+// ============================================
+// STATUS
+// ============================================
+function setStatus(type, text) {
+    DOM.statusText.textContent = text;
+}
+
+// ============================================
+// HELPERS
+// ============================================
+function formatRupiah(v) { return new Intl.NumberFormat('id-ID').format(v || 0); }
+function formatTime(iso) {
+    try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); } 
+    catch { return iso || ''; }
+}
+function showToast(msg) {
+    DOM.toastMessage.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+    DOM.toast.classList.add('show');
+    clearTimeout(DOM.toast._timeout);
+    DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 3000);
+}
+
+// ============================================
+// SAVE TOKEN - FIX: Simpan ke localStorage
+// ============================================
+function saveToken() {
+    const newToken = DOM.tokenInput.value.trim();
+    if (!newToken) {
+        showToast('Token tidak boleh kosong');
+        return;
     }
     
-    calculateStatsFromHistory();
+    // Simpan token ke localStorage
+    state.token = newToken;
+    localStorage.setItem('geekzpay_token', newToken);
+    
+    showToast('Token tersimpan');
+    
+    // Reset state untuk token baru
+    state.lastIds = new Set();
+    state.history = [];
+    state.newCount = 0;
+    state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
+    saveState();
+    
     renderTransactions();
     updateStatsUI();
     renderStats();
     renderChart();
-    registerServiceWorker();
-    checkNotificationPermission();
     
-    console.log('GeekzPay Monitor loaded');
+    // Mulai polling
+    startPolling();
 }
-
-// ============================================
-// NOTIFICATION PERMISSION
-// ============================================
-function checkNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-        DOM.permissionBanner.style.display = 'flex';
-    }
-}
-
-function requestNotificationPermission() {
-    if ('Notification' in window) {
-        Notification.requestPermission().then(p => {
-            if (p === 'granted') {
-                DOM.permissionBanner.style.display = 'none';
-                showToast('Notifikasi diizinkan');
-            }
-        });
-    }
-}
-window.requestNotificationPermission = requestNotificationPermission;
+window.saveToken = saveToken;
 
 // ============================================
 // POLLING
@@ -618,6 +632,7 @@ function startPolling() {
         state.pollingInterval = null;
     }
     
+    // Cek token dari state (sudah terisi dari localStorage di init)
     if (!state.token) {
         showToast('Masukkan token di Pengaturan');
         return;
@@ -692,35 +707,6 @@ async function pollData() {
     }
 }
 window.pollData = pollData;
-
-// ============================================
-// SAVE TOKEN
-// ============================================
-function saveToken() {
-    const newToken = DOM.tokenInput.value.trim();
-    if (!newToken) {
-        showToast('Token tidak boleh kosong');
-        return;
-    }
-    
-    state.token = newToken;
-    localStorage.setItem('geekzpay_token', state.token);
-    showToast('Token tersimpan');
-    
-    state.lastIds = new Set();
-    state.history = [];
-    state.newCount = 0;
-    state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
-    saveState();
-    
-    renderTransactions();
-    updateStatsUI();
-    renderStats();
-    renderChart();
-    
-    startPolling();
-}
-window.saveToken = saveToken;
 
 // ============================================
 // CLEAR HISTORY
@@ -847,43 +833,6 @@ function sendPushNotification(entry) {
 }
 
 // ============================================
-// UPDATE STATS UI
-// ============================================
-function updateStatsUI() {
-    const total = state.history.length;
-    const totalAmt = state.history.reduce((s, i) => s + (i.amount || 0), 0);
-    DOM.totalCount.textContent = total;
-    DOM.totalAmount.textContent = `Rp ${formatRupiah(totalAmt)}`;
-    DOM.newCount.textContent = state.newCount;
-}
-
-function updateBadge() {
-    if (navigator.setAppBadge) navigator.setAppBadge(state.newCount);
-}
-
-// ============================================
-// STATUS
-// ============================================
-function setStatus(type, text) {
-    DOM.statusText.textContent = text;
-}
-
-// ============================================
-// HELPERS
-// ============================================
-function formatRupiah(v) { return new Intl.NumberFormat('id-ID').format(v || 0); }
-function formatTime(iso) {
-    try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); } 
-    catch { return iso || ''; }
-}
-function showToast(msg) {
-    DOM.toastMessage.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
-    DOM.toast.classList.add('show');
-    clearTimeout(DOM.toast._timeout);
-    DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 3000);
-}
-
-// ============================================
 // SERVICE WORKER
 // ============================================
 function registerServiceWorker() {
@@ -892,6 +841,65 @@ function registerServiceWorker() {
             .then(() => console.log('Service Worker registered'))
             .catch(() => console.warn('SW failed'));
     }
+}
+
+// ============================================
+// NOTIFICATION PERMISSION
+// ============================================
+function checkNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        DOM.permissionBanner.style.display = 'flex';
+    }
+}
+
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(p => {
+            if (p === 'granted') {
+                DOM.permissionBanner.style.display = 'none';
+                showToast('Notifikasi diizinkan');
+            }
+        });
+    }
+}
+window.requestNotificationPermission = requestNotificationPermission;
+
+// ============================================
+// INIT - FIX: Token tetap ada saat refresh
+// ============================================
+function init() {
+    applyTheme(state.theme);
+    
+    initQRISUpload();
+    initSoundUpload();
+    
+    document.getElementById('darkToggle').checked = state.theme === 'dark';
+    DOM.soundToggle.checked = state.soundEnabled;
+    DOM.ttsToggle.checked = state.ttsEnabled;
+    DOM.soundVolume.value = state.soundVolume;
+    DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
+    
+    // ===== FIX: Token tetap terisi dari localStorage =====
+    if (state.token) {
+        DOM.tokenInput.value = state.token;
+        startPolling();
+    } else {
+        DOM.tokenInput.value = '';
+        setStatus('paused', 'Waiting Token');
+        DOM.statusDot.style.background = '#f5a623';
+        showToast('Masukkan token di Pengaturan');
+    }
+    
+    calculateStatsFromHistory();
+    renderTransactions();
+    updateStatsUI();
+    renderStats();
+    renderChart();
+    registerServiceWorker();
+    checkNotificationPermission();
+    
+    console.log('GeekzPay Monitor loaded');
+    console.log('Token:', state.token ? '✅ Tersimpan' : '❌ Kosong');
 }
 
 // ============================================

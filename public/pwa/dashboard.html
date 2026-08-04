@@ -70,28 +70,6 @@
     ============================================ -->
     <div id="page-dashboard" class="page-content active">
 
-        <!-- QRIS UPLOAD -->
-        <section class="qris-section">
-            <div class="qris-upload-area">
-                <div class="qris-upload-box" id="qrisDropZone">
-                    <i class="fas fa-cloud-upload-alt qris-upload-icon"></i>
-                    <p class="qris-upload-text">Tarik file ke sini atau klik tombol</p>
-                    <button class="qris-upload-btn" onclick="document.getElementById('qrisFileInput').click()">
-                        <i class="fas fa-folder-open"></i> Pilih File
-                    </button>
-                    <small class="qris-upload-hint">PNG, JPG, JPEG (Maks. 2MB)</small>
-                    <input type="file" id="qrisFileInput" accept="image/*" style="display:none;">
-                </div>
-                <div id="qrisPreviewContainer" style="display:none;" class="qris-preview-container">
-                    <img id="qrisPreview" class="qris-preview-image" alt="QRIS">
-                    <button class="qris-remove-btn" onclick="removeQRIS()"><i class="fas fa-times"></i></button>
-                </div>
-                <button class="btn-qris" onclick="openQRISWidget()" id="qrisShowBtn" style="display:none;">
-                    <i class="fas fa-qrcode"></i> Tampilkan QRIS
-                </button>
-            </div>
-        </section>
-
         <!-- STATS RINGKAS -->
         <section class="stats-grid">
             <div class="stat-card">
@@ -177,12 +155,35 @@
     </div>
 
     <!-- ============================================
-    PAGE: PENGATURAN (SEMUA KONTROL DI SINI)
+    PAGE: PENGATURAN (SEMUA KONTROL + QRIS)
     ============================================ -->
     <div id="page-settings" class="page-content">
         <section class="settings-section">
             <h2 class="settings-title"><i class="fas fa-cog"></i> Pengaturan</h2>
             
+            <!-- QRIS UPLOAD -->
+            <div class="settings-card">
+                <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                    <span><i class="fas fa-qrcode"></i> QRIS</span>
+                    <div class="qris-upload-box" id="qrisDropZone">
+                        <i class="fas fa-cloud-upload-alt qris-upload-icon"></i>
+                        <p class="qris-upload-text">Tarik file ke sini atau klik tombol</p>
+                        <button class="qris-upload-btn" onclick="document.getElementById('qrisFileInput').click()">
+                            <i class="fas fa-folder-open"></i> Pilih File
+                        </button>
+                        <small class="qris-upload-hint">PNG, JPG, JPEG (Maks. 2MB)</small>
+                        <input type="file" id="qrisFileInput" accept="image/*" style="display:none;">
+                    </div>
+                    <div id="qrisPreviewContainer" style="display:none;" class="qris-preview-container">
+                        <img id="qrisPreview" class="qris-preview-image" alt="QRIS">
+                        <button class="qris-remove-btn" onclick="removeQRIS()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <button class="btn-qris" onclick="openQRISWidget()" id="qrisShowBtn" style="display:none;">
+                        <i class="fas fa-qrcode"></i> Tampilkan QRIS
+                    </button>
+                </div>
+            </div>
+
             <!-- TOKEN INPUT -->
             <div class="settings-card">
                 <div class="settings-item">
@@ -223,7 +224,7 @@
             <div class="settings-card">
                 <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:8px;">
                     <span><i class="fas fa-music"></i> Suara Notifikasi</span>
-                    <div class="sound-upload-box" id="soundDropZone" style="width:100%;padding:12px;">
+                    <div class="sound-upload-box" id="soundDropZone">
                         <i class="fas fa-music sound-upload-icon"></i>
                         <p class="sound-upload-text">Upload suara custom (MP3, WAV)</p>
                         <button class="sound-upload-btn" onclick="document.getElementById('soundFileInput').click()">
@@ -237,7 +238,7 @@
                         <button class="sound-play-btn" onclick="playCustomSound()"><i class="fas fa-play"></i> Test</button>
                         <button class="sound-remove-btn" onclick="removeCustomSound()"><i class="fas fa-times"></i></button>
                     </div>
-                    <div class="volume-control" style="width:100%;">
+                    <div class="volume-control">
                         <span class="volume-label"><i class="fas fa-volume-up"></i> Volume</span>
                         <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.8" oninput="changeSoundVolume(this.value)">
                         <span class="volume-value" id="soundVolumeLabel">80%</span>
@@ -279,9 +280,7 @@
         <span id="toastMessage"><i class="fas fa-info-circle"></i> Pesan</span>
     </div>
 
-    <audio id="notificationSound" preload="auto" style="display:none;">
-        <source src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoAAACBhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqF" type="audio/wav">
-    </audio>
+    <audio id="notificationSound" preload="auto" style="display:none;"></audio>
 
     <script src="/pwa/dashboard.js"></script>
 </body>
