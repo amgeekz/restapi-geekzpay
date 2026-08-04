@@ -1,6 +1,8 @@
 /**
- * GeekzPay PWA Monitor - FIX SEMUA
- * QRIS Upload muncul, Token tetap, Suara custom jalan
+ * GeekzPay PWA Monitor
+ * Dashboard: QRIS + Statistik Ringkas + Transaksi Terbaru + Grafik
+ * Riwayat: Semua Transaksi + Statistik Lengkap
+ * Pengaturan: Token, Suara, Voice, Reset
  */
 
 // ============================================
@@ -14,11 +16,12 @@ const CONFIG = {
 };
 
 // ============================================
-// STATE - Semua dari localStorage
+// STATE
 // ============================================
 const state = {
     token: localStorage.getItem('geekzpay_token') || '',
     soundEnabled: localStorage.getItem('geekzpay_sound') !== 'false',
+    soundType: localStorage.getItem('geekzpay_sound_type') || 'coin',
     soundVolume: parseFloat(localStorage.getItem('geekzpay_sound_volume')) || 0.8,
     ttsEnabled: localStorage.getItem('geekzpay_tts') !== 'false',
     theme: localStorage.getItem('geekzpay_theme') || 'light',
@@ -30,9 +33,15 @@ const state = {
     isPolling: false,
     isProcessing: false,
     customSound: localStorage.getItem('geekzpay_custom_sound') || null,
-    customSoundName: localStorage.getItem('geekzpay_custom_sound_name') || null,
-    qrisImage: localStorage.getItem('geekzpay_qris') || null,
-    qrisName: localStorage.getItem('geekzpay_qris_name') || null
+    customSoundName: localStorage.getItem('geekzpay_custom_sound_name') || null
+};
+
+// ============================================
+// QRIS STATE
+// ============================================
+const QRIS_STATE = {
+    imageData: localStorage.getItem('geekzpay_qris') || null,
+    fileName: localStorage.getItem('geekzpay_qris_name') || null
 };
 
 // ============================================
@@ -53,9 +62,7 @@ function playNotificationSound() {
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const volume = state.soundVolume;
-        const freqs = [2000, 1600, 1200, 800, 500];
-        const durations = [0.06, 0.06, 0.08, 0.10, 0.15];
-        const delays = [0, 80, 160, 250, 350];
+        const freqs = [1800, 1400, 1000, 700];
         
         freqs.forEach((freq, i) => {
             setTimeout(() => {
@@ -67,29 +74,28 @@ function playNotificationSound() {
                     osc.frequency.value = freq;
                     osc.type = 'sine';
                     const now = ctx.currentTime;
-                    const vol = volume * (1 - i * 0.12);
                     gain.gain.setValueAtTime(0.01, now);
-                    gain.gain.exponentialRampToValueAtTime(Math.max(vol * 0.3, 0.05), now + 0.01);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + durations[i]);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.25, now + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.01, now + 0.08);
                     osc.start(now);
-                    osc.stop(now + durations[i]);
+                    osc.stop(now + 0.08);
                     
-                    const bufSize = ctx.sampleRate * 0.025;
+                    const bufSize = ctx.sampleRate * 0.02;
                     const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
                     const data = buf.getChannelData(0);
                     for (let j = 0; j < bufSize; j++) {
-                        data[j] = (Math.random() * 2 - 1) * 0.04 * volume;
+                        data[j] = (Math.random() * 2 - 1) * 0.03;
                     }
                     const noise = ctx.createBufferSource();
                     noise.buffer = buf;
                     const ng = ctx.createGain();
-                    ng.gain.value = volume * 0.06 * (1 - i * 0.1);
+                    ng.gain.value = volume * 0.08;
                     noise.connect(ng);
                     ng.connect(ctx.destination);
                     noise.start(now);
-                    noise.stop(now + durations[i]);
+                    noise.stop(now + 0.08);
                 } catch (e) {}
-            }, delays[i]);
+            }, i * 100);
         });
     } catch (e) {
         try {
@@ -109,6 +115,7 @@ function playNotificationSound() {
 function navigateTo(page) {
     document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
+    
     document.querySelectorAll('.page-nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelector(`.page-nav-btn[data-page="${page}"]`).classList.add('active');
 }
@@ -120,84 +127,44 @@ document.querySelectorAll('.page-nav-btn').forEach(btn => {
 });
 
 // ============================================
-// QRIS - UPDATE DASHBOARD
-// ============================================
-function updateQRISDashboard() {
-    const previewDashboard = document.getElementById('qrisPreviewDashboard');
-    const previewImg = document.getElementById('qrisPreviewDashboardImg');
-    const showBtn = document.getElementById('qrisShowBtnDashboard');
-    const empty = document.getElementById('qrisEmptyDashboard');
-    
-    if (state.qrisImage) {
-        previewImg.src = state.qrisImage;
-        previewDashboard.style.display = 'block';
-        showBtn.style.display = 'inline-flex';
-        empty.style.display = 'none';
-    } else {
-        previewDashboard.style.display = 'none';
-        showBtn.style.display = 'none';
-        empty.style.display = 'block';
-    }
-}
-
-// ============================================
 // QRIS UPLOAD FUNCTIONS
 // ============================================
 function initQRISUpload() {
     const dropZone = document.getElementById('qrisDropZone');
     const fileInput = document.getElementById('qrisFileInput');
-    const uploadBtn = document.getElementById('qrisUploadBtn');
     const previewContainer = document.getElementById('qrisPreviewContainer');
     const previewImage = document.getElementById('qrisPreview');
     const showBtn = document.getElementById('qrisShowBtn');
     const modalImage = document.getElementById('qrisModalImage');
     
-    // Load existing QRIS
-    if (state.qrisImage) {
-        previewImage.src = state.qrisImage;
+    if (QRIS_STATE.imageData) {
+        previewImage.src = QRIS_STATE.imageData;
         previewContainer.style.display = 'inline-block';
         showBtn.style.display = 'flex';
-        modalImage.src = state.qrisImage;
+        modalImage.src = QRIS_STATE.imageData;
         dropZone.style.display = 'none';
-        updateQRISDashboard();
     }
     
-    // Upload via button
-    uploadBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        fileInput.click();
-    });
-    
-    // Drop zone click
-    dropZone.addEventListener('click', function(e) {
-        if (e.target === this || e.target.closest('.qris-upload-btn') === null) {
-            fileInput.click();
-        }
-    });
-    
-    // File input change
-    fileInput.addEventListener('change', function(e) {
-        if (e.target.files && e.target.files.length > 0) {
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
             handleQRISFile(e.target.files[0]);
         }
-        this.value = '';
+        fileInput.value = '';
     });
     
-    // Drag & Drop
-    dropZone.addEventListener('dragover', function(e) {
+    dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        this.classList.add('dragover');
+        dropZone.classList.add('dragover');
     });
     
-    dropZone.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        this.classList.remove('dragover');
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
     });
     
-    dropZone.addEventListener('drop', function(e) {
+    dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        this.classList.remove('dragover');
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
             handleQRISFile(e.dataTransfer.files[0]);
         }
     });
@@ -214,23 +181,19 @@ function handleQRISFile(file) {
     }
     
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = (e) => {
         const imageData = e.target.result;
-        state.qrisImage = imageData;
-        state.qrisName = file.name;
+        QRIS_STATE.imageData = imageData;
+        QRIS_STATE.fileName = file.name;
         
         localStorage.setItem('geekzpay_qris', imageData);
         localStorage.setItem('geekzpay_qris_name', file.name);
         
-        // Update settings
         document.getElementById('qrisPreview').src = imageData;
         document.getElementById('qrisPreviewContainer').style.display = 'inline-block';
         document.getElementById('qrisShowBtn').style.display = 'flex';
         document.getElementById('qrisModalImage').src = imageData;
         document.getElementById('qrisDropZone').style.display = 'none';
-        
-        // Update dashboard
-        updateQRISDashboard();
         
         showToast(`QRIS "${file.name}" berhasil diupload!`);
     };
@@ -238,8 +201,8 @@ function handleQRISFile(file) {
 }
 
 function removeQRIS() {
-    state.qrisImage = null;
-    state.qrisName = null;
+    QRIS_STATE.imageData = null;
+    QRIS_STATE.fileName = null;
     
     localStorage.removeItem('geekzpay_qris');
     localStorage.removeItem('geekzpay_qris_name');
@@ -249,25 +212,26 @@ function removeQRIS() {
     document.getElementById('qrisModalImage').src = '';
     document.getElementById('qrisDropZone').style.display = 'block';
     
-    updateQRISDashboard();
-    
     showToast('QRIS dihapus');
 }
 window.removeQRIS = removeQRIS;
 
 function openQRISWidget() {
-    if (!state.qrisImage) {
+    if (!QRIS_STATE.imageData) {
         showToast('Upload QRIS terlebih dahulu!');
         return;
     }
-    document.getElementById('qrisModalImage').src = state.qrisImage;
+    
+    document.getElementById('qrisModalImage').src = QRIS_STATE.imageData;
     document.getElementById('qrisOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 window.openQRISWidget = openQRISWidget;
 
 function closeQRISWidget(event) {
-    if (event && event.target !== event.currentTarget) return;
+    if (event && event.target !== event.currentTarget) {
+        return;
+    }
     document.getElementById('qrisOverlay').classList.remove('active');
     document.body.style.overflow = '';
 }
@@ -279,7 +243,6 @@ window.closeQRISWidget = closeQRISWidget;
 function initSoundUpload() {
     const dropZone = document.getElementById('soundDropZone');
     const fileInput = document.getElementById('soundFileInput');
-    const uploadBtn = document.getElementById('soundUploadBtn');
     const previewContainer = document.getElementById('soundPreviewContainer');
     const fileName = document.getElementById('soundFileName');
     
@@ -289,38 +252,26 @@ function initSoundUpload() {
         dropZone.style.display = 'none';
     }
     
-    uploadBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        fileInput.click();
-    });
-    
-    dropZone.addEventListener('click', function(e) {
-        if (e.target === this || e.target.closest('.sound-upload-btn') === null) {
-            fileInput.click();
-        }
-    });
-    
-    fileInput.addEventListener('change', function(e) {
-        if (e.target.files && e.target.files.length > 0) {
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
             handleSoundFile(e.target.files[0]);
         }
-        this.value = '';
+        fileInput.value = '';
     });
     
-    dropZone.addEventListener('dragover', function(e) {
+    dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        this.classList.add('dragover');
+        dropZone.classList.add('dragover');
     });
     
-    dropZone.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        this.classList.remove('dragover');
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
     });
     
-    dropZone.addEventListener('drop', function(e) {
+    dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        this.classList.remove('dragover');
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
             handleSoundFile(e.dataTransfer.files[0]);
         }
     });
@@ -337,7 +288,7 @@ function handleSoundFile(file) {
     }
     
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = (e) => {
         const audioData = e.target.result;
         state.customSound = audioData;
         state.customSoundName = file.name;
@@ -409,8 +360,7 @@ const DOM = {
     soundVolume: document.getElementById('soundVolume'),
     soundVolumeLabel: document.getElementById('soundVolumeLabel'),
     soundToggle: document.getElementById('soundToggle'),
-    ttsToggle: document.getElementById('ttsToggle'),
-    saveTokenBtn: document.getElementById('saveTokenBtn')
+    ttsToggle: document.getElementById('ttsToggle')
 };
 
 // ============================================
@@ -549,9 +499,10 @@ function renderChart() {
 }
 
 // ============================================
-// RENDER TRANSACTIONS
+// RENDER TRANSACTIONS (Dashboard & Riwayat)
 // ============================================
 function renderTransactions() {
+    // Dashboard - 10 transaksi terbaru
     const dashItems = state.history.slice(0, CONFIG.DASHBOARD_LIMIT);
     if (dashItems.length === 0) {
         DOM.dashTransactionList.innerHTML = `
@@ -576,6 +527,7 @@ function renderTransactions() {
         DOM.dashHistoryCount.textContent = state.history.length;
     }
     
+    // Riwayat - semua transaksi
     if (state.history.length === 0) {
         DOM.transactionList.innerHTML = `
             <div class="empty-state">
@@ -601,71 +553,61 @@ function renderTransactions() {
 }
 
 // ============================================
-// UPDATE STATS UI
+// INIT
 // ============================================
-function updateStatsUI() {
-    const total = state.history.length;
-    const totalAmt = state.history.reduce((s, i) => s + (i.amount || 0), 0);
-    DOM.totalCount.textContent = total;
-    DOM.totalAmount.textContent = `Rp ${formatRupiah(totalAmt)}`;
-    DOM.newCount.textContent = state.newCount;
-}
-
-function updateBadge() {
-    if (navigator.setAppBadge) navigator.setAppBadge(state.newCount);
-}
-
-// ============================================
-// STATUS
-// ============================================
-function setStatus(type, text) {
-    DOM.statusText.textContent = text;
-}
-
-// ============================================
-// HELPERS
-// ============================================
-function formatRupiah(v) { return new Intl.NumberFormat('id-ID').format(v || 0); }
-function formatTime(iso) {
-    try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); } 
-    catch { return iso || ''; }
-}
-function showToast(msg) {
-    DOM.toastMessage.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
-    DOM.toast.classList.add('show');
-    clearTimeout(DOM.toast._timeout);
-    DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 3000);
-}
-
-// ============================================
-// SAVE TOKEN - FIX: Simpan & Tampilkan
-// ============================================
-function saveToken() {
-    const newToken = DOM.tokenInput.value.trim();
-    if (!newToken) {
-        showToast('Token tidak boleh kosong');
-        return;
+function init() {
+    applyTheme(state.theme);
+    
+    initQRISUpload();
+    initSoundUpload();
+    
+    document.getElementById('darkToggle').checked = state.theme === 'dark';
+    DOM.soundToggle.checked = state.soundEnabled;
+    DOM.ttsToggle.checked = state.ttsEnabled;
+    DOM.soundVolume.value = state.soundVolume;
+    DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
+    
+    if (state.token) {
+        DOM.tokenInput.value = state.token;
+        startPolling();
+    } else {
+        DOM.tokenInput.value = '';
+        setStatus('paused', 'Waiting Token');
+        DOM.statusDot.style.background = '#f5a623';
+        showToast('Masukkan token di Pengaturan');
     }
     
-    state.token = newToken;
-    localStorage.setItem('geekzpay_token', newToken);
-    
-    showToast('Token tersimpan');
-    
-    // Reset data untuk token baru
-    state.lastIds = new Set();
-    state.history = [];
-    state.newCount = 0;
-    state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
-    saveState();
-    
+    calculateStatsFromHistory();
     renderTransactions();
     updateStatsUI();
     renderStats();
     renderChart();
+    registerServiceWorker();
+    checkNotificationPermission();
     
-    startPolling();
+    console.log('GeekzPay Monitor loaded');
 }
+
+// ============================================
+// NOTIFICATION PERMISSION
+// ============================================
+function checkNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        DOM.permissionBanner.style.display = 'flex';
+    }
+}
+
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(p => {
+            if (p === 'granted') {
+                DOM.permissionBanner.style.display = 'none';
+                showToast('Notifikasi diizinkan');
+            }
+        });
+    }
+}
+window.requestNotificationPermission = requestNotificationPermission;
 
 // ============================================
 // POLLING
@@ -752,6 +694,35 @@ async function pollData() {
 window.pollData = pollData;
 
 // ============================================
+// SAVE TOKEN
+// ============================================
+function saveToken() {
+    const newToken = DOM.tokenInput.value.trim();
+    if (!newToken) {
+        showToast('Token tidak boleh kosong');
+        return;
+    }
+    
+    state.token = newToken;
+    localStorage.setItem('geekzpay_token', state.token);
+    showToast('Token tersimpan');
+    
+    state.lastIds = new Set();
+    state.history = [];
+    state.newCount = 0;
+    state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
+    saveState();
+    
+    renderTransactions();
+    updateStatsUI();
+    renderStats();
+    renderChart();
+    
+    startPolling();
+}
+window.saveToken = saveToken;
+
+// ============================================
 // CLEAR HISTORY
 // ============================================
 function clearHistory() {
@@ -775,36 +746,28 @@ function clearHistory() {
 window.clearHistory = clearHistory;
 
 function clearAllData() {
-    if (!confirm('Hapus SEMUA data (history, QRIS, suara custom, token)?')) return;
+    if (!confirm('Hapus SEMUA data (history, QRIS, suara custom)?')) return;
     
     state.history = [];
     state.lastIds = new Set();
     state.newCount = 0;
     state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
     
-    // QRIS
-    state.qrisImage = null;
-    state.qrisName = null;
+    QRIS_STATE.imageData = null;
+    QRIS_STATE.fileName = null;
     localStorage.removeItem('geekzpay_qris');
     localStorage.removeItem('geekzpay_qris_name');
     document.getElementById('qrisPreviewContainer').style.display = 'none';
     document.getElementById('qrisShowBtn').style.display = 'none';
     document.getElementById('qrisModalImage').src = '';
     document.getElementById('qrisDropZone').style.display = 'block';
-    updateQRISDashboard();
     
-    // Sound
     state.customSound = null;
     state.customSoundName = null;
     localStorage.removeItem('geekzpay_custom_sound');
     localStorage.removeItem('geekzpay_custom_sound_name');
     document.getElementById('soundPreviewContainer').style.display = 'none';
     document.getElementById('soundDropZone').style.display = 'block';
-    
-    // Token
-    state.token = '';
-    localStorage.removeItem('geekzpay_token');
-    DOM.tokenInput.value = '';
     
     saveState();
     
@@ -884,6 +847,43 @@ function sendPushNotification(entry) {
 }
 
 // ============================================
+// UPDATE STATS UI
+// ============================================
+function updateStatsUI() {
+    const total = state.history.length;
+    const totalAmt = state.history.reduce((s, i) => s + (i.amount || 0), 0);
+    DOM.totalCount.textContent = total;
+    DOM.totalAmount.textContent = `Rp ${formatRupiah(totalAmt)}`;
+    DOM.newCount.textContent = state.newCount;
+}
+
+function updateBadge() {
+    if (navigator.setAppBadge) navigator.setAppBadge(state.newCount);
+}
+
+// ============================================
+// STATUS
+// ============================================
+function setStatus(type, text) {
+    DOM.statusText.textContent = text;
+}
+
+// ============================================
+// HELPERS
+// ============================================
+function formatRupiah(v) { return new Intl.NumberFormat('id-ID').format(v || 0); }
+function formatTime(iso) {
+    try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); } 
+    catch { return iso || ''; }
+}
+function showToast(msg) {
+    DOM.toastMessage.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+    DOM.toast.classList.add('show');
+    clearTimeout(DOM.toast._timeout);
+    DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 3000);
+}
+
+// ============================================
 // SERVICE WORKER
 // ============================================
 function registerServiceWorker() {
@@ -892,83 +892,6 @@ function registerServiceWorker() {
             .then(() => console.log('Service Worker registered'))
             .catch(() => console.warn('SW failed'));
     }
-}
-
-// ============================================
-// NOTIFICATION PERMISSION
-// ============================================
-function checkNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-        DOM.permissionBanner.style.display = 'flex';
-    }
-}
-
-function requestNotificationPermission() {
-    if ('Notification' in window) {
-        Notification.requestPermission().then(p => {
-            if (p === 'granted') {
-                DOM.permissionBanner.style.display = 'none';
-                showToast('Notifikasi diizinkan');
-            }
-        });
-    }
-}
-window.requestNotificationPermission = requestNotificationPermission;
-
-// ============================================
-// INIT - FIX SEMUA
-// ============================================
-function init() {
-    applyTheme(state.theme);
-    
-    // QRIS Upload
-    initQRISUpload();
-    updateQRISDashboard();
-    
-    // Sound Upload
-    initSoundUpload();
-    
-    // Settings
-    document.getElementById('darkToggle').checked = state.theme === 'dark';
-    DOM.soundToggle.checked = state.soundEnabled;
-    DOM.ttsToggle.checked = state.ttsEnabled;
-    DOM.soundVolume.value = state.soundVolume;
-    DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
-    
-    // ===== FIX: Token tetap di input =====
-    if (state.token) {
-        DOM.tokenInput.value = state.token;
-        startPolling();
-    } else {
-        DOM.tokenInput.value = '';
-        setStatus('paused', 'Waiting Token');
-        DOM.statusDot.style.background = '#f5a623';
-        showToast('Masukkan token di Pengaturan');
-    }
-    
-    // ===== FIX: Save token button =====
-    if (DOM.saveTokenBtn) {
-        DOM.saveTokenBtn.addEventListener('click', saveToken);
-    }
-    // Enter key di token input
-    DOM.tokenInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            saveToken();
-        }
-    });
-    
-    calculateStatsFromHistory();
-    renderTransactions();
-    updateStatsUI();
-    renderStats();
-    renderChart();
-    registerServiceWorker();
-    checkNotificationPermission();
-    
-    console.log('GeekzPay Monitor loaded');
-    console.log('Token:', state.token ? '✅ Tersimpan' : '❌ Kosong');
-    console.log('QRIS:', state.qrisImage ? '✅ Ada' : '❌ Kosong');
-    console.log('Sound:', state.customSound ? '✅ Ada' : '❌ Kosong');
 }
 
 // ============================================
