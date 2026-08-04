@@ -1,8 +1,8 @@
 /**
  * GeekzPay PWA Monitor
- * Dashboard: QRIS + Statistik Ringkas + Transaksi Terbaru + Grafik
- * Riwayat: Semua Transaksi + Statistik Lengkap
- * Pengaturan: Token, Suara, Voice, Reset
+ * Elegant & Professional Version with Dark Mode
+ * Polling Mode - Simple & Stabil
+ * Dengan QRIS Upload + Custom Sound
  */
 
 // ============================================
@@ -11,8 +11,7 @@
 const CONFIG = {
     API_BASE: 'https://restapi.amgeekz.my.id',
     MAX_HISTORY: 200,
-    POLLING_INTERVAL: 3000,
-    DASHBOARD_LIMIT: 10
+    POLLING_INTERVAL: 3000
 };
 
 // ============================================
@@ -45,97 +44,103 @@ const QRIS_STATE = {
 };
 
 // ============================================
-// PLAY NOTIFICATION SOUND
+// SOUND CONFIGURATION - HANYA COIN + CUSTOM
 // ============================================
-function playNotificationSound() {
-    if (!state.soundEnabled) return;
-    
-    if (state.customSound) {
-        try {
-            const audio = new Audio(state.customSound);
-            audio.volume = state.soundVolume;
-            audio.play().catch(() => {});
-            return;
-        } catch (e) {}
+const SOUNDS = {
+    coin: {
+        label: 'Coin Drop',
+        beeps: [
+            { freq: 1200, duration: 0.06, delay: 0 },
+            { freq: 900, duration: 0.06, delay: 0.1 },
+            { freq: 700, duration: 0.08, delay: 0.2 },
+            { freq: 500, duration: 0.1, delay: 0.32 },
+            { freq: 400, duration: 0.15, delay: 0.46 }
+        ]
+    },
+    custom: {
+        label: 'Custom',
+        beeps: []
     }
-    
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const volume = state.soundVolume;
-        const freqs = [1800, 1400, 1000, 700];
-        
-        freqs.forEach((freq, i) => {
-            setTimeout(() => {
-                try {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.frequency.value = freq;
-                    osc.type = 'sine';
-                    const now = ctx.currentTime;
-                    gain.gain.setValueAtTime(0.01, now);
-                    gain.gain.exponentialRampToValueAtTime(volume * 0.25, now + 0.01);
-                    gain.gain.exponentialRampToValueAtTime(volume * 0.01, now + 0.08);
-                    osc.start(now);
-                    osc.stop(now + 0.08);
-                    
-                    const bufSize = ctx.sampleRate * 0.02;
-                    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-                    const data = buf.getChannelData(0);
-                    for (let j = 0; j < bufSize; j++) {
-                        data[j] = (Math.random() * 2 - 1) * 0.03;
-                    }
-                    const noise = ctx.createBufferSource();
-                    noise.buffer = buf;
-                    const ng = ctx.createGain();
-                    ng.gain.value = volume * 0.08;
-                    noise.connect(ng);
-                    ng.connect(ctx.destination);
-                    noise.start(now);
-                    noise.stop(now + 0.08);
-                } catch (e) {}
-            }, i * 100);
-        });
-    } catch (e) {
-        try {
-            const audio = document.getElementById('notificationSound');
-            if (audio) {
-                audio.currentTime = 0;
-                audio.volume = state.soundVolume;
-                audio.play().catch(() => {});
-            }
-        } catch (err) {}
-    }
-}
+};
 
 // ============================================
-// PAGE NAVIGATION
+// DOM REFS
 // ============================================
-function navigateTo(page) {
-    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    
-    document.querySelectorAll('.page-nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.page-nav-btn[data-page="${page}"]`).classList.add('active');
-}
+const DOM = {
+    tokenInput: document.getElementById('tokenInput'),
+    statusText: document.getElementById('statusText'),
+    statusDot: document.getElementById('statusDot'),
+    totalCount: document.getElementById('totalCount'),
+    totalAmount: document.getElementById('totalAmount'),
+    newCount: document.getElementById('newCount'),
+    todayCount: document.getElementById('todayCount'),
+    todayAmount: document.getElementById('todayAmount'),
+    monthCount: document.getElementById('monthCount'),
+    monthAmount: document.getElementById('monthAmount'),
+    allCount: document.getElementById('allCount'),
+    allAmount: document.getElementById('allAmount'),
+    chartContainer: document.getElementById('chartContainer'),
+    transactionList: document.getElementById('transactionList'),
+    toast: document.getElementById('toast'),
+    toastMessage: document.getElementById('toastMessage'),
+    toggleSoundBtn: document.getElementById('toggleSoundBtn'),
+    toggleTtsBtn: document.getElementById('toggleTtsBtn'),
+    sound: document.getElementById('notificationSound'),
+    permissionBanner: document.getElementById('permissionBanner'),
+    historyCount: document.getElementById('historyCount'),
+    themeToggle: document.getElementById('themeToggle'),
+    themeIcon: document.querySelector('.theme-icon'),
+    // QRIS
+    qrisDropZone: document.getElementById('qrisDropZone'),
+    qrisFileInput: document.getElementById('qrisFileInput'),
+    qrisPreviewContainer: document.getElementById('qrisPreviewContainer'),
+    qrisPreview: document.getElementById('qrisPreview'),
+    qrisShowBtn: document.getElementById('qrisShowBtn'),
+    qrisModalImage: document.getElementById('qrisModalImage'),
+    qrisOverlay: document.getElementById('qrisOverlay'),
+    // Sound Custom
+    soundDropZone: document.getElementById('soundDropZone'),
+    soundFileInput: document.getElementById('soundFileInput'),
+    soundPreviewContainer: document.getElementById('soundPreviewContainer'),
+    soundPreviewName: document.getElementById('soundPreviewName')
+};
 
-document.querySelectorAll('.page-nav-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        navigateTo(this.dataset.page);
-    });
-});
+// ============================================
+// THEME FUNCTIONS
+// ============================================
+function toggleTheme() {
+    const newTheme = state.theme === 'light' ? 'dark' : 'light';
+    state.theme = newTheme;
+    localStorage.setItem('geekzpay_theme', newTheme);
+    applyTheme(newTheme);
+}
+window.toggleTheme = toggleTheme;
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        DOM.themeIcon.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        DOM.themeIcon.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+        meta.content = theme === 'dark' ? '#0f1420' : '#f0f4f8';
+    }
+}
 
 // ============================================
 // QRIS UPLOAD FUNCTIONS
 // ============================================
+
 function initQRISUpload() {
-    const dropZone = document.getElementById('qrisDropZone');
-    const fileInput = document.getElementById('qrisFileInput');
-    const previewContainer = document.getElementById('qrisPreviewContainer');
-    const previewImage = document.getElementById('qrisPreview');
-    const showBtn = document.getElementById('qrisShowBtn');
-    const modalImage = document.getElementById('qrisModalImage');
+    const dropZone = DOM.qrisDropZone;
+    const fileInput = DOM.qrisFileInput;
+    const previewContainer = DOM.qrisPreviewContainer;
+    const previewImage = DOM.qrisPreview;
+    const showBtn = DOM.qrisShowBtn;
+    const modalImage = DOM.qrisModalImage;
     
     if (QRIS_STATE.imageData) {
         previewImage.src = QRIS_STATE.imageData;
@@ -189,11 +194,11 @@ function handleQRISFile(file) {
         localStorage.setItem('geekzpay_qris', imageData);
         localStorage.setItem('geekzpay_qris_name', file.name);
         
-        document.getElementById('qrisPreview').src = imageData;
-        document.getElementById('qrisPreviewContainer').style.display = 'inline-block';
-        document.getElementById('qrisShowBtn').style.display = 'flex';
-        document.getElementById('qrisModalImage').src = imageData;
-        document.getElementById('qrisDropZone').style.display = 'none';
+        DOM.qrisPreview.src = imageData;
+        DOM.qrisPreviewContainer.style.display = 'inline-block';
+        DOM.qrisShowBtn.style.display = 'flex';
+        DOM.qrisModalImage.src = imageData;
+        DOM.qrisDropZone.style.display = 'none';
         
         showToast(`QRIS "${file.name}" berhasil diupload!`);
     };
@@ -207,10 +212,10 @@ function removeQRIS() {
     localStorage.removeItem('geekzpay_qris');
     localStorage.removeItem('geekzpay_qris_name');
     
-    document.getElementById('qrisPreviewContainer').style.display = 'none';
-    document.getElementById('qrisShowBtn').style.display = 'none';
-    document.getElementById('qrisModalImage').src = '';
-    document.getElementById('qrisDropZone').style.display = 'block';
+    DOM.qrisPreviewContainer.style.display = 'none';
+    DOM.qrisShowBtn.style.display = 'none';
+    DOM.qrisModalImage.src = '';
+    DOM.qrisDropZone.style.display = 'block';
     
     showToast('QRIS dihapus');
 }
@@ -222,8 +227,8 @@ function openQRISWidget() {
         return;
     }
     
-    document.getElementById('qrisModalImage').src = QRIS_STATE.imageData;
-    document.getElementById('qrisOverlay').classList.add('active');
+    DOM.qrisModalImage.src = QRIS_STATE.imageData;
+    DOM.qrisOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 window.openQRISWidget = openQRISWidget;
@@ -232,24 +237,26 @@ function closeQRISWidget(event) {
     if (event && event.target !== event.currentTarget) {
         return;
     }
-    document.getElementById('qrisOverlay').classList.remove('active');
+    DOM.qrisOverlay.classList.remove('active');
     document.body.style.overflow = '';
 }
 window.closeQRISWidget = closeQRISWidget;
 
 // ============================================
-// SOUND UPLOAD CUSTOM
+// CUSTOM SOUND FUNCTIONS
 // ============================================
+
 function initSoundUpload() {
-    const dropZone = document.getElementById('soundDropZone');
-    const fileInput = document.getElementById('soundFileInput');
-    const previewContainer = document.getElementById('soundPreviewContainer');
-    const fileName = document.getElementById('soundFileName');
+    const dropZone = DOM.soundDropZone;
+    const fileInput = DOM.soundFileInput;
+    const previewContainer = DOM.soundPreviewContainer;
+    const previewName = DOM.soundPreviewName;
     
     if (state.customSound) {
-        previewContainer.style.display = 'inline-flex';
-        fileName.textContent = state.customSoundName || 'custom.mp3';
+        previewContainer.style.display = 'flex';
+        previewName.textContent = state.customSoundName || 'custom.mp3';
         dropZone.style.display = 'none';
+        document.getElementById('customSoundBtn').style.display = 'flex';
     }
     
     fileInput.addEventListener('change', (e) => {
@@ -282,8 +289,8 @@ function handleSoundFile(file) {
         showToast('File harus audio!');
         return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-        showToast('Maksimal 2MB!');
+    if (file.size > 1 * 1024 * 1024) {
+        showToast('Maksimal 1MB!');
         return;
     }
     
@@ -296,9 +303,14 @@ function handleSoundFile(file) {
         localStorage.setItem('geekzpay_custom_sound', audioData);
         localStorage.setItem('geekzpay_custom_sound_name', file.name);
         
-        document.getElementById('soundFileName').textContent = file.name;
-        document.getElementById('soundPreviewContainer').style.display = 'inline-flex';
-        document.getElementById('soundDropZone').style.display = 'none';
+        DOM.soundPreviewContainer.style.display = 'flex';
+        DOM.soundPreviewName.textContent = file.name;
+        DOM.soundDropZone.style.display = 'none';
+        
+        document.getElementById('customSoundBtn').style.display = 'flex';
+        
+        // Test play
+        playCustomSound();
         
         showToast(`Suara "${file.name}" berhasil diupload!`);
     };
@@ -306,14 +318,13 @@ function handleSoundFile(file) {
 }
 
 function playCustomSound() {
-    if (state.customSound) {
-        try {
-            const audio = new Audio(state.customSound);
-            audio.volume = state.soundVolume;
-            audio.play().catch(() => {});
-        } catch (e) {
-            showToast('Gagal memutar suara');
-        }
+    if (!state.customSound) return;
+    try {
+        const audio = new Audio(state.customSound);
+        audio.volume = state.soundVolume;
+        audio.play().catch(() => {});
+    } catch (e) {
+        showToast('Gagal memutar suara custom');
     }
 }
 window.playCustomSound = playCustomSound;
@@ -325,68 +336,90 @@ function removeCustomSound() {
     localStorage.removeItem('geekzpay_custom_sound');
     localStorage.removeItem('geekzpay_custom_sound_name');
     
-    document.getElementById('soundPreviewContainer').style.display = 'none';
-    document.getElementById('soundDropZone').style.display = 'block';
+    DOM.soundPreviewContainer.style.display = 'none';
+    DOM.soundDropZone.style.display = 'block';
+    document.getElementById('customSoundBtn').style.display = 'none';
+    
+    if (state.soundType === 'custom') {
+        state.soundType = 'coin';
+        localStorage.setItem('geekzpay_sound_type', 'coin');
+        document.querySelectorAll('.sound-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.sound === 'coin');
+        });
+    }
     
     showToast('Suara custom dihapus');
 }
 window.removeCustomSound = removeCustomSound;
 
 // ============================================
-// DOM REFS
+// SOUND FUNCTIONS - HANYA COIN + CUSTOM
 // ============================================
-const DOM = {
-    tokenInput: document.getElementById('tokenInput'),
-    statusText: document.getElementById('statusText'),
-    statusDot: document.getElementById('statusDot'),
-    totalCount: document.getElementById('totalCount'),
-    totalAmount: document.getElementById('totalAmount'),
-    newCount: document.getElementById('newCount'),
-    todayCount: document.getElementById('todayCount'),
-    todayAmount: document.getElementById('todayAmount'),
-    monthCount: document.getElementById('monthCount'),
-    monthAmount: document.getElementById('monthAmount'),
-    allCount: document.getElementById('allCount'),
-    allAmount: document.getElementById('allAmount'),
-    chartContainer: document.getElementById('chartContainer'),
-    dashTransactionList: document.getElementById('dashTransactionList'),
-    transactionList: document.getElementById('transactionList'),
-    toast: document.getElementById('toast'),
-    toastMessage: document.getElementById('toastMessage'),
-    permissionBanner: document.getElementById('permissionBanner'),
-    dashHistoryCount: document.getElementById('dashHistoryCount'),
-    historyCount: document.getElementById('historyCount'),
-    themeIcon: document.querySelector('.theme-icon'),
-    soundVolume: document.getElementById('soundVolume'),
-    soundVolumeLabel: document.getElementById('soundVolumeLabel'),
-    soundToggle: document.getElementById('soundToggle'),
-    ttsToggle: document.getElementById('ttsToggle')
-};
 
-// ============================================
-// THEME FUNCTIONS
-// ============================================
-function toggleTheme() {
-    const newTheme = state.theme === 'light' ? 'dark' : 'light';
-    state.theme = newTheme;
-    localStorage.setItem('geekzpay_theme', newTheme);
-    applyTheme(newTheme);
-}
-window.toggleTheme = toggleTheme;
-
-function applyTheme(theme) {
-    if (theme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        if (DOM.themeIcon) DOM.themeIcon.innerHTML = '<i class="fas fa-sun"></i>';
-        document.getElementById('darkToggle').checked = true;
-    } else {
-        document.documentElement.removeAttribute('data-theme');
-        if (DOM.themeIcon) DOM.themeIcon.innerHTML = '<i class="fas fa-moon"></i>';
-        document.getElementById('darkToggle').checked = false;
+function playNotificationSound() {
+    if (!state.soundEnabled) return;
+    
+    // Jika custom sound dan ada
+    if (state.soundType === 'custom' && state.customSound) {
+        try {
+            const audio = new Audio(state.customSound);
+            audio.volume = state.soundVolume;
+            audio.play().catch(() => {});
+            return;
+        } catch (e) {
+            // Fallback ke coin jika custom gagal
+        }
     }
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) {
-        meta.content = theme === 'dark' ? '#0f1420' : '#f0f4f8';
+    
+    // Default: Coin Drop (uang jatuh ke celengan)
+    try {
+        if (!state.audioContext) {
+            state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const ctx = state.audioContext;
+        const config = SOUNDS.coin;
+        const volume = state.soundVolume;
+        
+        config.beeps.forEach((beep, i) => {
+            setTimeout(() => {
+                try {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.value = beep.freq;
+                    osc.type = 'sine';
+                    const now = ctx.currentTime;
+                    gain.gain.setValueAtTime(0.01, now);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.35, now + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(volume * 0.01, now + beep.duration);
+                    osc.start(now);
+                    osc.stop(now + beep.duration);
+                    
+                    // Efek noise (seperti suara coin)
+                    const bufSize = ctx.sampleRate * 0.01;
+                    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let j = 0; j < bufSize; j++) {
+                        data[j] = (Math.random() * 2 - 1) * 0.03;
+                    }
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = buf;
+                    const ng = ctx.createGain();
+                    ng.gain.value = volume * 0.08;
+                    noise.connect(ng);
+                    ng.connect(ctx.destination);
+                    noise.start(now);
+                    noise.stop(now + beep.duration);
+                } catch (e) {}
+            }, beep.delay * 1000);
+        });
+    } catch (e) {
+        try { 
+            DOM.sound.currentTime = 0; 
+            DOM.sound.volume = state.soundVolume; 
+            DOM.sound.play(); 
+        } catch (err) {}
     }
 }
 
@@ -499,60 +532,6 @@ function renderChart() {
 }
 
 // ============================================
-// RENDER TRANSACTIONS (Dashboard & Riwayat)
-// ============================================
-function renderTransactions() {
-    // Dashboard - 10 transaksi terbaru
-    const dashItems = state.history.slice(0, CONFIG.DASHBOARD_LIMIT);
-    if (dashItems.length === 0) {
-        DOM.dashTransactionList.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
-                <p>Belum ada transaksi</p>
-                <span>Masukkan token di Pengaturan</span>
-            </div>`;
-        DOM.dashHistoryCount.textContent = '0';
-    } else {
-        DOM.dashTransactionList.innerHTML = dashItems.map((item, index) => {
-            const isNew = index < state.newCount && index < 5;
-            return `
-                <div class="transaction-item ${isNew ? 'new' : ''}">
-                    <div>
-                        <div class="amount">Rp ${formatRupiah(item.amount)}</div>
-                        <div class="info">${item.message}</div>
-                    </div>
-                    <div class="time">${formatTime(item.time)}</div>
-                </div>`;
-        }).join('');
-        DOM.dashHistoryCount.textContent = state.history.length;
-    }
-    
-    // Riwayat - semua transaksi
-    if (state.history.length === 0) {
-        DOM.transactionList.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
-                <p>Belum ada transaksi</p>
-                <span>Masukkan token di Pengaturan</span>
-            </div>`;
-        DOM.historyCount.textContent = '0';
-    } else {
-        DOM.transactionList.innerHTML = state.history.map((item, index) => {
-            const isNew = index < state.newCount && index < 5;
-            return `
-                <div class="transaction-item ${isNew ? 'new' : ''}">
-                    <div>
-                        <div class="amount">Rp ${formatRupiah(item.amount)}</div>
-                        <div class="info">${item.message}</div>
-                    </div>
-                    <div class="time">${formatTime(item.time)}</div>
-                </div>`;
-        }).join('');
-        DOM.historyCount.textContent = state.history.length;
-    }
-}
-
-// ============================================
 // INIT
 // ============================================
 function init() {
@@ -561,12 +540,6 @@ function init() {
     initQRISUpload();
     initSoundUpload();
     
-    document.getElementById('darkToggle').checked = state.theme === 'dark';
-    DOM.soundToggle.checked = state.soundEnabled;
-    DOM.ttsToggle.checked = state.ttsEnabled;
-    DOM.soundVolume.value = state.soundVolume;
-    DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
-    
     if (state.token) {
         DOM.tokenInput.value = state.token;
         startPolling();
@@ -574,10 +547,11 @@ function init() {
         DOM.tokenInput.value = '';
         setStatus('paused', 'Waiting Token');
         DOM.statusDot.style.background = '#f5a623';
-        showToast('Masukkan token di Pengaturan');
+        showToast('Masukkan token terlebih dahulu');
     }
     
     calculateStatsFromHistory();
+    updateSoundUI();
     renderTransactions();
     updateStatsUI();
     renderStats();
@@ -619,7 +593,7 @@ function startPolling() {
     }
     
     if (!state.token) {
-        showToast('Masukkan token di Pengaturan');
+        showToast('Masukkan token terlebih dahulu');
         return;
     }
 
@@ -630,6 +604,15 @@ function startPolling() {
     
     pollData();
     state.pollingInterval = setInterval(pollData, CONFIG.POLLING_INTERVAL);
+}
+
+function stopPolling() {
+    if (state.pollingInterval) {
+        clearInterval(state.pollingInterval);
+        state.pollingInterval = null;
+        state.isPolling = false;
+        console.log('Polling stopped');
+    }
 }
 
 // ============================================
@@ -745,43 +728,6 @@ function clearHistory() {
 }
 window.clearHistory = clearHistory;
 
-function clearAllData() {
-    if (!confirm('Hapus SEMUA data (history, QRIS, suara custom)?')) return;
-    
-    state.history = [];
-    state.lastIds = new Set();
-    state.newCount = 0;
-    state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
-    
-    QRIS_STATE.imageData = null;
-    QRIS_STATE.fileName = null;
-    localStorage.removeItem('geekzpay_qris');
-    localStorage.removeItem('geekzpay_qris_name');
-    document.getElementById('qrisPreviewContainer').style.display = 'none';
-    document.getElementById('qrisShowBtn').style.display = 'none';
-    document.getElementById('qrisModalImage').src = '';
-    document.getElementById('qrisDropZone').style.display = 'block';
-    
-    state.customSound = null;
-    state.customSoundName = null;
-    localStorage.removeItem('geekzpay_custom_sound');
-    localStorage.removeItem('geekzpay_custom_sound_name');
-    document.getElementById('soundPreviewContainer').style.display = 'none';
-    document.getElementById('soundDropZone').style.display = 'block';
-    
-    saveState();
-    
-    renderTransactions();
-    updateStatsUI();
-    renderStats();
-    renderChart();
-    updateBadge();
-    if (navigator.clearAppBadge) navigator.clearAppBadge();
-    
-    showToast('Semua data dibersihkan');
-}
-window.clearAllData = clearAllData;
-
 // ============================================
 // TEXT-TO-SPEECH
 // ============================================
@@ -807,7 +753,7 @@ function speakPayment(amount) {
 function toggleSound() {
     state.soundEnabled = !state.soundEnabled;
     localStorage.setItem('geekzpay_sound', String(state.soundEnabled));
-    DOM.soundToggle.checked = state.soundEnabled;
+    updateSoundUI();
     showToast(state.soundEnabled ? 'Suara ON' : 'Suara OFF');
 }
 window.toggleSound = toggleSound;
@@ -815,18 +761,47 @@ window.toggleSound = toggleSound;
 function toggleTts() {
     state.ttsEnabled = !state.ttsEnabled;
     localStorage.setItem('geekzpay_tts', String(state.ttsEnabled));
-    DOM.ttsToggle.checked = state.ttsEnabled;
+    updateSoundUI();
     showToast(state.ttsEnabled ? 'Voice ON' : 'Voice OFF');
     if (state.ttsEnabled) speakPayment(10000);
 }
 window.toggleTts = toggleTts;
 
+function changeSoundType(type) {
+    if (type === 'custom' && !state.customSound) {
+        showToast('Upload suara custom terlebih dahulu!');
+        return;
+    }
+    state.soundType = type;
+    localStorage.setItem('geekzpay_sound_type', type);
+    updateSoundUI();
+    playNotificationSound();
+    showToast(`Suara: ${type === 'coin' ? 'Coin Drop' : 'Custom'}`);
+}
+window.changeSoundType = changeSoundType;
+
 function changeSoundVolume(value) {
     state.soundVolume = parseFloat(value);
     localStorage.setItem('geekzpay_sound_volume', String(state.soundVolume));
-    DOM.soundVolumeLabel.textContent = `${Math.round(state.soundVolume * 100)}%`;
+    updateSoundUI();
 }
 window.changeSoundVolume = changeSoundVolume;
+
+function updateSoundUI() {
+    DOM.toggleSoundBtn.innerHTML = state.soundEnabled ? '<i class="fas fa-volume-up"></i> Suara' : '<i class="fas fa-volume-mute"></i> Mute';
+    DOM.toggleSoundBtn.className = state.soundEnabled ? 'btn btn-soft active' : 'btn btn-soft';
+    
+    DOM.toggleTtsBtn.innerHTML = state.ttsEnabled ? '<i class="fas fa-microphone"></i> Voice' : '<i class="fas fa-microphone-slash"></i> Mute';
+    DOM.toggleTtsBtn.className = state.ttsEnabled ? 'btn btn-soft active' : 'btn btn-soft';
+    
+    document.querySelectorAll('.sound-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sound === state.soundType);
+    });
+    
+    const slider = document.getElementById('soundVolume');
+    if (slider) slider.value = state.soundVolume;
+    document.getElementById('soundVolumeLabel').textContent = `${Math.round(state.soundVolume * 100)}%`;
+}
 
 // ============================================
 // PUSH NOTIFICATION
@@ -847,8 +822,35 @@ function sendPushNotification(entry) {
 }
 
 // ============================================
-// UPDATE STATS UI
+// RENDER FUNCTIONS
 // ============================================
+function renderTransactions() {
+    if (state.history.length === 0) {
+        DOM.transactionList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                <p>Belum ada transaksi</p>
+                <span>Masukkan token dan tunggu notifikasi</span>
+            </div>`;
+        DOM.historyCount.textContent = '0';
+        return;
+    }
+    
+    DOM.transactionList.innerHTML = state.history.map((item, index) => {
+        const isNew = index < state.newCount && index < 5;
+        return `
+            <div class="transaction-item ${isNew ? 'new' : ''}">
+                <div>
+                    <div class="amount">Rp ${formatRupiah(item.amount)}</div>
+                    <div class="info">${item.message}</div>
+                </div>
+                <div class="time">${formatTime(item.time)}</div>
+            </div>`;
+    }).join('');
+    
+    DOM.historyCount.textContent = state.history.length;
+}
+
 function updateStatsUI() {
     const total = state.history.length;
     const totalAmt = state.history.reduce((s, i) => s + (i.amount || 0), 0);
@@ -898,7 +900,10 @@ function registerServiceWorker() {
 // KEYBOARD SHORTCUTS
 // ============================================
 document.addEventListener('keydown', (e) => {
+    if (e.key === 'm' || e.key === 'M') toggleSound();
+    if (e.key === 't' || e.key === 'T') toggleTts();
     if (e.key === 'Escape') closeQRISWidget();
+    if (e.key === 'Enter' && document.activeElement === DOM.tokenInput) saveToken();
     if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
         e.preventDefault();
         toggleTheme();

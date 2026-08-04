@@ -175,52 +175,6 @@ body {
 }
 
 /* ============================================
-   PAGE NAVIGATION
-   ============================================ */
-.page-nav {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.page-nav-btn {
-    padding: 10px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--card-bg);
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-weight: 600;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.page-nav-btn:hover {
-    border-color: var(--primary);
-    color: var(--text-primary);
-}
-
-.page-nav-btn.active {
-    background: var(--primary);
-    color: #fff;
-    border-color: var(--primary);
-}
-
-.page-content {
-    display: none;
-}
-
-.page-content.active {
-    display: block;
-}
-
-/* ============================================
    QRIS UPLOAD SECTION
    ============================================ */
 .qris-section {
@@ -352,6 +306,164 @@ body {
 .btn-qris:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 16px rgba(79, 110, 247, 0.30);
+}
+
+/* ============================================
+   SOUND UPLOAD SECTION - CUSTOM
+   ============================================ */
+.sound-upload-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+}
+
+.sound-upload-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.sound-upload-icon {
+    font-size: 16px;
+    color: var(--text-muted);
+}
+
+.sound-upload-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.sound-upload-box {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: var(--bg);
+}
+
+.sound-upload-box:hover {
+    border-color: var(--primary);
+    background: rgba(79, 110, 247, 0.05);
+}
+
+.sound-upload-box.dragover {
+    border-color: var(--primary);
+    background: rgba(79, 110, 247, 0.10);
+}
+
+.sound-upload-box .sound-upload-icon {
+    font-size: 24px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.sound-upload-text {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.sound-upload-hint {
+    font-size: 10px;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 4px;
+}
+
+.sound-upload-btn {
+    padding: 6px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 6px 0;
+}
+
+.sound-upload-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.sound-preview-container {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.sound-preview-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sound-play-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sound-play-btn:hover {
+    transform: scale(1.05);
+}
+
+.sound-remove-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--danger);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sound-remove-btn:hover {
+    transform: scale(1.05);
+}
+
+.sound-default-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sound-default-label {
+    font-weight: 600;
+    color: var(--text-secondary);
 }
 
 /* ============================================
@@ -532,6 +644,108 @@ body {
 }
 
 /* ============================================
+   TOKEN INPUT
+   ============================================ */
+.token-section {
+    background: var(--card-bg);
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+}
+
+.token-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.token-input-group input {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: 0.3s;
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.token-input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
+}
+
+.token-input-group input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn {
+    padding: 9px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    box-shadow: 0 4px 16px rgba(79, 110, 247, 0.30);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #d94a5a;
+}
+
+.btn-soft {
+    background: var(--bg);
+    color: var(--text-secondary);
+}
+
+.btn-soft:hover {
+    background: var(--border);
+}
+
+.btn-soft.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.controls .btn {
+    padding: 8px;
+    font-size: 11px;
+    justify-content: center;
+}
+
+/* ============================================
    TRANSACTION LIST
    ============================================ */
 .transaction-section {
@@ -539,7 +753,6 @@ body {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     overflow: hidden;
-    margin-bottom: 14px;
 }
 
 .transaction-header {
@@ -774,342 +987,6 @@ body {
 }
 
 /* ============================================
-   SETTINGS
-   ============================================ */
-.settings-section {
-    margin-bottom: 16px;
-}
-
-.settings-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 14px;
-}
-
-.settings-card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow);
-    margin-bottom: 12px;
-}
-
-.settings-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    gap: 10px;
-}
-
-.settings-item:last-child {
-    border-bottom: none;
-}
-
-.settings-item span {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    white-space: nowrap;
-}
-
-.settings-input-group {
-    display: flex;
-    gap: 6px;
-    flex: 1;
-    max-width: 300px;
-}
-
-.settings-input {
-    flex: 1;
-    padding: 6px 10px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    font-family: 'Inter', sans-serif;
-    background: var(--input-bg);
-    color: var(--text-primary);
-    outline: none;
-    transition: 0.3s;
-    min-width: 0;
-}
-
-.settings-input:focus {
-    border-color: var(--primary);
-}
-
-.settings-input::placeholder {
-    color: var(--text-muted);
-}
-
-.btn-sm {
-    padding: 6px 12px;
-    font-size: 11px;
-}
-
-/* ============================================
-   BUTTONS
-   ============================================ */
-.btn {
-    padding: 9px 16px;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    font-weight: 600;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: #fff;
-}
-
-.btn-primary:hover {
-    background: var(--primary-dark);
-    box-shadow: 0 4px 16px rgba(79, 110, 247, 0.30);
-}
-
-.btn-danger {
-    background: var(--danger);
-    color: #fff;
-}
-
-.btn-danger:hover {
-    background: #d94a5a;
-}
-
-.btn-soft {
-    background: var(--bg);
-    color: var(--text-secondary);
-}
-
-.btn-soft:hover {
-    background: var(--border);
-}
-
-.btn-soft.active {
-    background: var(--primary);
-    color: #fff;
-}
-
-/* ============================================
-   SOUND SETTINGS (di Pengaturan)
-   ============================================ */
-.sound-upload-box {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    text-align: center;
-    transition: all 0.3s ease;
-    background: var(--bg);
-    width: 100%;
-}
-
-.sound-upload-box:hover {
-    border-color: var(--primary);
-}
-
-.sound-upload-icon {
-    font-size: 20px;
-    color: var(--text-muted);
-    margin-bottom: 2px;
-}
-
-.sound-upload-text {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.sound-upload-btn {
-    padding: 4px 12px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--card-bg);
-    color: var(--text-secondary);
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin: 4px 0;
-}
-
-.sound-upload-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-.sound-upload-hint {
-    font-size: 9px;
-    color: var(--text-muted);
-    display: block;
-}
-
-.sound-preview-container {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    flex-wrap: wrap;
-}
-
-.sound-file-name {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.sound-play-btn {
-    padding: 3px 10px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--card-bg);
-    color: var(--text-secondary);
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.sound-play-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-.sound-remove-btn {
-    width: 22px;
-    height: 22px;
-    border: none;
-    border-radius: 50%;
-    background: var(--danger);
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-}
-
-.sound-remove-btn:hover {
-    transform: scale(1.1);
-}
-
-.volume-control {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-}
-
-.volume-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-.volume-control input[type="range"] {
-    flex: 1;
-    height: 4px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: var(--border);
-    border-radius: 2px;
-    outline: none;
-}
-
-.volume-control input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--primary);
-    cursor: pointer;
-}
-
-.volume-value {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    min-width: 40px;
-    text-align: right;
-}
-
-.sound-info {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    font-size: 10px;
-    color: var(--text-muted);
-    padding: 4px 0;
-}
-
-.sound-info span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* ============================================
-   TOGGLE SWITCH
-   ============================================ */
-.toggle-switch {
-    position: relative;
-    width: 44px;
-    height: 24px;
-    flex-shrink: 0;
-}
-
-.toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    inset: 0;
-    background: var(--border);
-    border-radius: 24px;
-    transition: 0.3s;
-}
-
-.toggle-slider::before {
-    content: '';
-    position: absolute;
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background: #fff;
-    border-radius: 50%;
-    transition: 0.3s;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-    background: var(--primary);
-}
-
-.toggle-switch input:checked + .toggle-slider::before {
-    transform: translateX(20px);
-}
-
-/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 480px) {
@@ -1136,6 +1013,15 @@ body {
     
     .chart-container {
         height: 60px;
+    }
+    
+    .controls {
+        gap: 6px;
+    }
+    
+    .controls .btn {
+        font-size: 10px;
+        padding: 6px 4px;
     }
     
     .header-left h1 {
@@ -1175,31 +1061,12 @@ body {
         font-size: 10px;
     }
     
-    .page-nav-btn {
-        font-size: 10px;
-        padding: 8px;
-    }
-    
-    .settings-item {
-        flex-wrap: wrap;
-    }
-    
-    .settings-input-group {
-        max-width: 100%;
-        flex-wrap: wrap;
-    }
-    
-    .settings-input {
-        width: 100%;
-    }
-    
-    .btn-sm {
-        width: 100%;
-        justify-content: center;
+    .sound-upload-box {
+        padding: 12px;
     }
     
     .sound-preview-container {
-        width: 100%;
+        flex-wrap: wrap;
         justify-content: center;
     }
 }
