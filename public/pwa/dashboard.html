@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚡ GeekzPay Monitor</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+    <meta name="theme-color" content="#0f0f1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/pwa/dashboard.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1>⚡ GeekzPay Monitor</h1>
+        </div>
+        <div class="header-right">
+            <div class="status-badge">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Online</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Stats Cards -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Total Transaksi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalAmount">Rp 0</div>
+                <div class="stat-label">Total Nominal</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="newCount">0</div>
+                <div class="stat-label">Baru</div>
+            </div>
+        </section>
+
+        <!-- Token Input -->
+        <section class="token-section">
+            <div class="token-input-group">
+                <input type="text" id="tokenInput" placeholder="Masukkan Token GeekzPay..." 
+                       value="USER123">
+                <button class="btn btn-primary" onclick="saveToken()">Simpan</button>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <section class="controls">
+            <button class="btn btn-success" id="toggleSoundBtn" onclick="toggleSound()">🔊 Suara ON</button>
+            <button class="btn btn-primary" onclick="fetchData()">🔄 Refresh</button>
+            <button class="btn btn-danger" onclick="clearHistory()">🗑️ Clear</button>
+        </section>
+
+        <!-- Transaction List -->
+        <section class="transaction-section">
+            <div id="transactionList" class="transaction-list">
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>Belum ada transaksi</p>
+                    <small>Masukkan token dan tunggu notifikasi</small>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">💳 Pembayaran baru masuk!</span>
+    </div>
+
+    <!-- Audio for notification (fallback) -->
+    <audio id="notificationSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoAAACBhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqFhYqF" type="audio/wav">
+    </audio>
+
+    <!-- JavaScript -->
+    <script src="/pwa/dashboard.js"></script>
+</body>
+</html>
