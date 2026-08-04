@@ -21,34 +21,6 @@ const EVENT_TTL_SEC = Math.max(1, parseInt(process.env.EVENT_TTL_SEC || '300', 1
 const EVENT_MAX_KEEP = Math.max(1, parseInt(process.env.EVENT_MAX_KEEP || '10', 10));
 
 // ============================================
-// SSE CLIENTS
-// ============================================
-const sseClients = new Map();
-
-function sendSSENotification(token, eventData) {
-    const clients = sseClients.get(token);
-    if (!clients || clients.size === 0) {
-        console.log(`◆ No SSE clients for token: ${token}`);
-        return;
-    }
-
-    const message = `event: payment\ndata: ${JSON.stringify(eventData)}\n\n`;
-    let sent = 0;
-    
-    clients.forEach(client => {
-        try {
-            client.write(message);
-            sent++;
-        } catch (e) {
-            clients.delete(client);
-            console.warn('⊘ Failed to send SSE to client:', e.message);
-        }
-    });
-    
-    console.log(`◆ SSE notification sent to ${sent} clients for token: ${token}`);
-}
-
-// ============================================
 // EXTRACT FUNCTIONS
 // ============================================
 function extractToken(req) {
@@ -325,7 +297,7 @@ function safeParseMaybeString(v) {
 }
 
 // ============================================
-// WEBHOOK PAYMENT - DENGAN SSE
+// WEBHOOK PAYMENT
 // ============================================
 app.all('/webhook/payment', async (req, res) => {
     try {
@@ -375,26 +347,11 @@ app.all('/webhook/payment', async (req, res) => {
         const key = `ev:${tokenForBucket}`;
         await redisLPushTrimExpire(key, eventPayload, EVENT_MAX_KEEP, EVENT_TTL_SEC);
 
-        // Simpan ke file log
         try {
             const p = process.env.VERCEL ? '/tmp/events.log' : './data/events.log';
             if (!process.env.VERCEL) fs.mkdirSync('./data', { recursive: true });
             fs.appendFileSync(p, JSON.stringify(eventPayload) + '\n');
         } catch {}
-
-        // ============================================
-        // KIRIM SSE NOTIFIKASI KE SEMUA CLIENT
-        // ============================================
-        const sseData = {
-            event_id: eventId,
-            amount: amount,
-            received_at: new Date().toISOString(),
-            message: body.message || body.text || 'Pembayaran masuk',
-            body: body
-        };
-        
-        console.log(`◆ Sending SSE notification for token: ${tokenForBucket}, amount: ${amount}`);
-        sendSSENotification(tokenForBucket, sseData);
 
         const debug = String(req.query.debug || '0') === '1';
         return res.json(toCompact(eventPayload, debug));
@@ -494,65 +451,6 @@ app.get('/webhook/summary', async (req, res) => {
 });
 
 // ============================================
-// SSE ENDPOINT - DENGAN HEARTBEAT
-// ============================================
-app.get('/pwa/events', (req, res) => {
-    const token = req.query.token;
-    if (!token) {
-        return res.status(401).json({ error: 'Token required' });
-    }
-
-    // Header SSE
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
-        'X-Accel-Buffering': 'no'
-    });
-
-    // Kirim event connected
-    res.write(`event: connected\ndata: ${JSON.stringify({ status: 'connected', token: token })}\n\n`);
-
-    // Heartbeat setiap 10 detik
-    const heartbeat = setInterval(() => {
-        try {
-            res.write(`: heartbeat\n\n`);
-            // Kirim ping setiap 30 detik
-            if (Math.floor(Date.now() / 30000) % 2 === 0) {
-                res.write(`event: ping\ndata: {"time":"${new Date().toISOString()}"}\n\n`);
-            }
-        } catch (e) {
-            clearInterval(heartbeat);
-        }
-    }, 10000);
-
-    // Simpan client
-    if (!sseClients.has(token)) {
-        sseClients.set(token, new Set());
-    }
-    sseClients.get(token).add(res);
-    
-    console.log(`◆ SSE connected: ${token} (${sseClients.get(token).size} clients)`);
-
-    // Hapus client saat koneksi ditutup
-    req.on('close', () => {
-        clearInterval(heartbeat);
-        const clients = sseClients.get(token);
-        if (clients) {
-            clients.delete(res);
-            if (clients.size === 0) {
-                sseClients.delete(token);
-            }
-        }
-        console.log(`◆ SSE disconnected: ${token} (${clients ? clients.size : 0} clients left)`);
-    });
-
-    // Keep-alive - jangan matikan koneksi
-    req.setTimeout(0);
-});
-
-// ============================================
 // SERVE STATIC FILES
 // ============================================
 app.use(express.static(path.join(__dirname, 'public'), {
@@ -632,8 +530,6 @@ if (require.main === module) {
     const HOST = '0.0.0.0';
     app.listen(PORT, HOST, () => {
         console.log(`QRIS REST API listening on http://${HOST}:${PORT}`);
-        console.log(`◆ SSE endpoint: http://${HOST}:${PORT}/pwa/events?token=YOUR_TOKEN`);
-        console.log(`◆ Webhook endpoint: http://${HOST}:${PORT}/webhook/payment?token=YOUR_TOKEN`);
     });
 } else {
     module.exports = app;
