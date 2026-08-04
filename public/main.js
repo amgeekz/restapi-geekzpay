@@ -203,6 +203,26 @@ document.getElementById('btnDynamicReset')?.addEventListener('click', function()
 });
 
 // ============================================
+// QRIS MODAL ZOOM
+// ============================================
+function openQRISModal() {
+    document.getElementById('qrisModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeQRISModal() {
+    document.getElementById('qrisModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Tutup dengan ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeQRISModal();
+    }
+});
+
+// ============================================
 // QR CONVERTER
 // ============================================
 const dropZone = document.getElementById('dropZone');

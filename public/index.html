@@ -375,7 +375,7 @@
             </div>
 
             <!-- ==========================================
-            PAGE: DONATE
+            PAGE: DONATE - DENGAN MODAL ZOOM QRIS
             ========================================== -->
             <div id="page-donate" class="page">
                 <div class="card text-center">
@@ -384,7 +384,9 @@
                 </div>
                 <div class="card donate-card">
                     <h3><i class="fas fa-qrcode"></i> Scan QRIS Berikut</h3>
-                    <img src="/qris.jpg" alt="QRIS Donasi" class="donate-qr">
+                    <!-- QRIS bisa di-klik untuk zoom -->
+                    <img src="/qris.jpg" alt="QRIS Donasi" class="donate-qr" onclick="openQRISModal()" style="cursor:pointer;">
+                    <p class="qr-hint"><i class="fas fa-search-plus"></i> Klik gambar untuk memperbesar</p>
                     <p>QRIS Interoperabilitas Nasional</p>
                     <p style="color:var(--text-muted);font-size:12px;">Terima kasih</p>
                 </div>
@@ -404,6 +406,19 @@
 
         </div>
     </main>
+
+    <!-- ============================================
+    QRIS MODAL ZOOM
+    ============================================ -->
+    <div id="qrisModal" class="qris-modal-overlay" onclick="closeQRISModal()">
+        <div class="qris-modal-content" onclick="event.stopPropagation()">
+            <button class="qris-modal-close" onclick="closeQRISModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <img src="/qris.jpg" alt="QRIS Donasi" class="qris-modal-image">
+            <p class="qris-modal-hint">Scan QRIS untuk donasi</p>
+        </div>
+    </div>
 
     <!-- TOAST -->
     <div id="toast" class="toast"></div>
