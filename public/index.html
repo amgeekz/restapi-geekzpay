@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeekzPay API Docs</title>
     
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -25,13 +29,13 @@
     <header class="header">
         <div class="header-inner">
             <div class="logo">
-                <span class="logo-icon">&raquo;</span>
+                <span class="logo-icon"><i class="fas fa-bolt"></i></span>
                 <span class="logo-text">GeekzPay</span>
                 <span class="logo-badge">v2.0</span>
             </div>
             <div class="header-actions">
-                <button class="theme-btn" onclick="toggleTheme()">&bull;</button>
-                <button class="menu-btn" onclick="toggleMenu()">&equiv;</button>
+                <button class="theme-btn" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+                <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
             </div>
         </div>
     </header>
@@ -42,20 +46,30 @@
     <div id="mobileMenu" class="mobile-menu">
         <div class="mobile-menu-inner">
             <div class="mobile-menu-header">
-                <span>Menu</span>
-                <button onclick="toggleMenu()">&times;</button>
+                <span><i class="fas fa-bars"></i> Menu</span>
+                <button onclick="toggleMenu()"><i class="fas fa-times"></i></button>
             </div>
             <nav>
-                <a href="#" class="active" data-page="docs">Dokumentasi</a>
-                <a href="#" data-page="history">Cek Riwayat</a>
-                <a href="#" data-page="forwarder">Forwarder</a>
-                <a href="#" data-page="donate">Donasi</a>
-                <a href="#" data-page="pwa">PWA Monitor</a>
+                <a href="#" class="active" data-page="docs">
+                    <i class="fas fa-book"></i> Dokumentasi
+                </a>
+                <a href="#" data-page="history">
+                    <i class="fas fa-clock-rotate-left"></i> Cek Riwayat
+                </a>
+                <a href="#" data-page="forwarder">
+                    <i class="fas fa-arrow-right-arrow-left"></i> Forwarder
+                </a>
+                <a href="#" data-page="donate">
+                    <i class="fas fa-heart"></i> Donasi
+                </a>
+                <a href="#" data-page="pwa">
+                    <i class="fas fa-mobile-screen-button"></i> PWA Monitor
+                </a>
                 <hr>
-                <a href="#hero">Cara Kerja</a>
-                <a href="#qris">Buat QRIS</a>
-                <a href="#webhook">Webhook</a>
-                <a href="#examples">cURL</a>
+                <a href="#hero"><i class="fas fa-house"></i> Cara Kerja</a>
+                <a href="#qris"><i class="fas fa-qrcode"></i> Buat QRIS</a>
+                <a href="#webhook"><i class="fas fa-code-branch"></i> Webhook</a>
+                <a href="#examples"><i class="fas fa-terminal"></i> cURL</a>
             </nav>
         </div>
     </div>
@@ -68,11 +82,21 @@
 
             <!-- TABS -->
             <div class="tabs">
-                <button class="tab active" data-page="docs">Dokumentasi</button>
-                <button class="tab" data-page="history">Cek Riwayat</button>
-                <button class="tab" data-page="forwarder">Forwarder</button>
-                <button class="tab" data-page="donate">Donasi</button>
-                <button class="tab" data-page="pwa">PWA Monitor</button>
+                <button class="tab active" data-page="docs">
+                    <i class="fas fa-book"></i> Dokumentasi
+                </button>
+                <button class="tab" data-page="history">
+                    <i class="fas fa-clock-rotate-left"></i> Cek Riwayat
+                </button>
+                <button class="tab" data-page="forwarder">
+                    <i class="fas fa-arrow-right-arrow-left"></i> Forwarder
+                </button>
+                <button class="tab" data-page="donate">
+                    <i class="fas fa-heart"></i> Donasi
+                </button>
+                <button class="tab" data-page="pwa">
+                    <i class="fas fa-mobile-screen-button"></i> PWA Monitor
+                </button>
             </div>
 
             <!-- ==========================================
@@ -82,7 +106,7 @@
 
                 <!-- HERO -->
                 <section class="card">
-                    <span class="badge-red">PENTING</span>
+                    <span class="badge-red"><i class="fas fa-triangle-exclamation"></i> PENTING</span>
                     <h1>Panduan Sistem GeekzPay REST API</h1>
                     <p>Sistem ini berfungsi untuk mengecek dan mencatat pembayaran QRIS secara otomatis hanya dengan membaca notifikasi handphone Anda sendiri secara langsung.</p>
                     
@@ -100,14 +124,14 @@
 
                 <!-- BASE URL -->
                 <section class="card warning">
-                    <h3>&#9888; Konfigurasi Alamat API Utama</h3>
+                    <h3><i class="fas fa-triangle-exclamation"></i> Konfigurasi Alamat API Utama</h3>
                     <p>Alamat URL server terdeteksi otomatis sesuai lokasi aplikasi.</p>
                     <input id="baseUrl" type="text" class="input-disabled" disabled>
                 </section>
 
                 <!-- QRIS DYNAMIC -->
                 <section class="card" id="qris">
-                    <h2>1. BUAT QRIS DINAMIS</h2>
+                    <h2><i class="fas fa-qrcode"></i> 1. BUAT QRIS DINAMIS</h2>
                     <p>Membuat kode bayar dengan nominal acak.</p>
 
                     <div class="form-row">
@@ -124,7 +148,7 @@
                     <div class="form-row">
                         <div style="grid-column: span 2;">
                             <label class="checkbox">
-                                <input id="tiAutoUnique" type="checkbox"> Acak Kode Unik Otomatis
+                                <input id="tiAutoUnique" type="checkbox"> <i class="fas fa-shuffle"></i> Acak Kode Unik Otomatis
                             </label>
                         </div>
                     </div>
@@ -144,12 +168,12 @@
                     </div>
 
                     <div class="btn-group">
-                        <button id="btnDynamic" class="btn btn-primary">&raquo; Proses QRIS</button>
-                        <button id="btnDynamicReset" class="btn btn-secondary">Bersihkan</button>
+                        <button id="btnDynamic" class="btn btn-primary"><i class="fas fa-play"></i> Proses QRIS</button>
+                        <button id="btnDynamicReset" class="btn btn-secondary"><i class="fas fa-eraser"></i> Bersihkan</button>
                     </div>
 
                     <div id="outDynamic" class="result hidden">
-                        <div class="result-header">&sect; HASIL</div>
+                        <div class="result-header"><i class="fas fa-check-circle"></i> HASIL</div>
                         <div id="metaDynamic" class="result-meta"></div>
                         <div class="result-grid">
                             <pre class="code-block"><code id="jsonDynamic" class="language-json"></code></pre>
@@ -162,11 +186,11 @@
 
                 <!-- QR CONVERTER -->
                 <section class="card" id="qr-converter">
-                    <h2>2. SCAN GAMBAR QRIS</h2>
+                    <h2><i class="fas fa-image"></i> 2. SCAN GAMBAR QRIS</h2>
                     <p>Upload file gambar QRIS untuk diubah menjadi teks payload.</p>
 
                     <div id="dropZone" class="drop-zone">
-                        <div>&#9744;</div>
+                        <div><i class="fas fa-cloud-upload-alt"></i></div>
                         <p>Tarik file ke sini atau klik untuk pilih</p>
                         <small>PNG, JPG, JPEG (Maks. 2MB)</small>
                         <input type="file" id="fileInput" accept="image/*" style="display:none;">
@@ -177,21 +201,21 @@
                     </div>
 
                     <div class="btn-group">
-                        <button id="btnConvert" class="btn btn-primary" disabled>Baca Gambar</button>
-                        <button id="btnResetConverter" class="btn btn-secondary">Hapus</button>
+                        <button id="btnConvert" class="btn btn-primary" disabled><i class="fas fa-eye"></i> Baca Gambar</button>
+                        <button id="btnResetConverter" class="btn btn-secondary"><i class="fas fa-eraser"></i> Hapus</button>
                     </div>
 
                     <div id="outConverter" class="result hidden">
-                        <div class="result-header">&sect; HASIL BACA</div>
+                        <div class="result-header"><i class="fas fa-check-circle"></i> HASIL BACA</div>
                         <div id="metaConverter" class="result-meta"></div>
                         <pre class="code-block"><code id="jsonConverter" class="language-json"></code></pre>
-                        <button id="btnCopyPayload" class="btn btn-copy">&clubs; Salin</button>
+                        <button id="btnCopyPayload" class="btn btn-copy"><i class="fas fa-copy"></i> Salin</button>
                     </div>
                 </section>
 
                 <!-- WEBHOOK -->
                 <section class="card" id="webhook">
-                    <h2>3. SIMULATOR WEBHOOK</h2>
+                    <h2><i class="fas fa-code-branch"></i> 3. SIMULATOR WEBHOOK</h2>
                     <p>Uji coba kirim notifikasi pembayaran ke server.</p>
 
                     <div class="form-row">
@@ -217,12 +241,12 @@
                     </div>
 
                     <div class="btn-group">
-                        <button id="btnWebhook" class="btn btn-danger">&blacktriangleright; Kirim</button>
-                        <button id="btnWebhookReset" class="btn btn-secondary">Reset</button>
+                        <button id="btnWebhook" class="btn btn-danger"><i class="fas fa-paper-plane"></i> Kirim</button>
+                        <button id="btnWebhookReset" class="btn btn-secondary"><i class="fas fa-undo"></i> Reset</button>
                     </div>
 
                     <div id="outWebhook" class="result hidden">
-                        <div class="result-header">&sect; RESPON SERVER</div>
+                        <div class="result-header"><i class="fas fa-server"></i> RESPON SERVER</div>
                         <div id="metaWebhook" class="result-meta"></div>
                         <pre class="code-block"><code id="jsonWebhook" class="language-json"></code></pre>
                     </div>
@@ -230,7 +254,7 @@
 
                 <!-- ENDPOINT -->
                 <section class="card">
-                    <h2>4. CEK RIWAYAT PEMBAYARAN</h2>
+                    <h2><i class="fas fa-link"></i> 4. CEK RIWAYAT PEMBAYARAN</h2>
                     <div class="endpoint-box">
                         <span class="method">GET</span>
                         <span>/webhook/status?token=USER123&limit=5</span>
@@ -239,7 +263,7 @@
 
                 <!-- EXAMPLES -->
                 <section class="card" id="examples">
-                    <h2>&sect; Contoh cURL</h2>
+                    <h2><i class="fas fa-terminal"></i> Contoh cURL</h2>
 
                     <div>
                         <div class="label-small">// A. QRIS Dinamis</div>
@@ -264,16 +288,16 @@
 
                 <!-- STATUS CODE -->
                 <section class="card">
-                    <h3>// KODE STATUS HTTP</h3>
+                    <h3><i class="fas fa-table"></i> // KODE STATUS HTTP</h3>
                     <div style="overflow-x:auto;">
                         <table class="status-table">
                             <thead><tr><th>Kode</th><th>Nama</th><th>Keterangan</th></tr></thead>
                             <tbody>
-                                <tr><td class="green">200</td><td>Sukses</td><td>Permintaan berhasil</td></tr>
-                                <tr><td class="yellow">400</td><td>Data Salah</td><td>Input tidak valid</td></tr>
-                                <tr><td class="red">401</td><td>Akses Ditolak</td><td>Token salah</td></tr>
-                                <tr><td class="red">404</td><td>Tidak Ditemukan</td><td>Endpoint salah</td></tr>
-                                <tr><td class="red">500</td><td>Server Error</td><td>Cek backend</td></tr>
+                                <tr><td class="green"><i class="fas fa-check-circle"></i> 200</td><td>Sukses</td><td>Permintaan berhasil</td></tr>
+                                <tr><td class="yellow"><i class="fas fa-triangle-exclamation"></i> 400</td><td>Data Salah</td><td>Input tidak valid</td></tr>
+                                <tr><td class="red"><i class="fas fa-ban"></i> 401</td><td>Akses Ditolak</td><td>Token salah</td></tr>
+                                <tr><td class="red"><i class="fas fa-ban"></i> 404</td><td>Tidak Ditemukan</td><td>Endpoint salah</td></tr>
+                                <tr><td class="red"><i class="fas fa-circle-exclamation"></i> 500</td><td>Server Error</td><td>Cek backend</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -285,7 +309,7 @@
             ========================================== -->
             <div id="page-history" class="page">
                 <div class="card">
-                    <h2>&sect; Cek Riwayat</h2>
+                    <h2><i class="fas fa-clock-rotate-left"></i> Cek Riwayat</h2>
                     <p>Masukkan token untuk melihat transaksi terakhir</p>
                     <div class="history-form">
                         <div>
@@ -296,7 +320,7 @@
                             <label>Limit</label>
                             <input id="historyLimit" class="input" value="10">
                         </div>
-                        <button id="btnFetchHistory" class="btn btn-danger">&larr; Cari</button>
+                        <button id="btnFetchHistory" class="btn btn-danger"><i class="fas fa-search"></i> Cari</button>
                     </div>
                 </div>
 
@@ -310,42 +334,42 @@
             ========================================== -->
             <div id="page-forwarder" class="page">
                 <div class="card pink">
-                    <h2>&sect; PANDUAN FORWARDER v2.0</h2>
+                    <h2><i class="fas fa-arrow-right-arrow-left"></i> PANDUAN FORWARDER v2.0</h2>
                     <p>3 langkah setting aplikasi Geekz Forwarder di HP</p>
-                    <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="btn btn-danger">&darr; UNDUH APK</a>
+                    <a href="https://sfile.co/W8OBwD7EWZJ" target="_blank" class="btn btn-danger"><i class="fas fa-download"></i> UNDUH APK</a>
                 </div>
 
                 <div class="card">
                     <div class="step">
                         <div class="step-num">1</div>
                         <div>
-                            <h4>HIDUPKAN SERVICE STATE</h4>
+                            <h4><i class="fas fa-power-off"></i> HIDUPKAN SERVICE STATE</h4>
                             <p>Aktifkan izin <span class="tag">Akses Notifikasi</span> dan nyalakan tombol utama.</p>
                         </div>
                     </div>
                     <div class="step">
                         <div class="step-num">2</div>
                         <div>
-                            <h4>PILIH APP TARGET</h4>
+                            <h4><i class="fas fa-check-circle"></i> PILIH APP TARGET</h4>
                             <p>Centang aplikasi bank/e-wallet di menu <span class="tag">APP REGISTRY</span>.</p>
                         </div>
                     </div>
                     <div class="step">
                         <div class="step-num">3</div>
                         <div>
-                            <h4>SET WEBHOOK URL</h4>
+                            <h4><i class="fas fa-link"></i> SET WEBHOOK URL</h4>
                             <p>Isi URL di menu <span class="tag">DATA PIPELINE</span>:</p>
                             <div class="endpoint-box">https://restapi.amgeekz.my.id/webhook/payment?token=USER123</div>
-                            <p class="warning-text">&#9888; Ganti USER123 dengan token Anda</p>
+                            <p class="warning-text"><i class="fas fa-triangle-exclamation"></i> Ganti USER123 dengan token Anda</p>
                             <p>Method: <span class="tag">JSON</span></p>
                         </div>
                     </div>
                 </div>
 
                 <div class="card yellow">
-                    <h4>// SETTINGAN TERBAIK</h4>
-                    <div class="setting-row"><span>Service State</span> <span class="check">&check; HARUS ON</span></div>
-                    <div class="setting-row"><span>App Registry</span> <span class="check">&check; TERPILIH</span></div>
+                    <h4><i class="fas fa-list-check"></i> // SETTINGAN TERBAIK</h4>
+                    <div class="setting-row"><span>Service State</span> <span class="check"><i class="fas fa-check"></i> HARUS ON</span></div>
+                    <div class="setting-row"><span>App Registry</span> <span class="check"><i class="fas fa-check"></i> TERPILIH</span></div>
                     <div class="setting-row"><span>Format Sink</span> <span class="check">APPLICATION/JSON</span></div>
                 </div>
             </div>
@@ -355,11 +379,11 @@
             ========================================== -->
             <div id="page-donate" class="page">
                 <div class="card text-center">
-                    <h2>&sect; Donasi</h2>
+                    <h2><i class="fas fa-heart"></i> Donasi</h2>
                     <p>Bantu kami menyewa server</p>
                 </div>
                 <div class="card donate-card">
-                    <h3>Scan QRIS Berikut</h3>
+                    <h3><i class="fas fa-qrcode"></i> Scan QRIS Berikut</h3>
                     <img src="/qris.jpg" alt="QRIS Donasi" class="donate-qr">
                     <p>QRIS Interoperabilitas Nasional</p>
                     <p style="color:var(--text-muted);font-size:12px;">Terima kasih</p>
@@ -371,9 +395,9 @@
             ========================================== -->
             <div id="page-pwa" class="page">
                 <div class="card text-center">
-                    <h2>&sect; PWA Monitor</h2>
+                    <h2><i class="fas fa-mobile-screen-button"></i> PWA Monitor</h2>
                     <p>Pantau pembayaran real-time dari HP</p>
-                    <a href="/pwa/dashboard.html" target="_blank" class="btn btn-primary">&blacktriangleright; Buka Monitor</a>
+                    <a href="/pwa/dashboard.html" target="_blank" class="btn btn-primary"><i class="fas fa-play"></i> Buka Monitor</a>
                     <p style="font-size:11px;color:var(--text-muted);margin-top:10px;">Install ke home screen untuk pengalaman native</p>
                 </div>
             </div>
