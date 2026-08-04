@@ -53,6 +53,7 @@
     <!-- QRIS UPLOAD SECTION -->
     <section class="qris-section">
         <div class="qris-upload-area">
+            <!-- Upload Box (hidden jika ada QRIS) -->
             <div class="qris-upload-box" id="qrisDropZone">
                 <i class="fas fa-cloud-upload-alt qris-upload-icon"></i>
                 <p class="qris-upload-text">Tarik file ke sini atau klik tombol</p>
@@ -63,11 +64,13 @@
                 <input type="file" id="qrisFileInput" accept="image/*" style="display:none;">
             </div>
             
+            <!-- Preview QRIS -->
             <div id="qrisPreviewContainer" style="display:none;" class="qris-preview-container">
                 <img id="qrisPreview" class="qris-preview-image" alt="QRIS">
                 <button class="qris-remove-btn" onclick="removeQRIS()"><i class="fas fa-times"></i></button>
             </div>
             
+            <!-- Tombol Tampilkan QRIS -->
             <button class="btn-qris" onclick="openQRISWidget()" id="qrisShowBtn" style="display:none;">
                 <i class="fas fa-qrcode"></i> Tampilkan QRIS
             </button>

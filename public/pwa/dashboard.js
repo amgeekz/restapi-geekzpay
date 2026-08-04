@@ -2,7 +2,7 @@
  * GeekzPay PWA Monitor
  * Elegant & Professional Version with Dark Mode
  * Polling Mode - Simple & Stabil
- * Dengan QRIS Upload (tanpa QRIS bawaan)
+ * Dengan QRIS Upload (Upload box hidden jika ada QRIS)
  */
 
 // ============================================
@@ -34,7 +34,7 @@ const state = {
 };
 
 // ============================================
-// QRIS STATE - TANPA DEFAULT
+// QRIS STATE
 // ============================================
 const QRIS_STATE = {
     imageData: localStorage.getItem('geekzpay_qris') || null,
@@ -153,12 +153,13 @@ function initQRISUpload() {
     const showBtn = DOM.qrisShowBtn;
     const modalImage = DOM.qrisModalImage;
     
-    // Jika ada QRIS tersimpan, tampilkan
+    // Jika ada QRIS tersimpan - sembunyikan upload box
     if (QRIS_STATE.imageData) {
         previewImage.src = QRIS_STATE.imageData;
         previewContainer.style.display = 'inline-block';
         showBtn.style.display = 'flex';
         modalImage.src = QRIS_STATE.imageData;
+        dropZone.style.display = 'none'; // Sembunyikan upload box
     }
     
     // File input change (dari tombol)
@@ -211,6 +212,7 @@ function handleQRISFile(file) {
         DOM.qrisPreviewContainer.style.display = 'inline-block';
         DOM.qrisShowBtn.style.display = 'flex';
         DOM.qrisModalImage.src = imageData;
+        DOM.qrisDropZone.style.display = 'none'; // Sembunyikan upload box
         
         showToast(`QRIS "${file.name}" berhasil diupload!`);
     };
@@ -227,6 +229,7 @@ function removeQRIS() {
     DOM.qrisPreviewContainer.style.display = 'none';
     DOM.qrisShowBtn.style.display = 'none';
     DOM.qrisModalImage.src = '';
+    DOM.qrisDropZone.style.display = 'block'; // Tampilkan upload box
     
     showToast('QRIS dihapus');
 }
