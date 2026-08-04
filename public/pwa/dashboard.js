@@ -1,7 +1,6 @@
 /**
  * GeekzPay PWA Monitor
- * SSE Real-time dengan Auto Reconnect + Fallback Polling
- * Versi Lengkap - 2026
+ * POLLING SAJA - Simple & Stabil
  */
 
 // ============================================
@@ -10,10 +9,7 @@
 const CONFIG = {
     API_BASE: 'https://restapi.amgeekz.my.id',
     MAX_HISTORY: 200,
-    SSE_RECONNECT_DELAY: 3000,
-    SSE_MAX_RETRIES: 20,
-    POLLING_INTERVAL: 5000,
-    HEARTBEAT_TIMEOUT: 20000
+    POLLING_INTERVAL: 3000 // 3 detik
 };
 
 // ============================================
@@ -29,21 +25,9 @@ const state = {
     lastIds: new Set(JSON.parse(localStorage.getItem('geekzpay_last_ids') || '[]')),
     newCount: parseInt(localStorage.getItem('geekzpay_new_count')) || 0,
     stats: JSON.parse(localStorage.getItem('geekzpay_stats') || '{"daily":{},"monthly":{},"total":0,"totalAmount":0}'),
-    
-    // SSE
-    eventSource: null,
-    isConnected: false,
-    reconnectAttempts: 0,
-    isProcessing: false,
-    processedEvents: new Set(),
-    reconnectTimer: null,
-    heartbeatTimer: null,
-    lastHeartbeat: Date.now(),
-    
-    // Fallback Polling
     pollingInterval: null,
     isPolling: false,
-    useFallback: false
+    isProcessing: false
 };
 
 // ============================================
@@ -123,24 +107,15 @@ function saveState() {
 // ============================================
 // STATISTIK
 // ============================================
-function getTodayKey() {
-    return new Date().toISOString().slice(0, 10);
-}
-
-function getMonthKey() {
-    return new Date().toISOString().slice(0, 7);
-}
+function getTodayKey() { return new Date().toISOString().slice(0, 10); }
+function getMonthKey() { return new Date().toISOString().slice(0, 7); }
 
 function updateStats(amount) {
     const today = getTodayKey();
     const month = getMonthKey();
     
-    if (!state.stats.daily[today]) {
-        state.stats.daily[today] = { count: 0, amount: 0 };
-    }
-    if (!state.stats.monthly[month]) {
-        state.stats.monthly[month] = { count: 0, amount: 0 };
-    }
+    if (!state.stats.daily[today]) state.stats.daily[today] = { count: 0, amount: 0 };
+    if (!state.stats.monthly[month]) state.stats.monthly[month] = { count: 0, amount: 0 };
     
     state.stats.daily[today].count += 1;
     state.stats.daily[today].amount += amount;
@@ -164,12 +139,8 @@ function calculateStatsFromHistory() {
         const monthKey = date.toISOString().slice(0, 7);
         const amount = item.amount || 0;
         
-        if (!state.stats.daily[dayKey]) {
-            state.stats.daily[dayKey] = { count: 0, amount: 0 };
-        }
-        if (!state.stats.monthly[monthKey]) {
-            state.stats.monthly[monthKey] = { count: 0, amount: 0 };
-        }
+        if (!state.stats.daily[dayKey]) state.stats.daily[dayKey] = { count: 0, amount: 0 };
+        if (!state.stats.monthly[monthKey]) state.stats.monthly[monthKey] = { count: 0, amount: 0 };
         
         state.stats.daily[dayKey].count += 1;
         state.stats.daily[dayKey].amount += amount;
@@ -237,7 +208,7 @@ function renderChart() {
 function init() {
     if (state.token) {
         DOM.tokenInput.value = state.token;
-        startSSE();
+        startPolling();
     } else {
         DOM.tokenInput.value = '';
         setStatus('paused', 'Waiting Token');
@@ -254,8 +225,7 @@ function init() {
     registerServiceWorker();
     checkNotificationPermission();
     
-    console.log('◆ GeekzPay Monitor loaded');
-    console.log('◆ Mode: SSE + Fallback Polling');
+    console.log('◆ GeekzPay Monitor loaded (Polling mode)');
 }
 
 // ============================================
@@ -280,171 +250,28 @@ function requestNotificationPermission() {
 window.requestNotificationPermission = requestNotificationPermission;
 
 // ============================================
-// SSE - START
+// POLLING - START
 // ============================================
-function startSSE() {
-    // Matikan polling jika aktif
-    stopPolling();
+function startPolling() {
+    if (state.pollingInterval) {
+        clearInterval(state.pollingInterval);
+        state.pollingInterval = null;
+    }
     
     if (!state.token) {
         showToast('⊘ Masukkan token terlebih dahulu');
         return;
     }
 
-    if (state.eventSource) {
-        state.eventSource.close();
-        state.eventSource = null;
-    }
-
-    setStatus('loading', 'Connecting...');
-    DOM.statusDot.style.background = '#ffa502';
-    state.useFallback = false;
-    state.reconnectAttempts = 0;
-
-    const url = `${CONFIG.API_BASE}/pwa/events?token=${encodeURIComponent(state.token)}`;
-    
-    try {
-        state.eventSource = new EventSource(url);
-        
-        // ===== ON OPEN =====
-        state.eventSource.onopen = () => {
-            console.log('◆ SSE Connected');
-            setStatus('online', 'Live');
-            DOM.statusDot.style.background = '#00c853';
-            state.isConnected = true;
-            state.reconnectAttempts = 0;
-            state.lastHeartbeat = Date.now();
-            showToast('◆ Terhubung ke server');
-            
-            // Ambil history
-            setTimeout(fetchHistory, 1000);
-            
-            // Monitor heartbeat
-            clearInterval(state.heartbeatTimer);
-            state.heartbeatTimer = setInterval(() => {
-                const elapsed = Date.now() - state.lastHeartbeat;
-                if (elapsed > CONFIG.HEARTBEAT_TIMEOUT && state.isConnected) {
-                    console.warn('⊘ Heartbeat timeout, reconnecting...');
-                    state.isConnected = false;
-                    if (state.eventSource) {
-                        state.eventSource.close();
-                        state.eventSource = null;
-                    }
-                    reconnectSSE();
-                }
-            }, 5000);
-        };
-
-        // ===== EVENT: CONNECTED =====
-        state.eventSource.addEventListener('connected', (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                console.log('◆ SSE confirmed:', data);
-                state.lastHeartbeat = Date.now();
-            } catch (e) {}
-        });
-
-        // ===== EVENT: PING (heartbeat) =====
-        state.eventSource.addEventListener('ping', (event) => {
-            state.lastHeartbeat = Date.now();
-        });
-
-        // ===== EVENT: PAYMENT =====
-        state.eventSource.addEventListener('payment', (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                state.lastHeartbeat = Date.now();
-                console.log('◆ Payment received via SSE:', data);
-                
-                const eventId = data.event_id || data.id;
-                if (!eventId) {
-                    console.warn('⊘ No event_id in payment data');
-                    return;
-                }
-                
-                // Cek duplikat
-                if (state.processedEvents.has(eventId)) {
-                    console.log('⊘ Event already processed:', eventId);
-                    return;
-                }
-                if (state.lastIds.has(eventId)) {
-                    console.log('⊘ Event already in history:', eventId);
-                    return;
-                }
-                
-                state.processedEvents.add(eventId);
-                processPayment(data);
-                
-            } catch (e) {
-                console.error('Error parsing payment data:', e);
-            }
-        });
-
-        // ===== ON ERROR =====
-        state.eventSource.onerror = (error) => {
-            console.warn('⊘ SSE Error:', error);
-            state.isConnected = false;
-            if (state.eventSource) {
-                state.eventSource.close();
-                state.eventSource = null;
-            }
-            
-            setStatus('error', 'Disconnected');
-            DOM.statusDot.style.background = '#ff1744';
-            
-            // Auto reconnect
-            reconnectSSE();
-        };
-
-    } catch (error) {
-        console.error('⊘ SSE Failed:', error);
-        setStatus('error', 'Connection Failed');
-        startPollingFallback();
-    }
-}
-
-// ============================================
-// RECONNECT SSE
-// ============================================
-function reconnectSSE() {
-    if (state.reconnectAttempts >= CONFIG.SSE_MAX_RETRIES) {
-        console.warn('⊘ SSE max retries reached, switching to polling');
-        startPollingFallback();
-        return;
-    }
-    
-    state.reconnectAttempts++;
-    const delay = Math.min(CONFIG.SSE_RECONNECT_DELAY * Math.pow(1.5, state.reconnectAttempts - 1), 30000);
-    
-    console.log(`◆ Reconnect attempt ${state.reconnectAttempts} in ${delay}ms`);
-    setStatus('loading', `Reconnect ${state.reconnectAttempts}...`);
-    DOM.statusDot.style.background = '#ffa502';
-    
-    clearTimeout(state.reconnectTimer);
-    state.reconnectTimer = setTimeout(() => {
-        if (!state.isConnected) {
-            startSSE();
-        }
-    }, delay);
-}
-
-// ============================================
-// FALLBACK: POLLING
-// ============================================
-function startPollingFallback() {
-    if (state.pollingInterval) return;
-    
-    state.useFallback = true;
     state.isPolling = true;
-    setStatus('loading', 'Polling Mode');
-    DOM.statusDot.style.background = '#ffa502';
-    showToast('◆ Mode polling aktif');
-    console.log('◆ Fallback polling started');
+    setStatus('online', 'Polling');
+    DOM.statusDot.style.background = '#00c853';
+    showToast('◆ Monitoring aktif');
     
     // Polling immediately
     pollData();
     
-    // Polling setiap 5 detik
+    // Polling setiap 3 detik
     state.pollingInterval = setInterval(pollData, CONFIG.POLLING_INTERVAL);
 }
 
@@ -453,13 +280,16 @@ function stopPolling() {
         clearInterval(state.pollingInterval);
         state.pollingInterval = null;
         state.isPolling = false;
-        state.useFallback = false;
         console.log('◆ Polling stopped');
     }
 }
 
+// ============================================
+// POLLING - FETCH DATA
+// ============================================
 async function pollData() {
     if (!state.token) return;
+    if (state.isProcessing) return;
     
     try {
         const response = await fetch(`${CONFIG.API_BASE}/webhook/status?token=${encodeURIComponent(state.token)}&limit=10`);
@@ -473,7 +303,6 @@ async function pollData() {
             const id = item.event_id || item.id;
             if (id && !state.lastIds.has(id)) {
                 state.lastIds.add(id);
-                state.processedEvents.add(id);
                 newItems++;
                 const amount = item.amount || 0;
                 state.history.unshift({
@@ -484,7 +313,7 @@ async function pollData() {
                 });
                 updateStats(amount);
                 
-                // Notifikasi tetap jalan
+                // Notifikasi
                 if (state.soundEnabled) playNotificationSound();
                 if (state.ttsEnabled) speakPayment(amount);
                 showToast(`◆ Pembayaran Rp ${formatRupiah(amount)} masuk`);
@@ -493,6 +322,7 @@ async function pollData() {
         });
         
         if (newItems > 0) {
+            state.newCount += newItems;
             if (state.history.length > CONFIG.MAX_HISTORY) {
                 state.history = state.history.slice(0, CONFIG.MAX_HISTORY);
             }
@@ -502,116 +332,19 @@ async function pollData() {
             renderStats();
             renderChart();
             updateBadge();
-            console.log(`◆ Polling: ${newItems} new items`);
+            console.log(`◆ ${newItems} new payment(s) detected`);
         }
         
         setStatus('online', 'Polling');
-        DOM.statusDot.style.background = '#ffa502';
+        DOM.statusDot.style.background = '#00c853';
         
     } catch (error) {
         console.warn('⊘ Polling error:', error);
+        setStatus('error', 'Error');
+        DOM.statusDot.style.background = '#ff1744';
     }
 }
-
-// ============================================
-// PROCESS PAYMENT
-// ============================================
-function processPayment(data) {
-    if (state.isProcessing) return;
-    state.isProcessing = true;
-    
-    try {
-        const id = data.event_id || data.id || Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-        if (state.lastIds.has(id)) {
-            state.isProcessing = false;
-            return;
-        }
-        
-        state.lastIds.add(id);
-        state.processedEvents.add(id);
-        
-        const amount = data.amount || 0;
-        const entry = {
-            id, amount,
-            time: data.received_at || new Date().toISOString(),
-            message: data.message || data.body?.message || 'Pembayaran masuk',
-            raw: data
-        };
-        
-        state.history.unshift(entry);
-        if (state.history.length > CONFIG.MAX_HISTORY) {
-            state.history = state.history.slice(0, CONFIG.MAX_HISTORY);
-        }
-        state.newCount += 1;
-        
-        updateStats(amount);
-        saveState();
-        
-        if (state.soundEnabled) playNotificationSound();
-        if (state.ttsEnabled) speakPayment(amount);
-        
-        showToast(`◆ Pembayaran Rp ${formatRupiah(amount)} masuk`);
-        sendPushNotification(entry);
-        
-        renderTransactions();
-        updateStatsUI();
-        renderStats();
-        renderChart();
-        updateBadge();
-        
-        console.log(`◆ Payment processed: ${id} - Rp ${formatRupiah(amount)}`);
-        
-    } catch (e) {
-        console.error('Process payment error:', e);
-    } finally {
-        state.isProcessing = false;
-    }
-}
-
-// ============================================
-// FETCH HISTORY
-// ============================================
-function fetchHistory() {
-    if (!state.token) return;
-    
-    fetch(`${CONFIG.API_BASE}/webhook/status?token=${encodeURIComponent(state.token)}&limit=50`)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => {
-            const items = Array.isArray(data?.data) ? data.data : [];
-            let added = 0;
-            
-            items.forEach(item => {
-                const id = item.event_id || item.id;
-                if (id && !state.lastIds.has(id)) {
-                    state.lastIds.add(id);
-                    state.processedEvents.add(id);
-                    added++;
-                    const amount = item.amount || 0;
-                    state.history.unshift({
-                        id, amount,
-                        time: item.received_at || new Date().toISOString(),
-                        message: item.body?.message || 'Pembayaran masuk',
-                        raw: item
-                    });
-                    updateStats(amount);
-                }
-            });
-            
-            if (added > 0) {
-                if (state.history.length > CONFIG.MAX_HISTORY) {
-                    state.history = state.history.slice(0, CONFIG.MAX_HISTORY);
-                }
-                saveState();
-                renderTransactions();
-                updateStatsUI();
-                renderStats();
-                renderChart();
-                console.log(`◆ Added ${added} items from history`);
-            }
-        })
-        .catch(() => console.warn('⊘ Failed to fetch history'));
-}
-window.fetchHistory = fetchHistory;
+window.pollData = pollData;
 
 // ============================================
 // SAVE TOKEN
@@ -627,9 +360,8 @@ function saveToken() {
     localStorage.setItem('geekzpay_token', state.token);
     showToast('◆ Token tersimpan');
     
-    // Reset state untuk token baru
+    // Reset state
     state.lastIds = new Set();
-    state.processedEvents = new Set();
     state.history = [];
     state.newCount = 0;
     state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
@@ -640,9 +372,7 @@ function saveToken() {
     renderStats();
     renderChart();
     
-    // Mulai SSE
-    stopPolling();
-    startSSE();
+    startPolling();
 }
 window.saveToken = saveToken;
 
@@ -654,7 +384,6 @@ function clearHistory() {
     
     state.history = [];
     state.lastIds = new Set();
-    state.processedEvents = new Set();
     state.newCount = 0;
     state.stats = { daily: {}, monthly: {}, total: 0, totalAmount: 0 };
     saveState();
@@ -671,7 +400,7 @@ function clearHistory() {
 window.clearHistory = clearHistory;
 
 // ============================================
-// NOTIFICATION SOUND - DANA STYLE
+// NOTIFICATION SOUND
 // ============================================
 function playNotificationSound() {
     if (!state.soundEnabled) return;
@@ -703,9 +432,7 @@ function playNotificationSound() {
                         const bufSize = ctx.sampleRate * 0.015;
                         const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
                         const data = buf.getChannelData(0);
-                        for (let j = 0; j < bufSize; j++) {
-                            data[j] = (Math.random() * 2 - 1) * 0.04;
-                        }
+                        for (let j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1) * 0.04;
                         const noise = ctx.createBufferSource();
                         noise.buffer = buf;
                         const ng = ctx.createGain();
@@ -719,11 +446,7 @@ function playNotificationSound() {
             }, beep.delay * 1000);
         });
     } catch (e) {
-        try {
-            DOM.sound.currentTime = 0;
-            DOM.sound.volume = state.soundVolume;
-            DOM.sound.play();
-        } catch (err) {}
+        try { DOM.sound.currentTime = 0; DOM.sound.volume = state.soundVolume; DOM.sound.play(); } catch (err) {}
     }
 }
 
@@ -833,7 +556,7 @@ function renderTransactions() {
             <div class="empty-state neo-card">
                 <div class="empty-icon">⊘</div>
                 <p>Belum ada transaksi</p>
-                <small>Masukkan token dan tunggu notifikasi real-time</small>
+                <small>Masukkan token dan tunggu notifikasi</small>
             </div>`;
         return;
     }
@@ -860,9 +583,7 @@ function updateStatsUI() {
 }
 
 function updateBadge() {
-    if (navigator.setAppBadge) {
-        navigator.setAppBadge(state.newCount);
-    }
+    if (navigator.setAppBadge) navigator.setAppBadge(state.newCount);
 }
 
 // ============================================
@@ -870,41 +591,23 @@ function updateBadge() {
 // ============================================
 function setStatus(type, text) {
     DOM.statusText.textContent = text;
-    const colors = {
-        online: '#00c853',
-        loading: '#ffa502',
-        error: '#ff1744',
-        paused: '#ffa502'
-    };
+    const colors = { online: '#00c853', loading: '#ffa502', error: '#ff1744', paused: '#ffa502' };
     DOM.statusDot.style.background = colors[type] || '#888';
 }
 
 // ============================================
 // HELPERS
 // ============================================
-function formatRupiah(v) {
-    return new Intl.NumberFormat('id-ID').format(v || 0);
-}
-
+function formatRupiah(v) { return new Intl.NumberFormat('id-ID').format(v || 0); }
 function formatTime(iso) {
-    try {
-        return new Date(iso).toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    } catch {
-        return iso || '';
-    }
+    try { return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); } 
+    catch { return iso || ''; }
 }
-
 function showToast(msg) {
     DOM.toastMessage.textContent = msg;
     DOM.toast.classList.add('show');
     clearTimeout(DOM.toast._timeout);
-    DOM.toast._timeout = setTimeout(() => {
-        DOM.toast.classList.remove('show');
-    }, 3000);
+    DOM.toast._timeout = setTimeout(() => DOM.toast.classList.remove('show'), 3000);
 }
 
 // ============================================
@@ -924,9 +627,7 @@ function registerServiceWorker() {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'm' || e.key === 'M') toggleSound();
     if (e.key === 't' || e.key === 'T') toggleTts();
-    if (e.key === 'Enter' && document.activeElement === DOM.tokenInput) {
-        saveToken();
-    }
+    if (e.key === 'Enter' && document.activeElement === DOM.tokenInput) saveToken();
 });
 
 // ============================================
