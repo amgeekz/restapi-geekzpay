@@ -458,14 +458,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
     setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=3600')
 }));
 
-app.get('/css/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'css', req.params[0]));
-});
-
-app.get('/js/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'js', req.params[0]));
-});
-
 // ============================================
 // SERVE ICONS
 // ============================================
