@@ -135,9 +135,7 @@
         <button class="btn btn-danger" onclick="clearHistory()"><i class="fas fa-trash"></i> Reset</button>
     </section>
 
-    <!-- ============================================
-    SOUND UPLOAD - CUSTOM
-    ============================================ -->
+    <!-- SOUND UPLOAD - CUSTOM -->
     <section class="sound-upload-section">
         <div class="sound-upload-header">
             <span class="sound-upload-icon"><i class="fas fa-music"></i></span>
@@ -159,6 +157,27 @@
         </div>
         <div class="sound-default-info">
             <i class="fas fa-info-circle"></i> Default: <span class="sound-default-label">Coin Drop (uang jatuh ke celengan)</span>
+        </div>
+    </section>
+
+    <!-- SOUND SETTINGS -->
+    <section class="sound-section">
+        <div class="sound-header">
+            <span class="sound-icon"><i class="fas fa-music"></i></span>
+            <span class="sound-title">Pilih Suara Notifikasi</span>
+        </div>
+        <div class="sound-grid sound-grid-2">
+            <button class="sound-btn active" data-sound="coin" onclick="changeSoundType('coin')">
+                <i class="fas fa-coins"></i> Coin
+            </button>
+            <button class="sound-btn" data-sound="custom" onclick="changeSoundType('custom')" id="customSoundBtn" style="display:none;">
+                <i class="fas fa-upload"></i> Custom
+            </button>
+        </div>
+        <div class="volume-control">
+            <span class="volume-label"><i class="fas fa-volume-up"></i> Volume</span>
+            <input type="range" id="soundVolume" min="0" max="1" step="0.05" value="0.8" oninput="changeSoundVolume(this.value)">
+            <span class="volume-value" id="soundVolumeLabel">80%</span>
         </div>
     </section>
 

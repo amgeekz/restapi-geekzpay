@@ -3,6 +3,7 @@
  * Elegant & Professional Version with Dark Mode
  * Polling Mode - Simple & Stabil
  * Dengan QRIS Upload + Custom Sound
+ * FIX: Custom sound auto aktif setelah upload
  */
 
 // ============================================
@@ -44,7 +45,7 @@ const QRIS_STATE = {
 };
 
 // ============================================
-// SOUND CONFIGURATION - HANYA COIN + CUSTOM
+// SOUND CONFIGURATION - COIN DROP
 // ============================================
 const SOUNDS = {
     coin: {
@@ -56,10 +57,6 @@ const SOUNDS = {
             { freq: 500, duration: 0.1, delay: 0.32 },
             { freq: 400, duration: 0.15, delay: 0.46 }
         ]
-    },
-    custom: {
-        label: 'Custom',
-        beeps: []
     }
 };
 
@@ -102,7 +99,8 @@ const DOM = {
     soundDropZone: document.getElementById('soundDropZone'),
     soundFileInput: document.getElementById('soundFileInput'),
     soundPreviewContainer: document.getElementById('soundPreviewContainer'),
-    soundPreviewName: document.getElementById('soundPreviewName')
+    soundPreviewName: document.getElementById('soundPreviewName'),
+    customSoundBtn: document.getElementById('customSoundBtn')
 };
 
 // ============================================
@@ -256,7 +254,9 @@ function initSoundUpload() {
         previewContainer.style.display = 'flex';
         previewName.textContent = state.customSoundName || 'custom.mp3';
         dropZone.style.display = 'none';
-        document.getElementById('customSoundBtn').style.display = 'flex';
+        if (DOM.customSoundBtn) {
+            DOM.customSoundBtn.style.display = 'flex';
+        }
     }
     
     fileInput.addEventListener('change', (e) => {
@@ -306,13 +306,19 @@ function handleSoundFile(file) {
         DOM.soundPreviewContainer.style.display = 'flex';
         DOM.soundPreviewName.textContent = file.name;
         DOM.soundDropZone.style.display = 'none';
+        if (DOM.customSoundBtn) {
+            DOM.customSoundBtn.style.display = 'flex';
+        }
         
-        document.getElementById('customSoundBtn').style.display = 'flex';
+        // ===== AUTO SWITCH KE CUSTOM =====
+        state.soundType = 'custom';
+        localStorage.setItem('geekzpay_sound_type', 'custom');
+        updateSoundUI();
         
         // Test play
-        playCustomSound();
+        setTimeout(playCustomSound, 300);
         
-        showToast(`Suara "${file.name}" berhasil diupload!`);
+        showToast(`Suara "${file.name}" berhasil diupload dan aktif!`);
     };
     reader.readAsDataURL(file);
 }
@@ -338,40 +344,46 @@ function removeCustomSound() {
     
     DOM.soundPreviewContainer.style.display = 'none';
     DOM.soundDropZone.style.display = 'block';
-    document.getElementById('customSoundBtn').style.display = 'none';
-    
-    if (state.soundType === 'custom') {
-        state.soundType = 'coin';
-        localStorage.setItem('geekzpay_sound_type', 'coin');
-        document.querySelectorAll('.sound-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.sound === 'coin');
-        });
+    if (DOM.customSoundBtn) {
+        DOM.customSoundBtn.style.display = 'none';
     }
     
-    showToast('Suara custom dihapus');
+    // ===== KEMBALI KE COIN =====
+    state.soundType = 'coin';
+    localStorage.setItem('geekzpay_sound_type', 'coin');
+    updateSoundUI();
+    
+    showToast('Suara custom dihapus, kembali ke Coin');
 }
 window.removeCustomSound = removeCustomSound;
 
 // ============================================
-// SOUND FUNCTIONS - HANYA COIN + CUSTOM
+// NOTIFICATION SOUND FUNCTIONS
 // ============================================
 
 function playNotificationSound() {
     if (!state.soundEnabled) return;
     
-    // Jika custom sound dan ada
+    // ===== PRIORITAS: CUSTOM SOUND =====
     if (state.soundType === 'custom' && state.customSound) {
         try {
             const audio = new Audio(state.customSound);
             audio.volume = state.soundVolume;
-            audio.play().catch(() => {});
+            audio.play().catch(() => {
+                playCoinSound();
+            });
             return;
         } catch (e) {
-            // Fallback ke coin jika custom gagal
+            playCoinSound();
         }
+        return;
     }
     
-    // Default: Coin Drop (uang jatuh ke celengan)
+    // Default: Coin
+    playCoinSound();
+}
+
+function playCoinSound() {
     try {
         if (!state.audioContext) {
             state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -396,7 +408,6 @@ function playNotificationSound() {
                     osc.start(now);
                     osc.stop(now + beep.duration);
                     
-                    // Efek noise (seperti suara coin)
                     const bufSize = ctx.sampleRate * 0.01;
                     const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
                     const data = buf.getChannelData(0);
@@ -422,6 +433,75 @@ function playNotificationSound() {
         } catch (err) {}
     }
 }
+
+// ============================================
+// FETCH HISTORY - LANGSUNG AMBIL DATA
+// ============================================
+async function fetchHistory() {
+    if (!state.token) {
+        console.warn('No token, skipping fetchHistory');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${CONFIG.API_BASE}/webhook/status?token=${encodeURIComponent(state.token)}&limit=20`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        const items = Array.isArray(data?.data) ? data.data : [];
+        
+        if (items.length === 0) {
+            DOM.transactionList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                    <p>Belum ada transaksi</p>
+                    <span>Masukkan token dan tunggu notifikasi</span>
+                </div>`;
+            DOM.historyCount.textContent = '0';
+            return;
+        }
+        
+        let newItems = 0;
+        items.forEach(item => {
+            const id = item.event_id || item.id;
+            if (id && !state.lastIds.has(id)) {
+                state.lastIds.add(id);
+                newItems++;
+                const amount = item.amount || 0;
+                state.history.unshift({
+                    id, amount,
+                    time: item.received_at || new Date().toISOString(),
+                    message: item.body?.message || 'Pembayaran masuk',
+                    raw: item
+                });
+                updateStats(amount);
+            }
+        });
+        
+        if (newItems > 0) {
+            if (state.history.length > CONFIG.MAX_HISTORY) {
+                state.history = state.history.slice(0, CONFIG.MAX_HISTORY);
+            }
+            saveState();
+            renderTransactions();
+            updateStatsUI();
+            renderStats();
+            renderChart();
+            updateBadge();
+            console.log(`${newItems} item(s) loaded from history`);
+        }
+        
+    } catch (error) {
+        console.warn('Fetch history error:', error);
+        DOM.transactionList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-exclamation-circle"></i></div>
+                <p>Gagal mengambil data</p>
+                <span>Pastikan token benar dan coba refresh</span>
+            </div>`;
+    }
+}
+window.fetchHistory = fetchHistory;
 
 // ============================================
 // SAVE STATE
@@ -543,6 +623,8 @@ function init() {
     if (state.token) {
         DOM.tokenInput.value = state.token;
         startPolling();
+        // ===== LANGSUNG FETCH HISTORY =====
+        setTimeout(fetchHistory, 500);
     } else {
         DOM.tokenInput.value = '';
         setStatus('paused', 'Waiting Token');
@@ -677,7 +759,7 @@ async function pollData() {
 window.pollData = pollData;
 
 // ============================================
-// SAVE TOKEN
+// SAVE TOKEN - LANGSUNG FETCH HISTORY
 // ============================================
 function saveToken() {
     const newToken = DOM.tokenInput.value.trim();
@@ -690,6 +772,7 @@ function saveToken() {
     localStorage.setItem('geekzpay_token', state.token);
     showToast('Token tersimpan');
     
+    // Reset state
     state.lastIds = new Set();
     state.history = [];
     state.newCount = 0;
@@ -702,6 +785,9 @@ function saveToken() {
     renderChart();
     
     startPolling();
+    
+    // ===== LANGSUNG FETCH HISTORY =====
+    setTimeout(fetchHistory, 500);
 }
 window.saveToken = saveToken;
 
@@ -775,6 +861,7 @@ function changeSoundType(type) {
     state.soundType = type;
     localStorage.setItem('geekzpay_sound_type', type);
     updateSoundUI();
+    // Test sound
     playNotificationSound();
     showToast(`Suara: ${type === 'coin' ? 'Coin Drop' : 'Custom'}`);
 }
@@ -868,6 +955,14 @@ function updateBadge() {
 // ============================================
 function setStatus(type, text) {
     DOM.statusText.textContent = text;
+    const colors = {
+        online: '#22b573',
+        paused: '#f5a623',
+        error: '#ef5a6b'
+    };
+    if (DOM.statusDot) {
+        DOM.statusDot.style.background = colors[type] || '#888';
+    }
 }
 
 // ============================================
