@@ -3,7 +3,7 @@
  * Elegant & Professional Version with Dark Mode
  * Polling Mode - Simple & Stabil
  * Dengan QRIS Upload + Custom Sound
- * FIX: Custom sound auto aktif setelah upload
+ * FIX: Suara notifikasi dan voice berjalan
  */
 
 // ============================================
@@ -362,24 +362,34 @@ window.removeCustomSound = removeCustomSound;
 // ============================================
 
 function playNotificationSound() {
-    if (!state.soundEnabled) return;
+    if (!state.soundEnabled) {
+        console.log('🔇 Sound disabled');
+        return;
+    }
+    
+    console.log('🔊 Playing sound, type:', state.soundType);
     
     // ===== PRIORITAS: CUSTOM SOUND =====
     if (state.soundType === 'custom' && state.customSound) {
         try {
             const audio = new Audio(state.customSound);
             audio.volume = state.soundVolume;
-            audio.play().catch(() => {
+            audio.play().then(() => {
+                console.log('✅ Custom sound played');
+            }).catch((err) => {
+                console.warn('❌ Custom sound failed, fallback to coin:', err);
                 playCoinSound();
             });
             return;
         } catch (e) {
+            console.warn('❌ Custom sound error, fallback to coin:', e);
             playCoinSound();
         }
         return;
     }
     
     // Default: Coin
+    console.log('🪙 Playing coin sound');
     playCoinSound();
 }
 
@@ -425,7 +435,10 @@ function playCoinSound() {
                 } catch (e) {}
             }, beep.delay * 1000);
         });
+        
+        console.log('✅ Coin sound played');
     } catch (e) {
+        console.warn('❌ Coin sound failed, fallback to audio element:', e);
         try { 
             DOM.sound.currentTime = 0; 
             DOM.sound.volume = state.soundVolume; 
@@ -435,7 +448,7 @@ function playCoinSound() {
 }
 
 // ============================================
-// FETCH HISTORY - LANGSUNG AMBIL DATA
+// FETCH HISTORY
 // ============================================
 async function fetchHistory() {
     if (!state.token) {
@@ -623,7 +636,6 @@ function init() {
     if (state.token) {
         DOM.tokenInput.value = state.token;
         startPolling();
-        // ===== LANGSUNG FETCH HISTORY =====
         setTimeout(fetchHistory, 500);
     } else {
         DOM.tokenInput.value = '';
@@ -698,7 +710,7 @@ function stopPolling() {
 }
 
 // ============================================
-// POLLING - FETCH DATA
+// POLLING - FETCH DATA (FIX SUARA)
 // ============================================
 async function pollData() {
     if (!state.token) return;
@@ -726,9 +738,23 @@ async function pollData() {
                 });
                 updateStats(amount);
                 
-                if (state.soundEnabled) playNotificationSound();
-                if (state.ttsEnabled) speakPayment(amount);
+                // ===== PLAY SOUND & VOICE =====
+                console.log('🔔 Payment detected, playing sound...');
+                
+                // 1. Suara notifikasi
+                if (state.soundEnabled) {
+                    playNotificationSound();
+                }
+                
+                // 2. Voice (Text-to-Speech)
+                if (state.ttsEnabled) {
+                    speakPayment(amount);
+                }
+                
+                // 3. Toast
                 showToast(`Pembayaran Rp ${formatRupiah(amount)} masuk`);
+                
+                // 4. Push Notification
                 sendPushNotification({ id, amount, message: item.body?.message || 'Pembayaran masuk' });
             }
         });
@@ -759,7 +785,7 @@ async function pollData() {
 window.pollData = pollData;
 
 // ============================================
-// SAVE TOKEN - LANGSUNG FETCH HISTORY
+// SAVE TOKEN
 // ============================================
 function saveToken() {
     const newToken = DOM.tokenInput.value.trim();
@@ -772,7 +798,6 @@ function saveToken() {
     localStorage.setItem('geekzpay_token', state.token);
     showToast('Token tersimpan');
     
-    // Reset state
     state.lastIds = new Set();
     state.history = [];
     state.newCount = 0;
@@ -785,8 +810,6 @@ function saveToken() {
     renderChart();
     
     startPolling();
-    
-    // ===== LANGSUNG FETCH HISTORY =====
     setTimeout(fetchHistory, 500);
 }
 window.saveToken = saveToken;
@@ -818,7 +841,10 @@ window.clearHistory = clearHistory;
 // TEXT-TO-SPEECH
 // ============================================
 function speakPayment(amount) {
-    if (!state.ttsEnabled || !('speechSynthesis' in window)) return;
+    if (!state.ttsEnabled || !('speechSynthesis' in window)) {
+        console.log('🔇 TTS disabled or not supported');
+        return;
+    }
     try {
         const text = `Pembayaran masuk Rp ${formatRupiah(amount)}`;
         const utterance = new SpeechSynthesisUtterance(text);
@@ -830,7 +856,10 @@ function speakPayment(amount) {
         const idVoice = voices.find(v => v.lang.startsWith('id'));
         if (idVoice) utterance.voice = idVoice;
         window.speechSynthesis.speak(utterance);
-    } catch (e) {}
+        console.log(`🗣️ TTS: "${text}"`);
+    } catch (e) {
+        console.warn('TTS error:', e);
+    }
 }
 
 // ============================================
